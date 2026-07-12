@@ -37,10 +37,8 @@ namespace Heroic.Core
             spellCaster?.EnableSkill("arcane_spell_echo");
             spellCaster?.EnableSkill("arcane_arcane_orbit");
 
-            arcaneUpgradeApplier?.Apply("upgrade_arcane_magic_missile_split_shot", 2);
             arcaneUpgradeApplier?.Apply("upgrade_arcane_magic_missile_seeking_shot", 2);
             arcaneUpgradeApplier?.Apply("upgrade_arcane_arcane_blast_scatter", 2);
-            arcaneUpgradeApplier?.Apply("upgrade_arcane_spell_echo_repeat", 1);
             arcaneUpgradeApplier?.Apply("upgrade_arcane_arcane_orbit_more_orbs", 1);
 
             if (movementCaster != null)
