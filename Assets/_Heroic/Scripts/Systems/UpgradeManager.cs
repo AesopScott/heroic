@@ -17,6 +17,19 @@ namespace Heroic.Systems
             Movement
         }
 
+        public enum AbilityType
+        {
+            Unspecified,
+            Projectile,
+            AreaOfEffectCaster,
+            AreaOfEffectEnemy,
+            AreaOfEffectGround,
+            Augmentation,
+            Cone,
+            Line,
+            NearestEnemy
+        }
+
         [Serializable]
         public class DraftChoice
         {
@@ -24,22 +37,30 @@ namespace Heroic.Systems
             [SerializeField] private string displayName;
             [TextArea] [SerializeField] private string description;
             [SerializeField] private UpgradeCategory category;
+            [SerializeField] private AbilityType abilityType = AbilityType.Unspecified;
 
             public string Id => id;
             public string DisplayName => displayName;
             public string Description => description;
             public UpgradeCategory Category => category;
+            public AbilityType Type => abilityType;
 
             public DraftChoice()
             {
             }
 
             public DraftChoice(string id, string displayName, string description, UpgradeCategory category)
+                : this(id, displayName, description, category, AbilityType.Unspecified)
+            {
+            }
+
+            public DraftChoice(string id, string displayName, string description, UpgradeCategory category, AbilityType abilityType)
             {
                 this.id = id;
                 this.displayName = displayName;
                 this.description = description;
                 this.category = category;
+                this.abilityType = abilityType;
             }
         }
 
