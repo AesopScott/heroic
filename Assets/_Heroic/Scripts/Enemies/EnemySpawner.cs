@@ -16,6 +16,7 @@ namespace Heroic.Enemies
         [SerializeField] private WaveDefinition[] waves = new WaveDefinition[0];
         [SerializeField] private float spawnRadius = 8f;
         [SerializeField] private float spawnInterval = 2f;
+        [SerializeField] private float spawnRateMultiplier = 0.7f;
         [SerializeField] private float packSpacing = 0.9f;
 
         private float nextSpawnTime;
@@ -146,12 +147,13 @@ namespace Heroic.Enemies
 
         private float GetCurrentSpawnInterval(WaveDefinition activeWave)
         {
+            float rateMultiplier = Mathf.Max(0.05f, spawnRateMultiplier);
             if (activeWave == null)
             {
-                return spawnInterval;
+                return Mathf.Max(0.1f, spawnInterval / rateMultiplier);
             }
 
-            return Mathf.Max(0.1f, activeWave.SpawnInterval);
+            return Mathf.Max(0.1f, activeWave.SpawnInterval / rateMultiplier);
         }
 
         private int GetCurrentSpawnCount(WaveDefinition activeWave)
