@@ -142,10 +142,10 @@ MonoBehaviour:
   destroyAfterContactDamage: 0
   suppressExperienceOnContactDamage: 0
   projectilePrefab: {fileID: 0}
-  shooterRange: 50
-  shooterFireInterval: 5
-  shooterProjectileSpeed: 4
-  shooterProjectileDamage: 15
+  ThrowerRange: 50
+  ThrowerFireInterval: 5
+  ThrowerProjectileSpeed: 4
+  ThrowerProjectileDamage: 15
   firePoint: {fileID: 0}
 --- !u!114 &7153313872011756394
 MonoBehaviour:
@@ -193,8 +193,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78509d5ab041a2743a132bd1e1af710f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Visuals.VisualPresetApplier
-  preset: 10
+  preset: 12
   applyOnAwake: 1
+  crashLevel1Texture: {fileID: 0}
+  crashLevel2Texture: {fileID: 0}
+  crashLevel3Texture: {fileID: 0}
+  crashLevel4Texture: {fileID: 0}
+  crashLevel5Texture: {fileID: 0}
+  wallLevel1Texture: {fileID: 0}
 --- !u!212 &3589455058445702885
 SpriteRenderer:
   serializedVersion: 3

@@ -51,8 +51,10 @@ namespace Heroic.Editor
             ValidateAssetExists(Root + "/Scenes/Results.unity", "Results scene", ref errors);
             ValidatePrefab<EnemyController>(Root + "/Prefabs/Enemies/Enemy_Crash.prefab", "Crash enemy prefab", ref errors);
             ValidatePrefabComponents(Root + "/Prefabs/Enemies/Enemy_Crash.prefab", "Crash enemy prefab", ref errors, typeof(Damageable), typeof(VisualPresetApplier), typeof(HitFlashVisual), typeof(DeathBurstVisual), typeof(WorldHealthBar), typeof(DamageNumberEmitter), typeof(AudioSource), typeof(ProceduralAudioFeedback));
-            ValidatePrefab<EnemyController>(Root + "/Prefabs/Enemies/Enemy_Shooter.prefab", "Shooter enemy prefab", ref errors);
-            ValidatePrefabComponents(Root + "/Prefabs/Enemies/Enemy_Shooter.prefab", "Shooter enemy prefab", ref errors, typeof(Damageable), typeof(VisualPresetApplier), typeof(HitFlashVisual), typeof(DeathBurstVisual), typeof(WorldHealthBar), typeof(DamageNumberEmitter), typeof(AudioSource), typeof(ProceduralAudioFeedback));
+            ValidatePrefab<EnemyController>(Root + "/Prefabs/Enemies/Enemy_Wall.prefab", "Wall enemy prefab", ref errors);
+            ValidatePrefabComponents(Root + "/Prefabs/Enemies/Enemy_Wall.prefab", "Wall enemy prefab", ref errors, typeof(Damageable), typeof(VisualPresetApplier), typeof(HitFlashVisual), typeof(DeathBurstVisual), typeof(WorldHealthBar), typeof(DamageNumberEmitter), typeof(AudioSource), typeof(ProceduralAudioFeedback));
+            ValidatePrefab<EnemyController>(Root + "/Prefabs/Enemies/Enemy_Thrower.prefab", "Thrower enemy prefab", ref errors);
+            ValidatePrefabComponents(Root + "/Prefabs/Enemies/Enemy_Thrower.prefab", "Thrower enemy prefab", ref errors, typeof(Damageable), typeof(VisualPresetApplier), typeof(HitFlashVisual), typeof(DeathBurstVisual), typeof(WorldHealthBar), typeof(DamageNumberEmitter), typeof(AudioSource), typeof(ProceduralAudioFeedback));
             ValidatePrefab<BossController>(Root + "/Prefabs/Enemies/Enemy_Boss_ArcaneWarden.prefab", "boss prefab", ref errors);
             ValidatePrefabComponents(Root + "/Prefabs/Enemies/Enemy_Boss_ArcaneWarden.prefab", "boss prefab", ref errors, typeof(Damageable), typeof(VisualPresetApplier), typeof(HitFlashVisual), typeof(DeathBurstVisual), typeof(WorldHealthBar), typeof(DamageNumberEmitter), typeof(AudioSource), typeof(ProceduralAudioFeedback));
             ValidatePrefab<Projectile>(Root + "/Prefabs/Projectiles/Projectile_MagicMissile.prefab", "Magic Missile projectile prefab", ref errors);
@@ -68,7 +70,9 @@ namespace Heroic.Editor
             ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Crash_02.asset", "Crash II definition", VisualPresetApplier.Preset.CrashLevel2, ref errors);
             ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Crash_03.asset", "Crash III definition", VisualPresetApplier.Preset.CrashLevel3, ref errors);
             ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Crash_04.asset", "Crash IV definition", VisualPresetApplier.Preset.CrashLevel4, ref errors);
-            ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Shooter_01.asset", "Shooter I definition", VisualPresetApplier.Preset.ShooterLevel1, ref errors);
+            ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Crash_05.asset", "Crash V definition", VisualPresetApplier.Preset.CrashLevel5, ref errors);
+            ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Wall_01.asset", "Wall I definition", VisualPresetApplier.Preset.WallLevel1, ref errors);
+            ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Thrower_01.asset", "Thrower I definition", VisualPresetApplier.Preset.ThrowerLevel1, ref errors);
             ValidateAssetExists(Root + "/ScriptableObjects/Enemies/Enemy_Boss_ArcaneWarden.asset", "boss definition asset", ref errors);
             ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Boss_ArcaneWarden.asset", "boss definition asset", VisualPresetApplier.Preset.Boss, ref errors);
             ValidateBuildSettings(ref errors);
@@ -522,3 +526,4 @@ namespace Heroic.Editor
         }
     }
 }
+

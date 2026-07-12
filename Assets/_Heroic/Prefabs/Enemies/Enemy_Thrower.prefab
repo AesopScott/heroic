@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 8730045355150797471}
   - component: {fileID: 931851753006342990}
   m_Layer: 0
-  m_Name: Enemy_Shooter
+  m_Name: Enemy_Thrower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -141,10 +141,10 @@ MonoBehaviour:
   destroyAfterContactDamage: 0
   suppressExperienceOnContactDamage: 0
   projectilePrefab: {fileID: 7913512299637599637, guid: f466974e10c8b604c8a3fa1d11c9d5fb, type: 3}
-  shooterRange: 50
-  shooterFireInterval: 5
-  shooterProjectileSpeed: 4
-  shooterProjectileDamage: 15
+  ThrowerRange: 50
+  ThrowerFireInterval: 5
+  ThrowerProjectileSpeed: 4
+  ThrowerProjectileDamage: 15
   firePoint: {fileID: 0}
 --- !u!114 &5996393016942823609
 MonoBehaviour:
@@ -172,8 +172,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78509d5ab041a2743a132bd1e1af710f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Visuals.VisualPresetApplier
-  preset: 6
+  preset: 8
   applyOnAwake: 1
+  crashLevel1Texture: {fileID: 0}
+  crashLevel2Texture: {fileID: 0}
+  crashLevel3Texture: {fileID: 0}
+  crashLevel4Texture: {fileID: 0}
+  crashLevel5Texture: {fileID: 0}
+  wallLevel1Texture: {fileID: 0}
 --- !u!212 &8011130513177889501
 SpriteRenderer:
   serializedVersion: 3

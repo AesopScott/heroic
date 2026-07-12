@@ -10,7 +10,7 @@ namespace Heroic.Enemies
         public enum EnemyBehavior
         {
             Crash,
-            Shooter
+            Thrower
         }
 
         [SerializeField] private EnemyBehavior behavior = EnemyBehavior.Crash;
@@ -21,10 +21,10 @@ namespace Heroic.Enemies
         [SerializeField] private bool destroyAfterContactDamage = true;
         [SerializeField] private bool suppressExperienceOnContactDamage = true;
         [SerializeField] private EnemyProjectile projectilePrefab;
-        [SerializeField] private float shooterRange = 50f;
-        [SerializeField] private float shooterFireInterval = 5f;
-        [SerializeField] private float shooterProjectileSpeed = 4f;
-        [SerializeField] private int shooterProjectileDamage = 15;
+        [SerializeField] private float ThrowerRange = 50f;
+        [SerializeField] private float ThrowerFireInterval = 5f;
+        [SerializeField] private float ThrowerProjectileSpeed = 4f;
+        [SerializeField] private int ThrowerProjectileDamage = 15;
         [SerializeField] private Transform firePoint;
 
         private Transform target;
@@ -36,9 +36,9 @@ namespace Heroic.Enemies
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
-            if (behavior == EnemyBehavior.Shooter)
+            if (behavior == EnemyBehavior.Thrower)
             {
-                nextShotTime = Time.time + shooterFireInterval;
+                nextShotTime = Time.time + ThrowerFireInterval;
             }
         }
 
@@ -66,9 +66,9 @@ namespace Heroic.Enemies
                 slowMultiplier = 1f;
             }
 
-            if (behavior == EnemyBehavior.Shooter)
+            if (behavior == EnemyBehavior.Thrower)
             {
-                UpdateShooter();
+                UpdateThrower();
                 return;
             }
 
@@ -118,18 +118,18 @@ namespace Heroic.Enemies
             }
         }
 
-        private void UpdateShooter()
+        private void UpdateThrower()
         {
             float distance = Vector3.Distance(transform.position, target.position);
-            if (distance > shooterRange)
+            if (distance > ThrowerRange)
             {
                 MoveTowardTarget();
             }
 
-            if (Time.time >= nextShotTime && distance <= shooterRange)
+            if (Time.time >= nextShotTime && distance <= ThrowerRange)
             {
                 FireAtCurrentPlayerPosition();
-                nextShotTime = Time.time + shooterFireInterval;
+                nextShotTime = Time.time + ThrowerFireInterval;
             }
         }
 
@@ -143,7 +143,7 @@ namespace Heroic.Enemies
             Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
             Vector2 direction = (target.position - spawnPosition).normalized;
             EnemyProjectile projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-            projectile.Launch(direction, shooterProjectileSpeed, shooterProjectileDamage);
+            projectile.Launch(direction, ThrowerProjectileSpeed, ThrowerProjectileDamage);
         }
 
         public void Push(Vector2 direction, float distance)
@@ -164,3 +164,4 @@ namespace Heroic.Enemies
         }
     }
 }
+

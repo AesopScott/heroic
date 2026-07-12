@@ -45,19 +45,22 @@ namespace Heroic.Editor
             GameObject enemyMissile = CreateEnemyMissilePrefab();
             GameObject orb = CreateArcaneOrbPrefab();
             GameObject enemy = CreateEnemyPrefab(xpPickup);
-            GameObject shooter = CreateShooterEnemyPrefab(xpPickup, enemyMissile);
+            GameObject wall = CreateWallPrefab(xpPickup);
+            GameObject Thrower = CreateThrowerEnemyPrefab(xpPickup, enemyMissile);
             GameObject boss = CreateBossPrefab(xpPickup);
 
             EnemyDefinition crashOneDefinition = CreateEnemyDefinition("Enemy_Crash_01", "Crash I", enemy, 10, 2f, 10, 1, VisualPresetApplier.Preset.CrashLevel1, false);
             EnemyDefinition crashTwoDefinition = CreateEnemyDefinition("Enemy_Crash_02", "Crash II", enemy, 12, 2.15f, 10, 1, VisualPresetApplier.Preset.CrashLevel2, false);
             EnemyDefinition crashThreeDefinition = CreateEnemyDefinition("Enemy_Crash_03", "Crash III", enemy, 15, 2.3f, 10, 1, VisualPresetApplier.Preset.CrashLevel3, false);
             EnemyDefinition crashFourDefinition = CreateEnemyDefinition("Enemy_Crash_04", "Crash IV", enemy, 15, 2.875f, 10, 1, VisualPresetApplier.Preset.CrashLevel4, false);
-            EnemyDefinition shooterDefinition = CreateEnemyDefinition("Enemy_Shooter_01", "Shooter I", shooter, 25, 1.5f, 15, 2, VisualPresetApplier.Preset.ShooterLevel1, false);
+            EnemyDefinition crashFiveDefinition = CreateEnemyDefinition("Enemy_Crash_05", "Crash V", enemy, 18, 3.15f, 12, 2, VisualPresetApplier.Preset.CrashLevel5, false);
+            EnemyDefinition wallOneDefinition = CreateEnemyDefinition("Enemy_Wall_01", "Wall I", wall, 40, 0f, 14, 2, VisualPresetApplier.Preset.WallLevel1, false);
+            EnemyDefinition ThrowerDefinition = CreateEnemyDefinition("Enemy_Thrower_01", "Thrower I", Thrower, 25, 1.5f, 15, 2, VisualPresetApplier.Preset.ThrowerLevel1, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
 
-            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 1, 2, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
-            WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
-            WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
+            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 1, 2, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, crashFiveDefinition, wallOneDefinition, ThrowerDefinition);
+            WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, crashFiveDefinition, wallOneDefinition, ThrowerDefinition);
+            WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, crashFiveDefinition, wallOneDefinition, ThrowerDefinition);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
@@ -258,6 +261,18 @@ namespace Heroic.Editor
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.CrashLevel1);
+            SetObject(visual, "crashLevel2Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash II.png"));
+            SetObject(visual, "crashLevel3Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash III.png"));
+            SetObject(visual, "crashLevel4Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash IV.png"));
+            SetObject(visual, "crashLevel5Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash V.png"));
+            SetObject(visual, "wallLevel1Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Wall I.png"));
+            CrashSpriteAnimator crashAnimator = go.AddComponent<CrashSpriteAnimator>();
+            SetObject(crashAnimator, "sourceTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash I.png"));
+            SetInt(crashAnimator, "frameWidth", 384);
+            SetInt(crashAnimator, "frameHeight", 512);
+            SetFloat(crashAnimator, "secondsPerFrame", 0.35f);
+            SetInt(crashAnimator, "sortingOrder", 20);
+            SetFloat(crashAnimator, "pixelsPerUnit", 384f);
             go.AddComponent<HitFlashVisual>();
             go.AddComponent<DeathBurstVisual>();
             go.AddComponent<WorldHealthBar>();
@@ -266,33 +281,58 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Crash.prefab");
         }
 
-        private static GameObject CreateShooterEnemyPrefab(GameObject xpPickup, GameObject enemyMissile)
+        private static GameObject CreateWallPrefab(GameObject xpPickup)
         {
-            GameObject go = new GameObject("Enemy_Shooter");
+            GameObject go = new GameObject("Enemy_Wall");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
             body.gravityScale = 0f;
             body.freezeRotation = true;
             go.AddComponent<CircleCollider2D>();
             go.AddComponent<Damageable>();
             EnemyController controller = go.AddComponent<EnemyController>();
-            SetEnum(controller, "behavior", EnemyController.EnemyBehavior.Shooter);
-            SetObject(controller, "projectilePrefab", enemyMissile.GetComponent<EnemyProjectile>());
-            SetFloat(controller, "shooterRange", 50f);
-            SetFloat(controller, "shooterFireInterval", 5f);
-            SetFloat(controller, "shooterProjectileSpeed", 4f);
-            SetInt(controller, "shooterProjectileDamage", 15);
             SetBool(controller, "destroyAfterContactDamage", false);
             SetBool(controller, "suppressExperienceOnContactDamage", false);
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
-            SetEnum(visual, "preset", VisualPresetApplier.Preset.ShooterLevel1);
+            SetEnum(visual, "preset", VisualPresetApplier.Preset.WallLevel1);
+            SetObject(visual, "wallLevel1Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Wall I.png"));
+            go.AddComponent<HitFlashVisual>();
+            DeathBurstVisual burst = go.AddComponent<DeathBurstVisual>();
+            SetFloat(burst, "burstScale", 1.8f);
+            go.AddComponent<WorldHealthBar>();
+            go.AddComponent<DamageNumberEmitter>();
+            AddAudioFeedback(go, ProceduralAudioFeedback.Preset.Enemy, 0.32f);
+            return SavePrefab(go, Prefabs + "/Enemies/Enemy_Wall.prefab");
+        }
+
+        private static GameObject CreateThrowerEnemyPrefab(GameObject xpPickup, GameObject enemyMissile)
+        {
+            GameObject go = new GameObject("Enemy_Thrower");
+            Rigidbody2D body = go.AddComponent<Rigidbody2D>();
+            body.gravityScale = 0f;
+            body.freezeRotation = true;
+            go.AddComponent<CircleCollider2D>();
+            go.AddComponent<Damageable>();
+            EnemyController controller = go.AddComponent<EnemyController>();
+            SetEnum(controller, "behavior", EnemyController.EnemyBehavior.Thrower);
+            SetObject(controller, "projectilePrefab", enemyMissile.GetComponent<EnemyProjectile>());
+            SetFloat(controller, "ThrowerRange", 50f);
+            SetFloat(controller, "ThrowerFireInterval", 5f);
+            SetFloat(controller, "ThrowerProjectileSpeed", 4f);
+            SetInt(controller, "ThrowerProjectileDamage", 15);
+            SetBool(controller, "destroyAfterContactDamage", false);
+            SetBool(controller, "suppressExperienceOnContactDamage", false);
+            ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
+            SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
+            SetEnum(visual, "preset", VisualPresetApplier.Preset.ThrowerLevel1);
             go.AddComponent<HitFlashVisual>();
             go.AddComponent<DeathBurstVisual>();
             go.AddComponent<WorldHealthBar>();
             go.AddComponent<DamageNumberEmitter>();
             AddAudioFeedback(go, ProceduralAudioFeedback.Preset.Enemy, 0.32f);
-            return SavePrefab(go, Prefabs + "/Enemies/Enemy_Shooter.prefab");
+            return SavePrefab(go, Prefabs + "/Enemies/Enemy_Thrower.prefab");
         }
 
         private static GameObject CreateBossPrefab(GameObject xpPickup)
@@ -436,8 +476,9 @@ namespace Heroic.Editor
             BurningGroundCaster burningGround = player.AddComponent<BurningGroundCaster>();
             SpellCaster spellCaster = player.AddComponent<SpellCaster>();
             player.AddComponent<MovementCaster>();
-            VisualPresetApplier visual = player.AddComponent<VisualPresetApplier>();
-            SetEnum(visual, "preset", VisualPresetApplier.Preset.Player);
+            PlayerVisualController visual = player.AddComponent<PlayerVisualController>();
+            SetObject(visual, "levelOneTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Player I.png"));
+            SetObject(visual, "levelTwoTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Player II.png"));
             player.AddComponent<HitFlashVisual>();
             player.AddComponent<WorldHealthBar>();
             player.AddComponent<DamageNumberEmitter>();
@@ -1178,3 +1219,4 @@ namespace Heroic.Editor
         }
     }
 }
+

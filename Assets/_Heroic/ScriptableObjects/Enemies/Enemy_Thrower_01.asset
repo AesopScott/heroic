@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7eb1f653a63965498382e4a0c3f754b, type: 3}
-  m_Name: Enemy_Boss_ArcaneWarden
+  m_Name: Enemy_Thrower_01
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Data.EnemyDefinition
-  id: enemy_boss_arcanewarden
-  enemyName: Arcane Warden
-  prefab: {fileID: 6835940534997612918, guid: 55ad2b9395f3f9c4a897d2b3d925a050, type: 3}
-  maxHealth: 900
-  moveSpeed: 1.6
-  contactDamage: 18
-  experienceValue: 30
-  visualPreset: 12
-  boss: 1
+  id: enemy_thrower_01
+  enemyName: Thrower I
+  prefab: {fileID: 2077700866199972033, guid: a5c11f1e5db077c428f2c7d5ef03c7a2, type: 3}
+  maxHealth: 25
+  moveSpeed: 1.5
+  contactDamage: 15
+  experienceValue: 2
+  visualPreset: 8
+  boss: 0
   description: 

@@ -27,5 +27,9 @@ MonoBehaviour:
     weight: 1
   - enemy: {fileID: 11400000, guid: c285e0011f34e3d469b3b7fd18a8f8cf, type: 2}
     weight: 1
+  - enemy: {fileID: 11400000, guid: 0df77568f057ab344b5e3bb4c23b052a, type: 2}
+    weight: 1
+  - enemy: {fileID: 11400000, guid: d2c2ee1db89b8594eb506c47b36d46e6, type: 2}
+    weight: 1
   - enemy: {fileID: 11400000, guid: c049bff8dea216d4dba54d2fe835db1e, type: 2}
     weight: 1
