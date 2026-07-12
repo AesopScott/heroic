@@ -50,7 +50,7 @@ namespace Heroic.Editor
             EnemyDefinition tankEnemyDefinition = CreateEnemyDefinition("Enemy_Tank", "Tank Enemy", enemy, 80, 1.25f, 16, 3, VisualPresetApplier.Preset.TankEnemy, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
 
-            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 1.6f, basicEnemyDefinition);
+            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.53f, basicEnemyDefinition);
             WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, basicEnemyDefinition, fastEnemyDefinition);
             WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, basicEnemyDefinition, fastEnemyDefinition, tankEnemyDefinition);
 
@@ -351,7 +351,8 @@ namespace Heroic.Editor
             player.AddComponent<CircleCollider2D>();
             player.AddComponent<PlayerController>();
             player.AddComponent<PlayerHealth>();
-            player.AddComponent<PlayerExperience>();
+            PlayerExperience playerExperience = player.AddComponent<PlayerExperience>();
+            SetInt(playerExperience, "baseExperienceToLevel", 15);
             player.AddComponent<ArcaneDoubleCast>();
             SpellEchoCaster spellEcho = player.AddComponent<SpellEchoCaster>();
             MagicMissileCaster magicMissile = player.AddComponent<MagicMissileCaster>();
@@ -423,7 +424,7 @@ namespace Heroic.Editor
             TMP_Text levelText = CreateText("LevelText", gameRoot.transform, "Level 1", new Vector2(150f, 32f), new Vector2(90f, -30f));
             TMP_Text timerText = CreateText("TimerText", gameRoot.transform, "00:00", new Vector2(150f, 32f), new Vector2(0f, -30f));
             TMP_Text healthText = CreateText("HealthText", gameRoot.transform, "HP 100/100", new Vector2(160f, 26f), new Vector2(-90f, -30f));
-            TMP_Text experienceText = CreateText("ExperienceText", gameRoot.transform, "XP 0/5", new Vector2(160f, 24f), new Vector2(90f, -30f));
+            TMP_Text experienceText = CreateText("ExperienceText", gameRoot.transform, "XP 0/15", new Vector2(160f, 24f), new Vector2(90f, -30f));
             TMP_Text showcaseText = CreateText("ShowcaseLabel", gameRoot.transform, "Heroic 1.0 Showcase", new Vector2(360f, 32f), new Vector2(0f, -68f));
             Slider healthSlider = CreateSlider("HealthBar", gameRoot.transform, new Vector2(300f, 14f), new Vector2(0f, -55f), new Color(0.92f, 0.24f, 0.2f, 0.95f));
             Slider experienceSlider = CreateSlider("ExperienceBar", gameRoot.transform, new Vector2(300f, 10f), new Vector2(0f, -77f), new Color(0.24f, 0.64f, 1f, 0.95f));

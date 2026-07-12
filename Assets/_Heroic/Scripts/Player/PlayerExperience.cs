@@ -8,7 +8,7 @@ namespace Heroic.Player
     {
         [SerializeField] private int level = 1;
         [SerializeField] private int currentExperience;
-        [SerializeField] private int baseExperienceToLevel = 10;
+        [SerializeField] private int baseExperienceToLevel = 15;
         [SerializeField] private float thresholdGrowth = 1.35f;
         [SerializeField] private UpgradeManager upgradeManager;
 

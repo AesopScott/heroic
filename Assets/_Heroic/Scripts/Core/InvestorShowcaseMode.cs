@@ -51,7 +51,7 @@ namespace Heroic.Core
 
         private void ApplyShowcasePacing()
         {
-            playerExperience?.ConfigureLeveling(5, 1.18f);
+            playerExperience?.ConfigureLeveling(15, 1.18f);
             bossSpawner?.SetSpawnAtSeconds(120f);
         }
 
