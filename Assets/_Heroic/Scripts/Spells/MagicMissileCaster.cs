@@ -1,5 +1,6 @@
 using Heroic.Combat;
 using Heroic.Enemies;
+using Heroic.Systems;
 using UnityEngine;
 
 namespace Heroic.Spells
@@ -20,6 +21,7 @@ namespace Heroic.Spells
         [SerializeField] private SpellEchoCaster spellEcho;
 
         private float nextCastTime;
+        private SpellStatModifier spellStats;
 
         private void Awake()
         {
@@ -32,6 +34,8 @@ namespace Heroic.Spells
             {
                 spellEcho = GetComponent<SpellEchoCaster>();
             }
+
+            spellStats = GetComponent<SpellStatModifier>();
         }
 
         private void Update()
@@ -51,7 +55,7 @@ namespace Heroic.Spells
             Cast(targetTransform);
             doubleCast?.TrySchedule(() => CastIfTargetAlive(targetTransform));
             spellEcho?.Echo(() => CastIfTargetAlive(targetTransform));
-            nextCastTime = Time.time + castInterval;
+            nextCastTime = Time.time + ModifiedCooldown(castInterval);
         }
 
         public void SetProjectileCount(int value)
@@ -101,7 +105,7 @@ namespace Heroic.Spells
                 var hit = projectile.GetComponent<ProjectileHit>();
                 if (hit != null)
                 {
-                    hit.SetDamage(damage);
+                    hit.SetDamage(ModifiedDamage(damage));
                     hit.SetPierceCount(pierceCount);
                 }
             }
@@ -119,7 +123,22 @@ namespace Heroic.Spells
 
         private EnemyController FindNearestEnemy()
         {
-            return ArcaneTargeting.FindNearestEnemy(transform.position, range);
+            return ArcaneTargeting.FindNearestEnemy(transform.position, ModifiedRange(range));
+        }
+
+        private int ModifiedDamage(int value)
+        {
+            return spellStats != null ? spellStats.ModifyDamage(value) : value;
+        }
+
+        private float ModifiedRange(float value)
+        {
+            return spellStats != null ? spellStats.ModifyRange(value) : value;
+        }
+
+        private float ModifiedCooldown(float value)
+        {
+            return spellStats != null ? spellStats.ModifyCooldown(value) : value;
         }
     }
 }

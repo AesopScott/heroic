@@ -160,17 +160,22 @@ namespace Heroic.UI
 
         private static int ResolveLane(UpgradeManager.DraftChoice choice)
         {
-            if (choice.Category == UpgradeManager.UpgradeCategory.Movement)
+            if (choice.Category == UpgradeManager.UpgradeCategory.Movement || IsMovementBoost(choice))
             {
                 return 0;
             }
 
-            if (choice.Category == UpgradeManager.UpgradeCategory.System || choice.Category == UpgradeManager.UpgradeCategory.Boost)
+            if (choice.Category == UpgradeManager.UpgradeCategory.System)
             {
                 return 2;
             }
 
             return 1;
+        }
+
+        private static bool IsMovementBoost(UpgradeManager.DraftChoice choice)
+        {
+            return choice.Category == UpgradeManager.UpgradeCategory.Boost && ResolveSkillId(choice.Id).StartsWith("movement_");
         }
 
         private void ApplyChoiceVisuals(int index, UpgradeManager.DraftChoice choice)
@@ -299,6 +304,8 @@ namespace Heroic.UI
                     return "MOV";
                 case UpgradeManager.UpgradeCategory.System:
                     return "SYS";
+                case UpgradeManager.UpgradeCategory.Boost:
+                    return "UPG";
                 default:
                     return "UP";
             }
@@ -355,6 +362,11 @@ namespace Heroic.UI
             if (id.Contains("cloud_walk"))
             {
                 return "CW";
+            }
+
+            if (id.Contains("territory_casting"))
+            {
+                return "TC";
             }
 
             if (id.Contains("fire_bolt"))

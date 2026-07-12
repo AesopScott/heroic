@@ -10,6 +10,7 @@ namespace Heroic.Systems
         [SerializeField] private RunBuildState buildState;
         [SerializeField] private SpellCaster spellCaster;
         [SerializeField] private MovementCaster movementCaster;
+        [SerializeField] private TerritoryCastingController territoryCasting;
         [SerializeField] private ArcaneUpgradeApplier arcaneUpgradeApplier;
         [SerializeField] private FireUpgradeApplier fireUpgradeApplier;
 
@@ -76,6 +77,13 @@ namespace Heroic.Systems
             {
                 buildState?.LearnSkill(choice.Id);
                 spellCaster?.EnableSkill(choice.Id);
+                return;
+            }
+
+            if (choice.Id == "system_territory_casting")
+            {
+                buildState?.LearnSkill(choice.Id);
+                territoryCasting?.EnableTerritoryCasting();
                 return;
             }
 

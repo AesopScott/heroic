@@ -139,11 +139,11 @@ namespace Heroic.Systems
 
                 if (IsChoiceEligible(choice, includeMovementChoice, includeSystemChoice))
                 {
-                    if (choice.Category == UpgradeCategory.Movement)
+                    if (choice.Category == UpgradeCategory.Movement || IsMovementBoost(choice))
                     {
                         movementEligible.Add(choice);
                     }
-                    else if (choice.Category == UpgradeCategory.Attack || choice.Category == UpgradeCategory.Defense)
+                    else if (choice.Category == UpgradeCategory.Attack || choice.Category == UpgradeCategory.Defense || choice.Category == UpgradeCategory.Boost)
                     {
                         abilityEligible.Add(choice);
                     }
@@ -213,7 +213,7 @@ namespace Heroic.Systems
                 return ChoiceLane.Movement;
             }
 
-            if (choice.Category == UpgradeCategory.System || choice.Category == UpgradeCategory.Boost)
+            if (choice.Category == UpgradeCategory.System)
             {
                 return ChoiceLane.System;
             }
@@ -230,7 +230,7 @@ namespace Heroic.Systems
 
             if (choice.Category == UpgradeCategory.Boost)
             {
-                if (!includeSystemChoice)
+                if (IsMovementBoost(choice) && !includeMovementChoice)
                 {
                     return false;
                 }
@@ -246,7 +246,7 @@ namespace Heroic.Systems
 
             if (choice.Category == UpgradeCategory.System)
             {
-                return includeSystemChoice;
+                return includeSystemChoice && (buildState == null || !buildState.HasSkill(choice.Id));
             }
 
             if (choice.Category == UpgradeCategory.Attack)
@@ -255,6 +255,11 @@ namespace Heroic.Systems
             }
 
             return true;
+        }
+
+        private static bool IsMovementBoost(DraftChoice choice)
+        {
+            return choice.Category == UpgradeCategory.Boost && ResolveBoostedSkillId(choice.Id).StartsWith("movement_");
         }
 
         private bool IsMovementEquipped(string choiceId)

@@ -1,5 +1,6 @@
 using UnityEngine;
 using Heroic.Visuals;
+using Heroic.Systems;
 
 namespace Heroic.Spells
 {
@@ -13,6 +14,29 @@ namespace Heroic.Spells
 
         private bool spawned;
         private readonly System.Collections.Generic.List<ArcaneOrbitOrb> spawnedOrbs = new System.Collections.Generic.List<ArcaneOrbitOrb>();
+        private SpellStatModifier spellStats;
+
+        private void Awake()
+        {
+            spellStats = GetComponent<SpellStatModifier>();
+        }
+
+        private void Update()
+        {
+            if (!spawned)
+            {
+                return;
+            }
+
+            foreach (ArcaneOrbitOrb orb in spawnedOrbs)
+            {
+                if (orb != null)
+                {
+                    orb.SetDamage(ModifiedDamage(damage));
+                    orb.SetRadius(ModifiedRange(radius));
+                }
+            }
+        }
 
         public void SpawnOrbs()
         {
@@ -28,7 +52,7 @@ namespace Heroic.Spells
             {
                 float angle = i * (360f / orbCount);
                 ArcaneOrbitOrb orb = Instantiate(orbPrefab, transform.position, Quaternion.identity, transform);
-                orb.Initialize(transform, angle, radius, rotationSpeed, damage);
+                orb.Initialize(transform, angle, ModifiedRange(radius), rotationSpeed, ModifiedDamage(damage));
                 spawnedOrbs.Add(orb);
             }
         }
@@ -87,6 +111,16 @@ namespace Heroic.Spells
             }
 
             spawnedOrbs.Clear();
+        }
+
+        private int ModifiedDamage(int value)
+        {
+            return spellStats != null ? spellStats.ModifyDamage(value) : value;
+        }
+
+        private float ModifiedRange(float value)
+        {
+            return spellStats != null ? spellStats.ModifyRange(value) : value;
         }
     }
 }

@@ -1,5 +1,6 @@
 using Heroic.Combat;
 using Heroic.Enemies;
+using Heroic.Systems;
 using Heroic.Visuals;
 using UnityEngine;
 
@@ -19,6 +20,7 @@ namespace Heroic.Spells
         [SerializeField] private SpellEchoCaster spellEcho;
 
         private float nextCastTime;
+        private SpellStatModifier spellStats;
 
         private void Awake()
         {
@@ -31,6 +33,8 @@ namespace Heroic.Spells
             {
                 spellEcho = GetComponent<SpellEchoCaster>();
             }
+
+            spellStats = GetComponent<SpellStatModifier>();
         }
 
         private void Update()
@@ -40,7 +44,7 @@ namespace Heroic.Spells
                 return;
             }
 
-            EnemyController target = ArcaneTargeting.FindNearestEnemy(transform.position, range);
+            EnemyController target = ArcaneTargeting.FindNearestEnemy(transform.position, ModifiedRange(range));
             if (target == null)
             {
                 return;
@@ -50,7 +54,7 @@ namespace Heroic.Spells
             CastAt(targetPosition);
             doubleCast?.TrySchedule(() => CastAt(targetPosition));
             spellEcho?.Echo(() => CastAt(targetPosition));
-            nextCastTime = Time.time + castInterval;
+            nextCastTime = Time.time + ModifiedCooldown(castInterval);
         }
 
         public void SetDamage(int value)
@@ -75,12 +79,12 @@ namespace Heroic.Spells
 
         private void CastAt(Vector2 position)
         {
-            ApplyBlast(position, damage, radius);
+            ApplyBlast(position, ModifiedDamage(damage), radius);
 
             for (int i = 0; i < scatterCount; i++)
             {
                 Vector2 offset = Random.insideUnitCircle * scatterRadius;
-                ApplyBlast(position + offset, Mathf.RoundToInt(damage * scatterDamageMultiplier), radius * 0.65f);
+                ApplyBlast(position + offset, Mathf.RoundToInt(ModifiedDamage(damage) * scatterDamageMultiplier), radius * 0.65f);
             }
         }
 
@@ -100,6 +104,21 @@ namespace Heroic.Spells
                     damageable.ApplyDamage(blastDamage);
                 }
             }
+        }
+
+        private int ModifiedDamage(int value)
+        {
+            return spellStats != null ? spellStats.ModifyDamage(value) : value;
+        }
+
+        private float ModifiedRange(float value)
+        {
+            return spellStats != null ? spellStats.ModifyRange(value) : value;
+        }
+
+        private float ModifiedCooldown(float value)
+        {
+            return spellStats != null ? spellStats.ModifyCooldown(value) : value;
         }
     }
 }

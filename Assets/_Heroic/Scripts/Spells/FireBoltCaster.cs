@@ -1,5 +1,6 @@
 using Heroic.Combat;
 using Heroic.Enemies;
+using Heroic.Systems;
 using UnityEngine;
 
 namespace Heroic.Spells
@@ -18,6 +19,7 @@ namespace Heroic.Spells
         [SerializeField] private SpellEchoCaster spellEcho;
 
         private float nextCastTime;
+        private SpellStatModifier spellStats;
 
         private void Awake()
         {
@@ -25,6 +27,8 @@ namespace Heroic.Spells
             {
                 spellEcho = GetComponent<SpellEchoCaster>();
             }
+
+            spellStats = GetComponent<SpellStatModifier>();
         }
 
         private void Update()
@@ -34,7 +38,7 @@ namespace Heroic.Spells
                 return;
             }
 
-            EnemyController target = ArcaneTargeting.FindNearestEnemy(transform.position, range);
+            EnemyController target = ArcaneTargeting.FindNearestEnemy(transform.position, ModifiedRange(range));
             if (target == null)
             {
                 return;
@@ -43,7 +47,7 @@ namespace Heroic.Spells
             Transform targetTransform = target.transform;
             Cast(targetTransform);
             spellEcho?.Echo(() => CastIfTargetAlive(targetTransform));
-            nextCastTime = Time.time + castInterval;
+            nextCastTime = Time.time + ModifiedCooldown(castInterval);
         }
 
         public void SetDamage(int value)
@@ -87,7 +91,7 @@ namespace Heroic.Spells
                 ProjectileHit hit = projectile.GetComponent<ProjectileHit>();
                 if (hit != null)
                 {
-                    hit.SetDamage(damage);
+                    hit.SetDamage(ModifiedDamage(damage));
                     hit.SetPierceCount(pierceCount);
                 }
             }
@@ -99,6 +103,21 @@ namespace Heroic.Spells
             {
                 Cast(target);
             }
+        }
+
+        private int ModifiedDamage(int value)
+        {
+            return spellStats != null ? spellStats.ModifyDamage(value) : value;
+        }
+
+        private float ModifiedRange(float value)
+        {
+            return spellStats != null ? spellStats.ModifyRange(value) : value;
+        }
+
+        private float ModifiedCooldown(float value)
+        {
+            return spellStats != null ? spellStats.ModifyCooldown(value) : value;
         }
     }
 }

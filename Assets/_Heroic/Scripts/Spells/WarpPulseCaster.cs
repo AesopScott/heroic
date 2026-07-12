@@ -1,5 +1,6 @@
 using Heroic.Combat;
 using Heroic.Enemies;
+using Heroic.Systems;
 using Heroic.Visuals;
 using UnityEngine;
 
@@ -26,6 +27,7 @@ namespace Heroic.Spells
         [SerializeField] private SpellEchoCaster spellEcho;
 
         private float nextCastTime;
+        private SpellStatModifier spellStats;
 
         private void Awake()
         {
@@ -38,6 +40,8 @@ namespace Heroic.Spells
             {
                 spellEcho = GetComponent<SpellEchoCaster>();
             }
+
+            spellStats = GetComponent<SpellStatModifier>();
         }
 
         private void Update()
@@ -50,7 +54,7 @@ namespace Heroic.Spells
             Cast();
             doubleCast?.TrySchedule(Cast);
             spellEcho?.Echo(Cast);
-            nextCastTime = Time.time + castInterval;
+            nextCastTime = Time.time + ModifiedCooldown(castInterval);
         }
 
         public void SetMode(WarpMode newMode)
@@ -81,11 +85,12 @@ namespace Heroic.Spells
 
         private void Cast()
         {
-            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.55f, 0.9f, 1f, 0.35f), radius, 0.22f);
+            float activeRadius = ModifiedRange(radius);
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.55f, 0.9f, 1f, 0.35f), activeRadius, 0.22f);
 
             Collider2D[] hits = enemyLayers.value == 0
-                ? Physics2D.OverlapCircleAll(transform.position, radius)
-                : Physics2D.OverlapCircleAll(transform.position, radius, enemyLayers);
+                ? Physics2D.OverlapCircleAll(transform.position, activeRadius)
+                : Physics2D.OverlapCircleAll(transform.position, activeRadius, enemyLayers);
 
             foreach (Collider2D hit in hits)
             {
@@ -94,7 +99,7 @@ namespace Heroic.Spells
 
                 if (damageable != null)
                 {
-                    damageable.ApplyDamage(damage);
+                    damageable.ApplyDamage(ModifiedDamage(damage));
                 }
 
                 if (enemy == null)
@@ -115,6 +120,21 @@ namespace Heroic.Spells
                     enemy.ApplySlow(slowMultiplier, slowDuration);
                 }
             }
+        }
+
+        private int ModifiedDamage(int value)
+        {
+            return spellStats != null ? spellStats.ModifyDamage(value) : value;
+        }
+
+        private float ModifiedRange(float value)
+        {
+            return spellStats != null ? spellStats.ModifyRange(value) : value;
+        }
+
+        private float ModifiedCooldown(float value)
+        {
+            return spellStats != null ? spellStats.ModifyCooldown(value) : value;
         }
     }
 }

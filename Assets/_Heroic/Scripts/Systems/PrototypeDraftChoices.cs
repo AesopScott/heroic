@@ -14,6 +14,8 @@ namespace Heroic.Systems
                 Skill("fire_flame_wave", "Flame Wave", "Unlock a sweeping cone of Fire damage."),
                 Skill("fire_burning_ground", "Burning Ground", "Unlock lingering Fire zones."),
 
+                System("system_territory_casting", "Territory Casting", "Reveal arena territories that boost damage, range, recovery, or all spell stats."),
+
                 Boost("upgrade_arcane_magic_missile_split_shot", "Magic Missile: Split Shot", "Add more missiles."),
                 Boost("upgrade_arcane_magic_missile_seeking_shot", "Magic Missile: Seeking Shot", "Improve homing strength."),
                 Boost("upgrade_arcane_magic_missile_arcane_pierce", "Magic Missile: Arcane Pierce", "Add pierce count."),
@@ -71,6 +73,11 @@ namespace Heroic.Systems
         private static UpgradeManager.DraftChoice Movement(string id, string name, string description)
         {
             return new UpgradeManager.DraftChoice(id, name, description, UpgradeManager.UpgradeCategory.Movement);
+        }
+
+        private static UpgradeManager.DraftChoice System(string id, string name, string description)
+        {
+            return new UpgradeManager.DraftChoice(id, name, description, UpgradeManager.UpgradeCategory.System);
         }
     }
 }

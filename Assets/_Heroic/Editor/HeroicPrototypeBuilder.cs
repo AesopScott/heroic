@@ -356,6 +356,7 @@ namespace Heroic.Editor
             PlayerExperience playerExperience = player.GetComponent<PlayerExperience>();
             SpellCaster spellCaster = player.GetComponent<SpellCaster>();
             MovementCaster movementCaster = player.GetComponent<MovementCaster>();
+            TerritoryCastingController territoryCasting = player.GetComponent<TerritoryCastingController>();
 
             SetObject(runEndWatcher, "runManager", runManager);
             SetObject(runEndWatcher, "playerHealth", playerHealth);
@@ -380,6 +381,7 @@ namespace Heroic.Editor
             SetObject(choiceApplier, "buildState", buildState);
             SetObject(choiceApplier, "spellCaster", spellCaster);
             SetObject(choiceApplier, "movementCaster", movementCaster);
+            SetObject(choiceApplier, "territoryCasting", territoryCasting);
             SetObject(choiceApplier, "arcaneUpgradeApplier", arcaneUpgradeApplier);
             SetObject(choiceApplier, "fireUpgradeApplier", fireUpgradeApplier);
 
@@ -418,6 +420,8 @@ namespace Heroic.Editor
             player.AddComponent<PlayerController>();
             player.AddComponent<PlayerPickupMagnet>();
             player.AddComponent<CloudWalkController>();
+            player.AddComponent<SpellStatModifier>();
+            player.AddComponent<TerritoryCastingController>();
             player.AddComponent<PlayerHealth>();
             PlayerExperience playerExperience = player.AddComponent<PlayerExperience>();
             SetInt(playerExperience, "baseExperienceToLevel", 15);
