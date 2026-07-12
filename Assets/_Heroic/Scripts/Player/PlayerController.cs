@@ -5,14 +5,16 @@ namespace Heroic.Player
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] private float moveSpeed = 6f;
+        [SerializeField] private float baseMoveSpeed = 6f;
 
         private Rigidbody2D rb;
         private Vector2 moveInput;
         private Vector2 lastMoveDirection = Vector2.right;
         private bool movementLocked;
+        private float temporarySpeedMultiplier = 1f;
 
         public Vector2 LastMoveDirection => lastMoveDirection;
+        public float CurrentMoveSpeed => baseMoveSpeed * temporarySpeedMultiplier;
 
         private void Awake()
         {
@@ -36,12 +38,22 @@ namespace Heroic.Player
                 return;
             }
 
-            rb.linearVelocity = moveInput * moveSpeed;
+            rb.linearVelocity = moveInput * CurrentMoveSpeed;
         }
 
         public void SetMoveSpeed(float newMoveSpeed)
         {
-            moveSpeed = newMoveSpeed;
+            SetBaseMoveSpeed(newMoveSpeed);
+        }
+
+        public void SetBaseMoveSpeed(float newBaseMoveSpeed)
+        {
+            baseMoveSpeed = Mathf.Max(0f, newBaseMoveSpeed);
+        }
+
+        public void SetTemporarySpeedMultiplier(float multiplier)
+        {
+            temporarySpeedMultiplier = Mathf.Max(0f, multiplier);
         }
 
         public void SetMovementLocked(bool isLocked)

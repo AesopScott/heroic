@@ -237,7 +237,7 @@ namespace Heroic.Editor
             CircleCollider2D collider = go.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
             ExperiencePickup pickup = go.AddComponent<ExperiencePickup>();
-            SetFloat(pickup, "magnetRange", 7f);
+            SetFloat(pickup, "magnetRange", 20f);
             SetFloat(pickup, "magnetSpeed", 11f);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.ExperiencePickup);
@@ -416,6 +416,8 @@ namespace Heroic.Editor
             body.freezeRotation = true;
             player.AddComponent<CircleCollider2D>();
             player.AddComponent<PlayerController>();
+            player.AddComponent<PlayerPickupMagnet>();
+            player.AddComponent<CloudWalkController>();
             player.AddComponent<PlayerHealth>();
             PlayerExperience playerExperience = player.AddComponent<PlayerExperience>();
             SetInt(playerExperience, "baseExperienceToLevel", 15);
@@ -564,7 +566,7 @@ namespace Heroic.Editor
             DraftPresenter draft = draftRoot.AddComponent<DraftPresenter>();
             SetObject(draft, "upgradeManager", upgradeManager);
             SetObject(draft, "buildState", buildState);
-            TMP_Text header = CreateText("Header", draftRoot.transform, "Choose an upgrade", new Vector2(840f, 56f), new Vector2(0f, 322f));
+            TMP_Text header = CreateText("Header", draftRoot.transform, "Choose your spellbook path", new Vector2(900f, 56f), new Vector2(0f, 322f));
             header.fontSize = 38f;
             header.color = new Color(0.82f, 0.96f, 1f);
             SetObject(draft, "headerText", header);
@@ -578,42 +580,42 @@ namespace Heroic.Editor
             TMP_Text[] skillIconLabels = new TMP_Text[5];
             for (int i = 0; i < buttons.Length; i++)
             {
-                Button button = CreateButton("Choice" + (i + 1), draftRoot.transform, new Vector2(840f, 123f), new Vector2(0f, 246f - i * 128f));
+                Button button = CreateButton("Choice" + (i + 1), draftRoot.transform, new Vector2(390f, 123f), new Vector2(0f, 246f - i * 128f));
                 Image buttonImage = button.GetComponent<Image>();
                 if (buttonImage != null)
                 {
                     buttonImage.color = new Color(0.07f, 0.16f, 0.2f, 0.98f);
                 }
 
-                Image bar = CreateFilledImage("SchoolBar", button.transform, new Vector2(12f, 123f), new Vector2(-414f, 0f), Color.white);
+                Image bar = CreateFilledImage("SchoolBar", button.transform, new Vector2(10f, 123f), new Vector2(-190f, 0f), Color.white);
                 bar.raycastTarget = false;
 
-                Image categoryIcon = CreateFilledImage("CategoryIcon", button.transform, new Vector2(58f, 58f), new Vector2(-360f, 0f), new Color(0.03f, 0.08f, 0.1f, 0.96f));
+                Image categoryIcon = CreateFilledImage("CategoryIcon", button.transform, new Vector2(50f, 50f), new Vector2(-150f, 0f), new Color(0.03f, 0.08f, 0.1f, 0.96f));
                 categoryIcon.raycastTarget = false;
-                TMP_Text categoryLabel = CreateText("CategoryIconLabel", categoryIcon.transform, "ATK", new Vector2(58f, 58f), Vector2.zero);
-                categoryLabel.fontSize = 18f;
+                TMP_Text categoryLabel = CreateText("CategoryIconLabel", categoryIcon.transform, "ATK", new Vector2(50f, 50f), Vector2.zero);
+                categoryLabel.fontSize = 16f;
                 categoryLabel.fontStyle = FontStyles.Bold;
                 categoryLabel.alignment = TextAlignmentOptions.Center;
                 categoryLabel.raycastTarget = false;
                 categoryLabel.color = new Color(0.92f, 0.98f, 1f);
 
-                Image skillIcon = CreateFilledImage("SkillIcon", button.transform, new Vector2(58f, 58f), new Vector2(-292f, 0f), new Color(0.6f, 0.64f, 0.68f, 1f));
+                Image skillIcon = CreateFilledImage("SkillIcon", button.transform, new Vector2(50f, 50f), new Vector2(-92f, 0f), new Color(0.6f, 0.64f, 0.68f, 1f));
                 skillIcon.raycastTarget = false;
-                TMP_Text skillLabel = CreateText("SkillIconLabel", skillIcon.transform, "MM", new Vector2(58f, 58f), Vector2.zero);
-                skillLabel.fontSize = 20f;
+                TMP_Text skillLabel = CreateText("SkillIconLabel", skillIcon.transform, "MM", new Vector2(50f, 50f), Vector2.zero);
+                skillLabel.fontSize = 18f;
                 skillLabel.fontStyle = FontStyles.Bold;
                 skillLabel.alignment = TextAlignmentOptions.Center;
                 skillLabel.raycastTarget = false;
 
                 TMP_Text label = button.GetComponentInChildren<TMP_Text>();
-                label.fontSize = 26f;
+                label.fontSize = 21f;
                 label.alignment = TextAlignmentOptions.MidlineLeft;
                 label.textWrappingMode = TextWrappingModes.Normal;
                 label.overflowMode = TextOverflowModes.Ellipsis;
                 label.margin = new Vector4(8f, 0f, 18f, 0f);
                 RectTransform labelRect = label.rectTransform;
-                labelRect.sizeDelta = new Vector2(610f, 110f);
-                labelRect.anchoredPosition = new Vector2(112f, 0f);
+                labelRect.sizeDelta = new Vector2(235f, 110f);
+                labelRect.anchoredPosition = new Vector2(70f, 0f);
                 buttons[i] = button;
                 labels[i] = label;
                 bars[i] = bar;

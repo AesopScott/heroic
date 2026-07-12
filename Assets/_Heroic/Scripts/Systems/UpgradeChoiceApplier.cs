@@ -66,6 +66,12 @@ namespace Heroic.Systems
                 return;
             }
 
+            if (choice.Id.StartsWith("upgrade_movement_cloud_walk"))
+            {
+                ApplyCloudWalkUpgrade(choice.Id);
+                return;
+            }
+
             if (choice.Id.StartsWith("arcane_") || choice.Id.StartsWith("fire_"))
             {
                 buildState?.LearnSkill(choice.Id);
@@ -88,6 +94,10 @@ namespace Heroic.Systems
             else if (choice.Id == "movement_whirlwind")
             {
                 EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.Whirlwind);
+            }
+            else if (choice.Id == "movement_cloud_walk")
+            {
+                EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.CloudWalk);
             }
         }
 
@@ -169,12 +179,39 @@ namespace Heroic.Systems
             return "fire_unknown";
         }
 
+        private void ApplyCloudWalkUpgrade(string choiceId)
+        {
+            const string skillId = "movement_cloud_walk";
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+
+            if (choiceId == "upgrade_movement_cloud_walk_speed")
+            {
+                movementCaster?.SetCloudWalkStandardMovementTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_cloud_walk_pickup")
+            {
+                movementCaster?.SetCloudWalkPickupRangeTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_cloud_walk_knockback")
+            {
+                movementCaster?.SetCloudWalkKnockbackTier(tier);
+            }
+        }
+
         private void EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId skillId)
         {
             if (movementCaster == null)
             {
                 return;
             }
+
+            buildState?.LearnSkill(ResolveMovementSkillId(skillId));
 
             for (int i = 0; i < 3; i++)
             {
@@ -196,6 +233,25 @@ namespace Heroic.Systems
 
             movementCaster.EquipMovementSkill(0, skillId);
             buildState?.EquipMovementSkill(0, skillId);
+        }
+
+        private string ResolveMovementSkillId(MovementCaster.MovementSkillId skillId)
+        {
+            switch (skillId)
+            {
+                case MovementCaster.MovementSkillId.Blink:
+                    return "movement_blink";
+                case MovementCaster.MovementSkillId.Lunge:
+                    return "movement_lunge";
+                case MovementCaster.MovementSkillId.Teleport:
+                    return "movement_teleport";
+                case MovementCaster.MovementSkillId.Whirlwind:
+                    return "movement_whirlwind";
+                case MovementCaster.MovementSkillId.CloudWalk:
+                    return "movement_cloud_walk";
+                default:
+                    return string.Empty;
+            }
         }
     }
 }

@@ -55,10 +55,12 @@ namespace Heroic.UI
         private void HandleDraftOpened(IReadOnlyList<UpgradeManager.DraftChoice> choices, bool includesMovement)
         {
             currentChoices = choices;
+            int[] laneTotals = CountLanes(choices);
+            int[] laneIndices = new int[3];
 
             if (headerText != null)
             {
-                headerText.text = includesMovement ? "Choose an upgrade or movement" : "Choose an upgrade";
+                headerText.text = "Choose your spellbook path";
             }
 
             for (int i = 0; i < choiceButtons.Length; i++)
@@ -86,6 +88,7 @@ namespace Heroic.UI
                 }
 
                 ApplyChoiceVisuals(i, choices[i]);
+                PositionChoiceButton(i, choices[i], laneTotals, laneIndices);
             }
         }
 
@@ -113,6 +116,61 @@ namespace Heroic.UI
             }
 
             return $"<size=82%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>\n<size=86%><color=#C7E6F5>{choice.Description}</color></size>";
+        }
+
+        private void PositionChoiceButton(int index, UpgradeManager.DraftChoice choice, int[] laneTotals, int[] laneIndices)
+        {
+            if (index >= choiceButtons.Length || choiceButtons[index] == null)
+            {
+                return;
+            }
+
+            int lane = ResolveLane(choice);
+            int laneIndex = laneIndices[lane]++;
+            int laneTotal = Mathf.Max(1, laneTotals[lane]);
+            RectTransform rect = choiceButtons[index].GetComponent<RectTransform>();
+            if (rect == null)
+            {
+                return;
+            }
+
+            float x = lane == 0 ? -420f : lane == 2 ? 420f : 0f;
+            float y = ((laneTotal - 1) * 68f) - laneIndex * 136f;
+            rect.anchoredPosition = new Vector2(x, y);
+        }
+
+        private static int[] CountLanes(IReadOnlyList<UpgradeManager.DraftChoice> choices)
+        {
+            int[] totals = new int[3];
+            if (choices == null)
+            {
+                return totals;
+            }
+
+            foreach (UpgradeManager.DraftChoice choice in choices)
+            {
+                if (choice != null)
+                {
+                    totals[ResolveLane(choice)]++;
+                }
+            }
+
+            return totals;
+        }
+
+        private static int ResolveLane(UpgradeManager.DraftChoice choice)
+        {
+            if (choice.Category == UpgradeManager.UpgradeCategory.Movement)
+            {
+                return 0;
+            }
+
+            if (choice.Category == UpgradeManager.UpgradeCategory.System || choice.Category == UpgradeManager.UpgradeCategory.Boost)
+            {
+                return 2;
+            }
+
+            return 1;
         }
 
         private void ApplyChoiceVisuals(int index, UpgradeManager.DraftChoice choice)
@@ -294,6 +352,11 @@ namespace Heroic.UI
                 return "WH";
             }
 
+            if (id.Contains("cloud_walk"))
+            {
+                return "CW";
+            }
+
             if (id.Contains("fire_bolt"))
             {
                 return "FB";
@@ -352,6 +415,11 @@ namespace Heroic.UI
             if (choiceId.StartsWith("upgrade_fire_burning_ground"))
             {
                 return "fire_burning_ground";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_cloud_walk"))
+            {
+                return "movement_cloud_walk";
             }
 
             return choiceId;

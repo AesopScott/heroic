@@ -14,7 +14,8 @@ namespace Heroic.Player
             Blink,
             Lunge,
             Teleport,
-            Whirlwind
+            Whirlwind,
+            CloudWalk
         }
 
         [Serializable]
@@ -70,6 +71,11 @@ namespace Heroic.Player
                         range = 5f;
                         damage = 18;
                         break;
+                    case MovementSkillId.CloudWalk:
+                        cooldown = 8f;
+                        range = 5f;
+                        damage = 0;
+                        break;
                     default:
                         cooldown = 0f;
                         range = 0f;
@@ -94,6 +100,7 @@ namespace Heroic.Player
         [SerializeField] private bool equipPrototypeMovementSetOnStart = true;
 
         private PlayerController playerController;
+        private CloudWalkController cloudWalkController;
         private Coroutine activeLunge;
 
         public event Action<MovementSkillId> MovementActivated;
@@ -101,6 +108,7 @@ namespace Heroic.Player
         private void Awake()
         {
             playerController = GetComponent<PlayerController>();
+            cloudWalkController = GetComponent<CloudWalkController>();
 
             if (movementSlots.Length != 3)
             {
@@ -165,6 +173,10 @@ namespace Heroic.Player
             }
 
             movementSlots[slotIndex].Equip(skillId);
+            if (skillId == MovementSkillId.CloudWalk)
+            {
+                cloudWalkController?.EnableCloudWalk();
+            }
         }
 
         public MovementSkillId GetEquippedSkill(int slotIndex)
@@ -215,6 +227,8 @@ namespace Heroic.Player
                     return Teleport(slot);
                 case MovementSkillId.Whirlwind:
                     return Whirlwind(slot);
+                case MovementSkillId.CloudWalk:
+                    return CloudWalk(slot);
                 default:
                     return false;
             }
@@ -265,6 +279,33 @@ namespace Heroic.Player
             Vector2 destination = FindValidDestination(transform.position, direction, slot.Range);
             activeLunge = StartCoroutine(WhirlwindRoutine(destination, slot.Damage));
             return true;
+        }
+
+        private bool CloudWalk(MovementSlot slot)
+        {
+            if (cloudWalkController == null)
+            {
+                return false;
+            }
+
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.72f, 1f, 0.9f, 0.24f), 1f, 0.14f);
+            cloudWalkController.BeginCloudWalk(slot.Range);
+            return true;
+        }
+
+        public void SetCloudWalkStandardMovementTier(int tier)
+        {
+            cloudWalkController?.SetStandardMovementTier(tier);
+        }
+
+        public void SetCloudWalkPickupRangeTier(int tier)
+        {
+            cloudWalkController?.SetPickupRangeTier(tier);
+        }
+
+        public void SetCloudWalkKnockbackTier(int tier)
+        {
+            cloudWalkController?.SetKnockbackTier(tier);
         }
 
         private IEnumerator LungeRoutine(Vector2 destination, int damage)

@@ -46,10 +46,15 @@ namespace Heroic.Systems
                 Boost("upgrade_fire_burning_ground_spread", "Burning Ground: Spread", "Increase burning area."),
                 Boost("upgrade_fire_burning_ground_persist", "Burning Ground: Persist", "Increase zone duration."),
 
+                Boost("upgrade_movement_cloud_walk_speed", "Cloud Walk: Faster Steps", "Increase standard movement by 20% per tier."),
+                Boost("upgrade_movement_cloud_walk_pickup", "Cloud Walk: Cloud Reach", "Increase pickup range by 50% per tier."),
+                Boost("upgrade_movement_cloud_walk_knockback", "Cloud Walk: Rebuffing Mist", "Proc knockback against nearby enemies."),
+
                 Movement("movement_blink", "Blink", "Equip short Arcane reposition."),
                 Movement("movement_lunge", "Lunge", "Equip aggressive forward movement."),
                 Movement("movement_teleport", "Teleport", "Equip long-range reposition."),
-                Movement("movement_whirlwind", "Whirlwind", "Equip a damaging rush through enemies.")
+                Movement("movement_whirlwind", "Whirlwind", "Equip a damaging rush through enemies."),
+                Movement("movement_cloud_walk", "Cloud Walk", "Slow standard movement, then burst across clouds.")
             };
         }
 

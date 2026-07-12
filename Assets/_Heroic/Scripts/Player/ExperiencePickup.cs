@@ -11,6 +11,7 @@ namespace Heroic.Player
         [SerializeField] private float magnetSpeed = 11f;
 
         private Transform target;
+        private PlayerPickupMagnet targetMagnet;
 
         public event Action<ExperiencePickup> Collected;
 
@@ -32,7 +33,8 @@ namespace Heroic.Player
             }
 
             float distance = Vector2.Distance(transform.position, target.position);
-            if (distance <= magnetRange)
+            float activeMagnetRange = targetMagnet != null ? targetMagnet.PickupRange : magnetRange;
+            if (distance <= activeMagnetRange)
             {
                 transform.position = Vector2.MoveTowards(transform.position, target.position, magnetSpeed * Time.deltaTime);
             }
@@ -57,6 +59,7 @@ namespace Heroic.Player
             if (playerExperience != null)
             {
                 target = playerExperience.transform;
+                targetMagnet = playerExperience.GetComponent<PlayerPickupMagnet>();
             }
         }
     }

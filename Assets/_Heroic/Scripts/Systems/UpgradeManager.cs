@@ -82,7 +82,7 @@ namespace Heroic.Systems
         {
             IsDraftOpen = true;
             CurrentDraftIncludesMovement = includeMovementChoice;
-            BuildChoices(includeMovementChoice);
+            BuildChoices(playerLevel);
             runManager?.OpenLevelUpDraft();
             DraftOpened?.Invoke(currentChoices, includeMovementChoice);
         }
@@ -113,12 +113,15 @@ namespace Heroic.Systems
             runManager?.ResumeRun();
         }
 
-        private void BuildChoices(bool includeMovementChoice)
+        private void BuildChoices(int playerLevel)
         {
             currentChoices.Clear();
+            bool includeMovementChoice = playerLevel % 2 == 0;
+            bool includeSystemChoice = playerLevel % 3 == 0;
 
-            List<DraftChoice> eligible = new List<DraftChoice>();
             List<DraftChoice> movementEligible = new List<DraftChoice>();
+            List<DraftChoice> abilityEligible = new List<DraftChoice>();
+            List<DraftChoice> systemEligible = new List<DraftChoice>();
             foreach (DraftChoice choice in draftPool)
             {
                 if (choice == null)
@@ -126,36 +129,63 @@ namespace Heroic.Systems
                     continue;
                 }
 
-                if (IsChoiceEligible(choice, includeMovementChoice))
+                if (IsChoiceEligible(choice, includeMovementChoice, includeSystemChoice))
                 {
-                    eligible.Add(choice);
                     if (choice.Category == UpgradeCategory.Movement)
                     {
                         movementEligible.Add(choice);
                     }
+                    else if (choice.Category == UpgradeCategory.Attack || choice.Category == UpgradeCategory.Defense)
+                    {
+                        abilityEligible.Add(choice);
+                    }
+                    else
+                    {
+                        systemEligible.Add(choice);
+                    }
                 }
             }
 
+            int eligibleCount = movementEligible.Count + abilityEligible.Count + systemEligible.Count;
             int lowerChoiceCount = Mathf.Clamp(minimumChoices, 1, Mathf.Max(1, maximumChoices));
             int upperChoiceCount = Mathf.Max(lowerChoiceCount, maximumChoices);
-            int targetCount = Mathf.Min(UnityEngine.Random.Range(lowerChoiceCount, upperChoiceCount + 1), eligible.Count);
+            int targetCount = Mathf.Min(UnityEngine.Random.Range(lowerChoiceCount, upperChoiceCount + 1), eligibleCount);
 
             if (includeMovementChoice && movementEligible.Count > 0 && targetCount > 0)
             {
-                DraftChoice movementChoice = movementEligible[UnityEngine.Random.Range(0, movementEligible.Count)];
-                currentChoices.Add(movementChoice);
-                eligible.Remove(movementChoice);
+                AddRandomChoice(movementEligible);
             }
 
-            while (eligible.Count > 0 && currentChoices.Count < targetCount)
+            int reservedSystemSlots = systemEligible.Count > 0 && currentChoices.Count < targetCount ? 1 : 0;
+            while (abilityEligible.Count > 0 && currentChoices.Count < targetCount - reservedSystemSlots)
             {
-                int index = UnityEngine.Random.Range(0, eligible.Count);
-                currentChoices.Add(eligible[index]);
-                eligible.RemoveAt(index);
+                AddRandomChoice(abilityEligible);
+            }
+
+            while (systemEligible.Count > 0 && currentChoices.Count < targetCount)
+            {
+                AddRandomChoice(systemEligible);
+            }
+
+            while (abilityEligible.Count > 0 && currentChoices.Count < targetCount)
+            {
+                AddRandomChoice(abilityEligible);
+            }
+
+            while (movementEligible.Count > 0 && currentChoices.Count < targetCount)
+            {
+                AddRandomChoice(movementEligible);
             }
         }
 
-        private bool IsChoiceEligible(DraftChoice choice, bool includeMovementChoice)
+        private void AddRandomChoice(List<DraftChoice> choices)
+        {
+            int index = UnityEngine.Random.Range(0, choices.Count);
+            currentChoices.Add(choices[index]);
+            choices.RemoveAt(index);
+        }
+
+        private bool IsChoiceEligible(DraftChoice choice, bool includeMovementChoice, bool includeSystemChoice)
         {
             if (choice.Category == UpgradeCategory.Movement)
             {
@@ -164,6 +194,11 @@ namespace Heroic.Systems
 
             if (choice.Category == UpgradeCategory.Boost)
             {
+                if (!includeSystemChoice)
+                {
+                    return false;
+                }
+
                 string boostedSkillId = ResolveBoostedSkillId(choice.Id);
                 if (string.IsNullOrEmpty(boostedSkillId) || buildState == null || !buildState.HasSkill(boostedSkillId))
                 {
@@ -171,6 +206,11 @@ namespace Heroic.Systems
                 }
 
                 return buildState.GetSkillPathTier(boostedSkillId, choice.Id) < 5;
+            }
+
+            if (choice.Category == UpgradeCategory.System)
+            {
+                return includeSystemChoice;
             }
 
             if (choice.Category == UpgradeCategory.Attack)
@@ -217,6 +257,8 @@ namespace Heroic.Systems
                     return MovementCaster.MovementSkillId.Teleport;
                 case "movement_whirlwind":
                     return MovementCaster.MovementSkillId.Whirlwind;
+                case "movement_cloud_walk":
+                    return MovementCaster.MovementSkillId.CloudWalk;
                 default:
                     return MovementCaster.MovementSkillId.None;
             }
@@ -262,6 +304,11 @@ namespace Heroic.Systems
             if (choiceId.StartsWith("upgrade_fire_burning_ground"))
             {
                 return "fire_burning_ground";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_cloud_walk"))
+            {
+                return "movement_cloud_walk";
             }
 
             return string.Empty;
