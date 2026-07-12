@@ -2,6 +2,7 @@ using UnityEngine;
 using Heroic.Combat;
 using Heroic.Core;
 using Heroic.Data;
+using Heroic.Player;
 using Heroic.Visuals;
 
 namespace Heroic.Enemies
@@ -11,6 +12,7 @@ namespace Heroic.Enemies
         [SerializeField] private EnemyController enemyPrefab;
         [SerializeField] private Transform playerTarget;
         [SerializeField] private RunManager runManager;
+        [SerializeField] private PlayerExperience playerExperience;
         [SerializeField] private WaveDefinition[] waves = new WaveDefinition[0];
         [SerializeField] private float spawnRadius = 8f;
         [SerializeField] private float spawnInterval = 2f;
@@ -23,6 +25,11 @@ namespace Heroic.Enemies
             if (runManager == null)
             {
                 runManager = FindAnyObjectByType<RunManager>();
+            }
+
+            if (playerExperience == null)
+            {
+                playerExperience = FindAnyObjectByType<PlayerExperience>();
             }
         }
 
@@ -130,7 +137,15 @@ namespace Heroic.Enemies
                 return 1;
             }
 
-            return Random.Range(activeWave.MinSpawnCount, activeWave.MaxSpawnCount + 1);
+            int minSpawnCount = activeWave.MinSpawnCount;
+            int maxSpawnCount = activeWave.MaxSpawnCount;
+            if (activeWave.WaveIndex == 1 && playerExperience != null)
+            {
+                minSpawnCount = 1;
+                maxSpawnCount = playerExperience.Level >= 2 ? 3 : 2;
+            }
+
+            return Random.Range(minSpawnCount, maxSpawnCount + 1);
         }
 
         private EnemyDefinition ChooseEnemy(WaveDefinition activeWave)

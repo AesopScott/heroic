@@ -136,6 +136,9 @@ namespace Heroic.Audio
                 case MovementCaster.MovementSkillId.Teleport:
                     Play("move_teleport", 520f, 0.16f, -260f);
                     break;
+                case MovementCaster.MovementSkillId.Whirlwind:
+                    Play("move_whirlwind", 360f, 0.14f, 180f);
+                    break;
             }
         }
 

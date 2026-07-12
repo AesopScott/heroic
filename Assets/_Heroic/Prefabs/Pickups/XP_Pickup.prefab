@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78509d5ab041a2743a132bd1e1af710f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Visuals.VisualPresetApplier
-  preset: 7
+  preset: 8
   applyOnAwake: 1
 --- !u!82 &4840704662114218978
 AudioSource:

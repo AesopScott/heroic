@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Heroic.Core;
+using Heroic.Player;
 
 namespace Heroic.Systems
 {
@@ -47,6 +48,7 @@ namespace Heroic.Systems
         [SerializeField] private int minimumChoices = 3;
         [SerializeField] private int maximumChoices = 5;
         [SerializeField] private RunManager runManager;
+        [SerializeField] private RunBuildState buildState;
 
         private readonly List<DraftChoice> currentChoices = new List<DraftChoice>();
 
@@ -63,6 +65,11 @@ namespace Heroic.Systems
             if (runManager == null)
             {
                 runManager = FindAnyObjectByType<RunManager>();
+            }
+
+            if (buildState == null)
+            {
+                buildState = FindAnyObjectByType<RunBuildState>();
             }
 
             if (usePrototypeDraftPoolWhenEmpty && (draftPool == null || draftPool.Length == 0))
@@ -118,12 +125,10 @@ namespace Heroic.Systems
                     continue;
                 }
 
-                if (choice.Category == UpgradeCategory.Movement && !includeMovementChoice)
+                if (IsChoiceEligible(choice, includeMovementChoice))
                 {
-                    continue;
+                    eligible.Add(choice);
                 }
-
-                eligible.Add(choice);
             }
 
             int lowerChoiceCount = Mathf.Clamp(minimumChoices, 1, Mathf.Max(1, maximumChoices));
@@ -135,6 +140,118 @@ namespace Heroic.Systems
                 currentChoices.Add(eligible[index]);
                 eligible.RemoveAt(index);
             }
+        }
+
+        private bool IsChoiceEligible(DraftChoice choice, bool includeMovementChoice)
+        {
+            if (choice.Category == UpgradeCategory.Movement)
+            {
+                return includeMovementChoice && !IsMovementEquipped(choice.Id);
+            }
+
+            if (choice.Category == UpgradeCategory.Boost)
+            {
+                string boostedSkillId = ResolveBoostedSkillId(choice.Id);
+                if (string.IsNullOrEmpty(boostedSkillId) || buildState == null || !buildState.HasSkill(boostedSkillId))
+                {
+                    return false;
+                }
+
+                return buildState.GetSkillPathTier(boostedSkillId, choice.Id) < 5;
+            }
+
+            if (choice.Category == UpgradeCategory.Attack)
+            {
+                return buildState == null || !buildState.HasSkill(choice.Id);
+            }
+
+            return true;
+        }
+
+        private bool IsMovementEquipped(string choiceId)
+        {
+            if (buildState == null || buildState.EquippedMovementSkills == null)
+            {
+                return false;
+            }
+
+            MovementCaster.MovementSkillId skillId = ResolveMovementSkillId(choiceId);
+            if (skillId == MovementCaster.MovementSkillId.None)
+            {
+                return false;
+            }
+
+            foreach (MovementCaster.MovementSkillId equippedSkill in buildState.EquippedMovementSkills)
+            {
+                if (equippedSkill == skillId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static MovementCaster.MovementSkillId ResolveMovementSkillId(string choiceId)
+        {
+            switch (choiceId)
+            {
+                case "movement_blink":
+                    return MovementCaster.MovementSkillId.Blink;
+                case "movement_lunge":
+                    return MovementCaster.MovementSkillId.Lunge;
+                case "movement_teleport":
+                    return MovementCaster.MovementSkillId.Teleport;
+                case "movement_whirlwind":
+                    return MovementCaster.MovementSkillId.Whirlwind;
+                default:
+                    return MovementCaster.MovementSkillId.None;
+            }
+        }
+
+        private static string ResolveBoostedSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_arcane_magic_missile"))
+            {
+                return "arcane_magic_missile";
+            }
+
+            if (choiceId.StartsWith("upgrade_arcane_arcane_blast"))
+            {
+                return "arcane_arcane_blast";
+            }
+
+            if (choiceId.StartsWith("upgrade_arcane_warp_pulse"))
+            {
+                return "arcane_warp_pulse";
+            }
+
+            if (choiceId.StartsWith("upgrade_arcane_spell_echo"))
+            {
+                return "arcane_spell_echo";
+            }
+
+            if (choiceId.StartsWith("upgrade_arcane_arcane_orbit"))
+            {
+                return "arcane_arcane_orbit";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_fire_bolt"))
+            {
+                return "fire_fire_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_flame_wave"))
+            {
+                return "fire_flame_wave";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_burning_ground"))
+            {
+                return "fire_burning_ground";
+            }
+
+            return string.Empty;
         }
     }
 }

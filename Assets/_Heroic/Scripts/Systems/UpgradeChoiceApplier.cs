@@ -11,6 +11,7 @@ namespace Heroic.Systems
         [SerializeField] private SpellCaster spellCaster;
         [SerializeField] private MovementCaster movementCaster;
         [SerializeField] private ArcaneUpgradeApplier arcaneUpgradeApplier;
+        [SerializeField] private FireUpgradeApplier fireUpgradeApplier;
 
         private void Awake()
         {
@@ -22,6 +23,11 @@ namespace Heroic.Systems
             if (arcaneUpgradeApplier == null)
             {
                 arcaneUpgradeApplier = GetComponent<ArcaneUpgradeApplier>();
+            }
+
+            if (fireUpgradeApplier == null)
+            {
+                fireUpgradeApplier = GetComponent<FireUpgradeApplier>();
             }
         }
 
@@ -54,7 +60,13 @@ namespace Heroic.Systems
                 return;
             }
 
-            if (choice.Id.StartsWith("arcane_"))
+            if (choice.Id.StartsWith("upgrade_fire_"))
+            {
+                ApplyFireUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("arcane_") || choice.Id.StartsWith("fire_"))
             {
                 buildState?.LearnSkill(choice.Id);
                 spellCaster?.EnableSkill(choice.Id);
@@ -73,16 +85,38 @@ namespace Heroic.Systems
             {
                 EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.Teleport);
             }
+            else if (choice.Id == "movement_whirlwind")
+            {
+                EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.Whirlwind);
+            }
         }
 
         private void ApplyArcaneUpgrade(string choiceId)
         {
             string skillId = ResolveArcaneSkillId(choiceId);
-            buildState?.LearnSkill(skillId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
             spellCaster?.EnableSkill(skillId);
             buildState?.UpgradeSkillPath(skillId, choiceId);
             int tier = buildState != null ? buildState.GetSkillPathTier(skillId, choiceId) : 1;
             arcaneUpgradeApplier?.Apply(choiceId, tier);
+        }
+
+        private void ApplyFireUpgrade(string choiceId)
+        {
+            string skillId = ResolveFireSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            fireUpgradeApplier?.Apply(choiceId, tier);
         }
 
         private string ResolveArcaneSkillId(string choiceId)
@@ -113,6 +147,26 @@ namespace Heroic.Systems
             }
 
             return "arcane_unknown";
+        }
+
+        private string ResolveFireSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_fire_fire_bolt"))
+            {
+                return "fire_fire_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_flame_wave"))
+            {
+                return "fire_flame_wave";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_burning_ground"))
+            {
+                return "fire_burning_ground";
+            }
+
+            return "fire_unknown";
         }
 
         private void EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId skillId)

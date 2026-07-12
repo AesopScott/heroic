@@ -9,6 +9,9 @@ namespace Heroic.Spells
         [SerializeField] private WarpPulseCaster warpPulseCaster;
         [SerializeField] private SpellEchoCaster spellEchoCaster;
         [SerializeField] private ArcaneOrbitCaster arcaneOrbitCaster;
+        [SerializeField] private FireBoltCaster fireBoltCaster;
+        [SerializeField] private FlameWaveCaster flameWaveCaster;
+        [SerializeField] private BurningGroundCaster burningGroundCaster;
         [SerializeField] private bool startWithMagicMissile = true;
 
         private void Start()
@@ -17,6 +20,9 @@ namespace Heroic.Spells
             SetOptionalCasterEnabled(arcaneBlastCaster, false);
             SetOptionalCasterEnabled(warpPulseCaster, false);
             SetOptionalCasterEnabled(arcaneOrbitCaster, false);
+            SetOptionalCasterEnabled(fireBoltCaster, false);
+            SetOptionalCasterEnabled(flameWaveCaster, false);
+            SetOptionalCasterEnabled(burningGroundCaster, false);
         }
 
         public void CastPrimarySpell()
@@ -51,6 +57,15 @@ namespace Heroic.Spells
                 case "arcane_arcane_orbit":
                     SetOptionalCasterEnabled(arcaneOrbitCaster, true);
                     arcaneOrbitCaster?.SpawnOrbs();
+                    break;
+                case "fire_fire_bolt":
+                    SetOptionalCasterEnabled(fireBoltCaster, true);
+                    break;
+                case "fire_flame_wave":
+                    SetOptionalCasterEnabled(flameWaveCaster, true);
+                    break;
+                case "fire_burning_ground":
+                    SetOptionalCasterEnabled(burningGroundCaster, true);
                     break;
             }
         }

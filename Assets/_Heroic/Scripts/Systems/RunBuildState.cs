@@ -31,7 +31,10 @@ namespace Heroic.Systems
             }
         }
 
-        [SerializeField] private List<string> learnedSkillIds = new List<string>();
+        [SerializeField] private List<string> learnedSkillIds = new List<string>
+        {
+            "arcane_magic_missile"
+        };
         [SerializeField] private List<SkillUpgradeState> skillUpgrades = new List<SkillUpgradeState>();
         [SerializeField] private MovementCaster.MovementSkillId[] equippedMovementSkills =
         {

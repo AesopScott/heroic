@@ -13,7 +13,8 @@ namespace Heroic.Player
             None,
             Blink,
             Lunge,
-            Teleport
+            Teleport,
+            Whirlwind
         }
 
         [Serializable]
@@ -63,6 +64,11 @@ namespace Heroic.Player
                         cooldown = 12f;
                         range = 8f;
                         damage = 0;
+                        break;
+                    case MovementSkillId.Whirlwind:
+                        cooldown = 9f;
+                        range = 5f;
+                        damage = 18;
                         break;
                     default:
                         cooldown = 0f;
@@ -207,6 +213,8 @@ namespace Heroic.Player
                     return Lunge(slot);
                 case MovementSkillId.Teleport:
                     return Teleport(slot);
+                case MovementSkillId.Whirlwind:
+                    return Whirlwind(slot);
                 default:
                     return false;
             }
@@ -246,6 +254,19 @@ namespace Heroic.Player
             return true;
         }
 
+        private bool Whirlwind(MovementSlot slot)
+        {
+            if (activeLunge != null)
+            {
+                return false;
+            }
+
+            Vector2 direction = GetFacingDirection();
+            Vector2 destination = FindValidDestination(transform.position, direction, slot.Range);
+            activeLunge = StartCoroutine(WhirlwindRoutine(destination, slot.Damage));
+            return true;
+        }
+
         private IEnumerator LungeRoutine(Vector2 destination, int damage)
         {
             Vector2 start = transform.position;
@@ -266,6 +287,36 @@ namespace Heroic.Player
             }
 
             transform.position = destination;
+            if (playerController != null)
+            {
+                playerController.SetMovementLocked(false);
+            }
+
+            activeLunge = null;
+        }
+
+        private IEnumerator WhirlwindRoutine(Vector2 destination, int damage)
+        {
+            Vector2 start = transform.position;
+            float elapsed = 0f;
+            float duration = lungeDuration * 1.45f;
+            if (playerController != null)
+            {
+                playerController.SetMovementLocked(true);
+            }
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float percent = Mathf.Clamp01(elapsed / duration);
+                transform.position = Vector2.Lerp(start, destination, percent);
+                TemporaryVisualEffect.CreateCircle(transform.position, new Color(1f, 0.58f, 0.14f, 0.26f), 0.75f, 0.08f);
+                DamageAround(transform.position, damage, lungeHitRadius * 1.25f);
+                yield return null;
+            }
+
+            transform.position = destination;
+            TemporaryVisualEffect.CreateCircle(destination, new Color(1f, 0.42f, 0.08f, 0.38f), 1.1f, 0.16f);
             if (playerController != null)
             {
                 playerController.SetMovementLocked(false);

@@ -41,6 +41,7 @@ namespace Heroic.Editor
 
             GameObject xpPickup = CreateXpPickupPrefab();
             GameObject projectile = CreateMagicMissilePrefab();
+            GameObject fireProjectile = CreateFireProjectilePrefab();
             GameObject orb = CreateArcaneOrbPrefab();
             GameObject enemy = CreateEnemyPrefab(xpPickup);
             GameObject boss = CreateBossPrefab(xpPickup);
@@ -50,11 +51,11 @@ namespace Heroic.Editor
             EnemyDefinition tankEnemyDefinition = CreateEnemyDefinition("Enemy_Tank", "Tank Enemy", enemy, 80, 1.25f, 16, 3, VisualPresetApplier.Preset.TankEnemy, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
 
-            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 2, 4, basicEnemyDefinition);
+            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 1, 2, basicEnemyDefinition);
             WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, 1, 1, basicEnemyDefinition, fastEnemyDefinition);
             WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, 1, 1, basicEnemyDefinition, fastEnemyDefinition, tankEnemyDefinition);
 
-            CreateGameScene(projectile, orb, enemy, boss, xpPickup, bossDefinition, new[] { waveOne, waveTwo, waveThree });
+            CreateGameScene(projectile, fireProjectile, orb, enemy, boss, xpPickup, bossDefinition, new[] { waveOne, waveTwo, waveThree });
             CreateMenuScene("MainMenu");
             CreateMenuScene("Results");
             UpdateBuildSettings();
@@ -189,6 +190,18 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Projectiles/Projectile_MagicMissile.prefab");
         }
 
+        private static GameObject CreateFireProjectilePrefab()
+        {
+            GameObject go = new GameObject("Projectile_FireBolt");
+            CircleCollider2D collider = go.AddComponent<CircleCollider2D>();
+            collider.isTrigger = true;
+            go.AddComponent<Projectile>();
+            go.AddComponent<ProjectileHit>();
+            VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
+            SetEnum(visual, "preset", VisualPresetApplier.Preset.FireProjectile);
+            return SavePrefab(go, Prefabs + "/Projectiles/Projectile_FireBolt.prefab");
+        }
+
         private static GameObject CreateArcaneOrbPrefab()
         {
             GameObject go = new GameObject("ArcaneOrbitOrb");
@@ -258,7 +271,7 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Boss_ArcaneWarden.prefab");
         }
 
-        private static void CreateGameScene(GameObject projectile, GameObject orb, GameObject enemy, GameObject boss, GameObject xpPickup, EnemyDefinition bossDefinition, WaveDefinition[] waves)
+        private static void CreateGameScene(GameObject projectile, GameObject fireProjectile, GameObject orb, GameObject enemy, GameObject boss, GameObject xpPickup, EnemyDefinition bossDefinition, WaveDefinition[] waves)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = "Game";
@@ -282,13 +295,14 @@ namespace Heroic.Editor
             RunBuildState buildState = managers.AddComponent<RunBuildState>();
             UpgradeChoiceApplier choiceApplier = managers.AddComponent<UpgradeChoiceApplier>();
             ArcaneUpgradeApplier arcaneUpgradeApplier = managers.AddComponent<ArcaneUpgradeApplier>();
+            FireUpgradeApplier fireUpgradeApplier = managers.AddComponent<FireUpgradeApplier>();
             UIManager uiManager = managers.AddComponent<UIManager>();
             BackgroundMusicPlayer music = managers.AddComponent<BackgroundMusicPlayer>();
             SetString(music, "resourcesClipPath", "Audio/Music/HeroicDemoLoop");
             SetFloat(music, "volume", 0.24f);
             managers.AddComponent<DemoAudioControls>();
 
-            GameObject player = CreateScenePlayer(projectile, orb, upgradeManager);
+            GameObject player = CreateScenePlayer(projectile, fireProjectile, orb, upgradeManager);
             PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
             PlayerExperience playerExperience = player.GetComponent<PlayerExperience>();
             SpellCaster spellCaster = player.GetComponent<SpellCaster>();
@@ -301,6 +315,7 @@ namespace Heroic.Editor
             SetObject(enemySpawner, "enemyPrefab", enemy.GetComponent<EnemyController>());
             SetObject(enemySpawner, "playerTarget", player.transform);
             SetObject(enemySpawner, "runManager", runManager);
+            SetObject(enemySpawner, "playerExperience", playerExperience);
             SetObjectArray(enemySpawner, "waves", LoadWaveAssets(waves));
 
             SetObject(bossSpawner, "runManager", runManager);
@@ -310,14 +325,17 @@ namespace Heroic.Editor
             SetObject(bossSpawner, "bossDefinition", bossDefinition);
 
             SetObject(playerExperience, "upgradeManager", upgradeManager);
+            SetObject(upgradeManager, "buildState", buildState);
 
             SetObject(choiceApplier, "upgradeManager", upgradeManager);
             SetObject(choiceApplier, "buildState", buildState);
             SetObject(choiceApplier, "spellCaster", spellCaster);
             SetObject(choiceApplier, "movementCaster", movementCaster);
             SetObject(choiceApplier, "arcaneUpgradeApplier", arcaneUpgradeApplier);
+            SetObject(choiceApplier, "fireUpgradeApplier", fireUpgradeApplier);
 
             WireArcaneUpgradeApplier(arcaneUpgradeApplier, player);
+            WireFireUpgradeApplier(fireUpgradeApplier, player);
 
             GameObject cameraObject = new GameObject("Main Camera");
             Camera camera = cameraObject.AddComponent<Camera>();
@@ -341,7 +359,7 @@ namespace Heroic.Editor
             EditorSceneManager.SaveScene(scene, Scenes + "/Game.unity");
         }
 
-        private static GameObject CreateScenePlayer(GameObject projectile, GameObject orb, UpgradeManager upgradeManager)
+        private static GameObject CreateScenePlayer(GameObject projectile, GameObject fireProjectile, GameObject orb, UpgradeManager upgradeManager)
         {
             GameObject player = new GameObject("Player");
             Rigidbody2D body = player.AddComponent<Rigidbody2D>();
@@ -358,7 +376,10 @@ namespace Heroic.Editor
             ArcaneBlastCaster arcaneBlast = player.AddComponent<ArcaneBlastCaster>();
             WarpPulseCaster warpPulse = player.AddComponent<WarpPulseCaster>();
             ArcaneOrbitCaster arcaneOrbit = player.AddComponent<ArcaneOrbitCaster>();
-            player.AddComponent<SpellCaster>();
+            FireBoltCaster fireBolt = player.AddComponent<FireBoltCaster>();
+            FlameWaveCaster flameWave = player.AddComponent<FlameWaveCaster>();
+            BurningGroundCaster burningGround = player.AddComponent<BurningGroundCaster>();
+            SpellCaster spellCaster = player.AddComponent<SpellCaster>();
             player.AddComponent<MovementCaster>();
             VisualPresetApplier visual = player.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.Player);
@@ -377,6 +398,19 @@ namespace Heroic.Editor
             SetObject(arcaneBlast, "spellEcho", spellEcho);
             SetObject(warpPulse, "spellEcho", spellEcho);
             SetObject(arcaneOrbit, "orbPrefab", orb.GetComponent<ArcaneOrbitOrb>());
+            SetObject(fireBolt, "projectilePrefab", fireProjectile.GetComponent<Projectile>());
+            SetObject(fireBolt, "firePoint", firePoint.transform);
+            SetObject(fireBolt, "spellEcho", spellEcho);
+            SetObject(flameWave, "spellEcho", spellEcho);
+            SetObject(burningGround, "spellEcho", spellEcho);
+            SetObject(spellCaster, "magicMissileCaster", magicMissile);
+            SetObject(spellCaster, "arcaneBlastCaster", arcaneBlast);
+            SetObject(spellCaster, "warpPulseCaster", warpPulse);
+            SetObject(spellCaster, "spellEchoCaster", spellEcho);
+            SetObject(spellCaster, "arcaneOrbitCaster", arcaneOrbit);
+            SetObject(spellCaster, "fireBoltCaster", fireBolt);
+            SetObject(spellCaster, "flameWaveCaster", flameWave);
+            SetObject(spellCaster, "burningGroundCaster", burningGround);
             return player;
         }
 
@@ -399,6 +433,13 @@ namespace Heroic.Editor
             SetObject(applier, "warpPulse", player.GetComponent<WarpPulseCaster>());
             SetObject(applier, "spellEcho", player.GetComponent<SpellEchoCaster>());
             SetObject(applier, "arcaneOrbit", player.GetComponent<ArcaneOrbitCaster>());
+        }
+
+        private static void WireFireUpgradeApplier(FireUpgradeApplier applier, GameObject player)
+        {
+            SetObject(applier, "fireBolt", player.GetComponent<FireBoltCaster>());
+            SetObject(applier, "flameWave", player.GetComponent<FlameWaveCaster>());
+            SetObject(applier, "burningGround", player.GetComponent<BurningGroundCaster>());
         }
 
         private static TMP_Text CreateGameUi(UIManager uiManager, RunManager runManager, UpgradeManager upgradeManager, RunBuildState buildState, PlayerHealth health, PlayerExperience experience, MovementCaster movement, BossSpawner bossSpawner)

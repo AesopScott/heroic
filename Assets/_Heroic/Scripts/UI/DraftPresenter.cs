@@ -289,6 +289,26 @@ namespace Heroic.UI
                 return "TP";
             }
 
+            if (id.Contains("whirlwind"))
+            {
+                return "WH";
+            }
+
+            if (id.Contains("fire_bolt"))
+            {
+                return "FB";
+            }
+
+            if (id.Contains("flame_wave"))
+            {
+                return "FW";
+            }
+
+            if (id.Contains("burning_ground"))
+            {
+                return "BG";
+            }
+
             return "??";
         }
 
@@ -317,6 +337,21 @@ namespace Heroic.UI
             if (choiceId.StartsWith("upgrade_arcane_arcane_orbit"))
             {
                 return "arcane_arcane_orbit";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_fire_bolt"))
+            {
+                return "fire_fire_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_flame_wave"))
+            {
+                return "fire_flame_wave";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_burning_ground"))
+            {
+                return "fire_burning_ground";
             }
 
             return choiceId;

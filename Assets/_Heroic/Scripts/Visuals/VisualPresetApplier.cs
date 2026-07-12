@@ -12,6 +12,7 @@ namespace Heroic.Visuals
             TankEnemy,
             Boss,
             MagicMissile,
+            FireProjectile,
             ArcaneOrb,
             ExperiencePickup,
             ArcaneArea
@@ -94,6 +95,12 @@ namespace Heroic.Visuals
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(0.7f, 0.95f, 1f), new Vector2(0.28f, 0.28f), 30, true, false, 0.12f, 8f);
                     EnsureLayer("MissileHalo", AutoSpriteVisual.Shape.Ring, new Color(0.35f, 0.9f, 1f, 0.75f), new Vector2(0.48f, 0.48f), 29, true, true, Vector2.zero, 0f, 0.08f, 7f, 180f);
                     EnsureTrail(new Color(0.4f, 0.9f, 1f, 0.8f));
+                    break;
+                case Preset.FireProjectile:
+                    ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(1f, 0.32f, 0.08f), new Vector2(0.34f, 0.34f), 30, true, false, 0.14f, 9f);
+                    EnsureLayer("FireBoltHalo", AutoSpriteVisual.Shape.Ring, new Color(1f, 0.74f, 0.18f, 0.72f), new Vector2(0.58f, 0.58f), 29, true, true, Vector2.zero, 0f, 0.08f, 8f, 220f);
+                    EnsureLayer("FireBoltCore", AutoSpriteVisual.Shape.Circle, new Color(1f, 0.95f, 0.42f, 0.9f), new Vector2(0.15f, 0.15f), 31, true, false, Vector2.zero, 0f, 0.1f, 10f);
+                    EnsureTrail(new Color(1f, 0.38f, 0.08f, 0.78f));
                     break;
                 case Preset.ArcaneOrb:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Ring, new Color(0.45f, 0.75f, 1f, 0.86f), new Vector2(0.35f, 0.35f), 25, true, true, 0.05f, 4f, 120f);

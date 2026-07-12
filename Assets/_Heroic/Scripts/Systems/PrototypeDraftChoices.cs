@@ -10,6 +10,9 @@ namespace Heroic.Systems
                 Skill("arcane_warp_pulse", "Warp Pulse", "Unlock a close Arcane control pulse."),
                 Skill("arcane_spell_echo", "Spell Echo", "Unlock delayed Arcane repeat support."),
                 Skill("arcane_arcane_orbit", "Arcane Orbit", "Unlock orbiting Arcane damage."),
+                Skill("fire_fire_bolt", "Fire Bolt", "Unlock high-damage burning projectiles."),
+                Skill("fire_flame_wave", "Flame Wave", "Unlock a sweeping cone of Fire damage."),
+                Skill("fire_burning_ground", "Burning Ground", "Unlock lingering Fire zones."),
 
                 Boost("upgrade_arcane_magic_missile_split_shot", "Magic Missile: Split Shot", "Add more missiles."),
                 Boost("upgrade_arcane_magic_missile_seeking_shot", "Magic Missile: Seeking Shot", "Improve homing strength."),
@@ -31,9 +34,22 @@ namespace Heroic.Systems
                 Boost("upgrade_arcane_arcane_orbit_faster_orbs", "Arcane Orbit: Faster Orbs", "Increase orbit speed."),
                 Boost("upgrade_arcane_arcane_orbit_larger_orbs", "Arcane Orbit: Larger Orbs", "Increase orbit radius and hit size."),
 
+                Boost("upgrade_fire_fire_bolt_power", "Fire Bolt: Power", "Increase bolt damage."),
+                Boost("upgrade_fire_fire_bolt_fork", "Fire Bolt: Fork", "Add more fire bolts."),
+                Boost("upgrade_fire_fire_bolt_pierce", "Fire Bolt: Pierce", "Add pierce count."),
+
+                Boost("upgrade_fire_flame_wave_heat", "Flame Wave: Heat", "Increase cone damage."),
+                Boost("upgrade_fire_flame_wave_reach", "Flame Wave: Reach", "Extend cone range."),
+                Boost("upgrade_fire_flame_wave_width", "Flame Wave: Width", "Widen the burn cone."),
+
+                Boost("upgrade_fire_burning_ground_burn", "Burning Ground: Burn", "Increase damage per tick."),
+                Boost("upgrade_fire_burning_ground_spread", "Burning Ground: Spread", "Increase burning area."),
+                Boost("upgrade_fire_burning_ground_persist", "Burning Ground: Persist", "Increase zone duration."),
+
                 Movement("movement_blink", "Blink", "Equip short Arcane reposition."),
                 Movement("movement_lunge", "Lunge", "Equip aggressive forward movement."),
-                Movement("movement_teleport", "Teleport", "Equip long-range reposition.")
+                Movement("movement_teleport", "Teleport", "Equip long-range reposition."),
+                Movement("movement_whirlwind", "Whirlwind", "Equip a damaging rush through enemies.")
             };
         }
 
