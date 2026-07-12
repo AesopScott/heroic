@@ -1,0 +1,43 @@
+# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+unity-*.log
+unity-import.log
+.obsidian-memory/
+
+# Unity generated crash reports
+sysinfo.txt
+
+# Visual Studio / Rider
+.vs/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+
+# Python cache files from local helper scripts
+__pycache__/
+*.py[cod]
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Keep Unity asset metadata tracked.
+!*.meta

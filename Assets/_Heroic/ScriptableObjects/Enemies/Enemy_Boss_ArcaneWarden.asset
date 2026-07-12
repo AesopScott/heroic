@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7eb1f653a63965498382e4a0c3f754b, type: 3}
+  m_Name: Enemy_Boss_ArcaneWarden
+  m_EditorClassIdentifier: Assembly-CSharp::Heroic.Data.EnemyDefinition
+  id: enemy_boss_arcanewarden
+  enemyName: Arcane Warden
+  prefab: {fileID: 6835940534997612918, guid: 55ad2b9395f3f9c4a897d2b3d925a050, type: 3}
+  maxHealth: 900
+  moveSpeed: 1.6
+  contactDamage: 18
+  experienceValue: 30
+  visualPreset: 4
+  boss: 1
+  description: 
