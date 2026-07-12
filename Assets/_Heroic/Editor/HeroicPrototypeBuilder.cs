@@ -30,6 +30,71 @@ namespace Heroic.Editor
         private const string Scenes = Root + "/Scenes";
         private const string ScriptableObjects = Root + "/ScriptableObjects";
         private const string RuntimeFontPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
+        private static readonly string[] CrashFramePaths =
+        {
+            "Assets/mobs/Crash I_frame1.png",
+            "Assets/mobs/Crash I_frame2.png"
+        };
+
+        private static readonly string[] Crash2FramePaths =
+        {
+            "Assets/mobs/Crash II_frame1.png",
+            "Assets/mobs/Crash II_frame2.png"
+        };
+
+        private static readonly string[] Crash3FramePaths =
+        {
+            "Assets/mobs/Crash III_frame1.png",
+            "Assets/mobs/Crash III_frame2.png"
+        };
+
+        private static readonly string[] Crash4FramePaths =
+        {
+            "Assets/mobs/Crash IV_frame1.png",
+            "Assets/mobs/Crash IV_frame2.png"
+        };
+
+        private static readonly string[] Crash5FramePaths =
+        {
+            "Assets/mobs/Crash V_frame1.png",
+            "Assets/mobs/Crash V_frame2.png"
+        };
+
+        private static readonly string[] Wall1FramePaths =
+        {
+            "Assets/mobs/Wall I_frame1.png",
+            "Assets/mobs/Wall I_frame2.png"
+        };
+
+        private static readonly string[] Thrower1FramePaths =
+        {
+            "Assets/mobs/thrower I_frame1.png",
+            "Assets/mobs/thrower I_frame2.png"
+        };
+
+        private static readonly string[] PlayerLevel1FramePaths =
+        {
+            "Assets/mobs/Player I_frame1.png",
+            "Assets/mobs/Player I_frame2.png",
+            "Assets/mobs/Player I_frame3.png",
+            "Assets/mobs/Player I_frame4.png"
+        };
+
+        private static readonly string[] PlayerLevel2FramePaths =
+        {
+            "Assets/mobs/Player II_frame1.png",
+            "Assets/mobs/Player II_frame2.png",
+            "Assets/mobs/Player II_frame3.png",
+            "Assets/mobs/Player II_frame4.png"
+        };
+
+        private static readonly string[] PlayerLevel6FramePaths =
+        {
+            "Assets/mobs/Player VI_frame1.png",
+            "Assets/mobs/Player VI_frame2.png",
+            "Assets/mobs/Player VI_frame3.png",
+            "Assets/mobs/Player VI_frame4.png"
+        };
 
         private static TMP_FontAsset runtimeFont;
 
@@ -261,15 +326,14 @@ namespace Heroic.Editor
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.CrashLevel1);
-            SetObject(visual, "crashLevel2Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash II.png"));
-            SetObject(visual, "crashLevel3Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash III.png"));
-            SetObject(visual, "crashLevel4Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash IV.png"));
-            SetObject(visual, "crashLevel5Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash V.png"));
-            SetObject(visual, "wallLevel1Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Wall I.png"));
+            SetObjectArray(visual, "crashLevel2Frames", LoadTextures(Crash2FramePaths));
+            SetObjectArray(visual, "crashLevel3Frames", LoadTextures(Crash3FramePaths));
+            SetObjectArray(visual, "crashLevel4Frames", LoadTextures(Crash4FramePaths));
+            SetObjectArray(visual, "crashLevel5Frames", LoadTextures(Crash5FramePaths));
+            SetObjectArray(visual, "wallLevel1Frames", LoadTextures(Wall1FramePaths));
+            SetObjectArray(visual, "throwerLevel1Frames", LoadTextures(Thrower1FramePaths));
             CrashSpriteAnimator crashAnimator = go.AddComponent<CrashSpriteAnimator>();
-            SetObject(crashAnimator, "sourceTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Crash I.png"));
-            SetInt(crashAnimator, "frameWidth", 384);
-            SetInt(crashAnimator, "frameHeight", 512);
+            SetObjectArray(crashAnimator, "sourceFrames", LoadTextures(CrashFramePaths));
             SetFloat(crashAnimator, "secondsPerFrame", 0.35f);
             SetInt(crashAnimator, "sortingOrder", 20);
             SetFloat(crashAnimator, "pixelsPerUnit", 384f);
@@ -380,6 +444,7 @@ namespace Heroic.Editor
             managers.AddComponent<EnemyDirector>();
             BossSpawner bossSpawner = managers.AddComponent<BossSpawner>();
             InvestorShowcaseMode showcaseMode = managers.AddComponent<InvestorShowcaseMode>();
+            SetBool(showcaseMode, "enabledForPrototype", false);
             UpgradeManager upgradeManager = managers.AddComponent<UpgradeManager>();
             RunBuildState buildState = managers.AddComponent<RunBuildState>();
             UpgradeChoiceApplier choiceApplier = managers.AddComponent<UpgradeChoiceApplier>();
@@ -475,11 +540,12 @@ namespace Heroic.Editor
             FlameWaveCaster flameWave = player.AddComponent<FlameWaveCaster>();
             BurningGroundCaster burningGround = player.AddComponent<BurningGroundCaster>();
             SpellCaster spellCaster = player.AddComponent<SpellCaster>();
-            player.AddComponent<MovementCaster>();
+            MovementCaster movementCaster = player.AddComponent<MovementCaster>();
+            SetBool(movementCaster, "equipPrototypeMovementSetOnStart", false);
             PlayerVisualController visual = player.AddComponent<PlayerVisualController>();
-            SetObject(visual, "levelOneTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Player I.png"));
-            SetObject(visual, "levelTwoTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Player II.png"));
-            SetObject(visual, "levelSixTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Player VI.png"));
+            SetObjectArray(visual, "levelOneFrames", LoadTextures(PlayerLevel1FramePaths));
+            SetObjectArray(visual, "levelTwoFrames", LoadTextures(PlayerLevel2FramePaths));
+            SetObjectArray(visual, "levelSixFrames", LoadTextures(PlayerLevel6FramePaths));
             player.AddComponent<HitFlashVisual>();
             player.AddComponent<WorldHealthBar>();
             player.AddComponent<DamageNumberEmitter>();
@@ -588,22 +654,27 @@ namespace Heroic.Editor
 
             for (int i = 0; i < 3; i++)
             {
+                const float movementSlotSize = 144f;
                 GameObject slot = CreateUiRoot("MovementSlot" + (i + 1), gameRoot.transform);
                 RectTransform rect = slot.GetComponent<RectTransform>();
                 rect.anchorMin = new Vector2(0.5f, 0f);
                 rect.anchorMax = new Vector2(0.5f, 0f);
-                rect.sizeDelta = new Vector2(86f, 48f);
-                rect.anchoredPosition = new Vector2(-90f + i * 90f, 40f);
+                rect.sizeDelta = new Vector2(movementSlotSize, movementSlotSize);
+                rect.anchoredPosition = new Vector2(-170f + i * 170f, 88f);
                 Image slotBackground = slot.AddComponent<Image>();
                 slotBackground.color = new Color(0.04f, 0.08f, 0.12f, 0.72f);
-                Image cooldownFill = CreateFilledImage("CooldownFill", slot.transform, new Vector2(86f, 48f), Vector2.zero, new Color(0.24f, 0.64f, 1f, 0.32f));
-                TMP_Text slotText = CreateText("Label", slot.transform, (i + 1).ToString(), new Vector2(80f, 24f), new Vector2(0f, 7f));
-                slotText.fontSize = 15f;
-                TMP_Text cooldownText = CreateText("Cooldown", slot.transform, string.Empty, new Vector2(80f, 18f), new Vector2(0f, -13f));
-                cooldownText.fontSize = 13f;
+                Image cooldownFill = CreateFilledImage("CooldownFill", slot.transform, new Vector2(movementSlotSize, movementSlotSize), Vector2.zero, Color.clear);
+                cooldownFill.enabled = false;
+                cooldownFill.raycastTarget = false;
+                TMP_Text slotText = CreateText("Label", slot.transform, (i + 1).ToString(), new Vector2(132f, 36f), new Vector2(0f, 46f));
+                slotText.fontSize = 32f;
+                slotText.fontStyle = FontStyles.Bold;
+                TMP_Text cooldownText = CreateText("Cooldown", slot.transform, string.Empty, new Vector2(132f, 92f), new Vector2(0f, -8f));
+                cooldownText.fontSize = 54f;
+                cooldownText.fontStyle = FontStyles.Bold;
                 MovementSlotPresenter presenter = slot.AddComponent<MovementSlotPresenter>();
                 SetObject(presenter, "movementCaster", movement);
-                SetInt(presenter, "slotIndex", i);
+                SetInt(presenter, "displayIndex", i);
                 SetObject(presenter, "skillNameText", slotText);
                 SetObject(presenter, "cooldownText", cooldownText);
                 SetObject(presenter, "cooldownFill", cooldownFill);
@@ -1218,6 +1289,16 @@ namespace Heroic.Editor
             serializedProperty.enumValueIndex = System.Convert.ToInt32(value);
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
+
+        private static Texture2D[] LoadTextures(string[] assetPaths)
+        {
+            Texture2D[] textures = new Texture2D[assetPaths.Length];
+            for (int i = 0; i < assetPaths.Length; i++)
+            {
+                textures[i] = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPaths[i]);
+            }
+
+            return textures;
+        }
     }
 }
-

@@ -10,6 +10,9 @@ namespace Heroic.Visuals
         [SerializeField] private Texture2D levelOneTexture;
         [SerializeField] private Texture2D levelTwoTexture;
         [SerializeField] private Texture2D levelSixTexture;
+        [SerializeField] private Texture2D[] levelOneFrames;
+        [SerializeField] private Texture2D[] levelTwoFrames;
+        [SerializeField] private Texture2D[] levelSixFrames;
         [SerializeField] private int frameWidth = 384;
         [SerializeField] private int frameHeight = 512;
         [SerializeField] private float secondsPerFrame = 0.22f;
@@ -29,18 +32,21 @@ namespace Heroic.Visuals
         [SerializeField] private Color poisonTint = new Color(0.45f, 0.85f, 0.3f);
 
         private SpriteRenderer spriteRenderer;
+        private PlayerController playerController;
         private PlayerExperience playerExperience;
         private UpgradeManager upgradeManager;
         private string currentSchoolId;
         private Color? accumulatedRobeColor;
         private Sprite[] frames = new Sprite[0];
         private Texture2D activeTexture;
+        private Texture2D[] activeFramesSource;
         private int frameIndex;
         private float nextFrameTime;
 
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
+            playerController = GetComponent<PlayerController>();
             playerExperience = GetComponent<PlayerExperience>();
             upgradeManager = FindAnyObjectByType<UpgradeManager>();
             ApplyForCurrentState();
@@ -50,12 +56,14 @@ namespace Heroic.Visuals
         {
             if (frames == null || frames.Length < 2 || Time.time < nextFrameTime)
             {
+                UpdateFacing();
                 return;
             }
 
             frameIndex = (frameIndex + 1) % frames.Length;
             spriteRenderer.sprite = frames[frameIndex];
             nextFrameTime = Time.time + secondsPerFrame;
+            UpdateFacing();
         }
 
         private void OnEnable()
@@ -88,6 +96,10 @@ namespace Heroic.Visuals
         {
             levelOneTexture = newLevelOneTexture;
             levelTwoTexture = newLevelTwoTexture;
+            levelOneFrames = null;
+            levelTwoFrames = null;
+            levelSixFrames = null;
+            activeFramesSource = null;
             ApplyForCurrentState();
         }
 
@@ -96,6 +108,10 @@ namespace Heroic.Visuals
             levelOneTexture = newLevelOneTexture;
             levelTwoTexture = newLevelTwoTexture;
             levelSixTexture = newLevelSixTexture;
+            levelOneFrames = null;
+            levelTwoFrames = null;
+            levelSixFrames = null;
+            activeFramesSource = null;
             ApplyForCurrentState();
         }
 
@@ -128,10 +144,20 @@ namespace Heroic.Visuals
                 playerExperience = GetComponent<PlayerExperience>();
             }
 
+            if (playerController == null)
+            {
+                playerController = GetComponent<PlayerController>();
+            }
+
             int level = playerExperience != null ? playerExperience.Level : 1;
+            Texture2D[] framesSource = level >= 6 && HasFrames(levelSixFrames) ? levelSixFrames : level >= 2 && HasFrames(levelTwoFrames) ? levelTwoFrames : HasFrames(levelOneFrames) ? levelOneFrames : null;
             Texture2D texture = level >= 6 && levelSixTexture != null ? levelSixTexture : level >= 2 ? levelTwoTexture : levelOneTexture;
 
-            if (texture != null && texture != activeTexture)
+            if (framesSource != null && framesSource != activeFramesSource)
+            {
+                BuildFrames(framesSource);
+            }
+            else if (texture != null && texture != activeTexture)
             {
                 BuildFrames(texture);
             }
@@ -139,6 +165,7 @@ namespace Heroic.Visuals
             spriteRenderer.sortingOrder = sortingOrder;
             transform.localScale = new Vector3(worldScale.x, worldScale.y, 1f);
             spriteRenderer.color = level >= 2 && accumulatedRobeColor.HasValue ? accumulatedRobeColor.Value : Color.white;
+            UpdateFacing();
         }
 
         private void AccumulateRobeColor(string schoolId)
@@ -154,9 +181,46 @@ namespace Heroic.Visuals
             accumulatedRobeColor = Color.Lerp(accumulatedRobeColor.Value, nextColor, 0.5f);
         }
 
+        private static bool HasFrames(Texture2D[] framesSource)
+        {
+            return framesSource != null && framesSource.Length > 0;
+        }
+
+        private void BuildFrames(Texture2D[] textures)
+        {
+            activeTexture = null;
+            activeFramesSource = textures;
+            frameIndex = 0;
+            if (textures == null || textures.Length == 0)
+            {
+                frames = new Sprite[0];
+                return;
+            }
+
+            frames = new Sprite[textures.Length];
+            Vector2 pivot = new Vector2(Mathf.Clamp01(pivotNormalized.x), Mathf.Clamp01(pivotNormalized.y));
+            for (int i = 0; i < textures.Length; i++)
+            {
+                Texture2D texture = textures[i];
+                if (texture == null)
+                {
+                    continue;
+                }
+
+                frames[i] = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), pivot, pixelsPerUnit);
+            }
+
+            if (frames.Length > 0 && frames[0] != null)
+            {
+                spriteRenderer.sprite = frames[0];
+                nextFrameTime = Time.time + secondsPerFrame;
+            }
+        }
+
         private void BuildFrames(Texture2D texture)
         {
             activeTexture = texture;
+            activeFramesSource = null;
             frameIndex = 0;
 
             if (texture == null || frameWidth <= 0 || frameHeight <= 0)
@@ -181,6 +245,16 @@ namespace Heroic.Visuals
                 spriteRenderer.sprite = frames[0];
                 nextFrameTime = Time.time + secondsPerFrame;
             }
+        }
+
+        private void UpdateFacing()
+        {
+            if (spriteRenderer == null || playerController == null)
+            {
+                return;
+            }
+
+            spriteRenderer.flipX = playerController.LastHorizontalFacing < 0;
         }
 
         private static string ResolveSchoolId(UpgradeManager.DraftChoice choice)

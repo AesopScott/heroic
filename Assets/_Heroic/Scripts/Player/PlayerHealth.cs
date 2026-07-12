@@ -7,16 +7,18 @@ namespace Heroic.Player
     {
         [SerializeField] private int maxHealth = 100;
         [SerializeField] private int currentHealth = 100;
+        [SerializeField] private bool invulnerable;
 
         public event Action<int> Damaged;
         public event Action Died;
 
         public int CurrentHealth => currentHealth;
         public int MaxHealth => maxHealth;
+        public bool IsInvulnerable => invulnerable;
 
         public void TakeDamage(int amount)
         {
-            if (currentHealth <= 0 || amount <= 0)
+            if (currentHealth <= 0 || amount <= 0 || invulnerable)
             {
                 return;
             }
@@ -40,5 +42,11 @@ namespace Heroic.Player
             maxHealth = Mathf.Max(1, value);
             currentHealth = Mathf.Min(currentHealth, maxHealth);
         }
+
+        public void SetInvulnerable(bool value)
+        {
+            invulnerable = value;
+        }
+
     }
 }

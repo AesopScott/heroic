@@ -105,3 +105,11 @@ MonoBehaviour:
   crashLevel4Texture: {fileID: 0}
   crashLevel5Texture: {fileID: 0}
   wallLevel1Texture: {fileID: 0}
+  throwerLevel1Texture: {fileID: 0}
+  crashLevel1Frames: []
+  crashLevel2Frames: []
+  crashLevel3Frames: []
+  crashLevel4Frames: []
+  crashLevel5Frames: []
+  wallLevel1Frames: []
+  throwerLevel1Frames: []

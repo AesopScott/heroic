@@ -27,7 +27,9 @@ namespace Heroic.Systems
         [SerializeField] private float recoveryBoost = 1.35f;
         [SerializeField] private float confluenceBoost = 1.2f;
 
-        private readonly TerritoryZone[] zones = new TerritoryZone[6];
+        [SerializeField] private int activeZoneCount = 6;
+
+        private readonly TerritoryZone[] zones = new TerritoryZone[12];
         private SpellStatModifier spellStats;
         private bool enabledTerritory;
 
@@ -58,15 +60,71 @@ namespace Heroic.Systems
             ApplyCurrentTerritory();
         }
 
+        public bool HasActiveTerritoryBonus => enabledTerritory;
+
+        public string ActiveBonusSummary
+        {
+            get
+            {
+                if (!enabledTerritory)
+                {
+                    return string.Empty;
+                }
+
+                return "Territory bonus active";
+            }
+        }
+
+        public void SetActiveZoneCount(int count)
+        {
+            activeZoneCount = Mathf.Clamp(count, 1, zones.Length);
+            if (enabledTerritory)
+            {
+                CreateZones();
+                ApplyCurrentTerritory();
+            }
+        }
+
         private void CreateZones()
         {
+            for (int i = 0; i < zones.Length; i++)
+            {
+                if (zones[i].Visual != null)
+                {
+                    Destroy(zones[i].Visual);
+                }
+                zones[i] = default;
+            }
+
             Vector2 origin = transform.position;
-            SetZone(0, TerritoryKind.Damage, origin + new Vector2(-5.5f, 3.25f));
-            SetZone(1, TerritoryKind.Range, origin + new Vector2(5.5f, 3.25f));
-            SetZone(2, TerritoryKind.Recovery, origin + new Vector2(-5.5f, -3.25f));
-            SetZone(3, TerritoryKind.Confluence, origin + new Vector2(5.5f, -3.25f));
-            SetZone(4, TerritoryKind.Damage, origin + new Vector2(0f, 6.1f));
-            SetZone(5, TerritoryKind.Range, origin + new Vector2(0f, -6.1f));
+            Vector2[] positions = new[]
+            {
+                origin + new Vector2(-5.5f, 3.25f),
+                origin + new Vector2(5.5f, 3.25f),
+                origin + new Vector2(-5.5f, -3.25f),
+                origin + new Vector2(5.5f, -3.25f),
+                origin + new Vector2(0f, 6.1f),
+                origin + new Vector2(0f, -6.1f),
+                origin + new Vector2(-8.0f, 0f),
+                origin + new Vector2(8.0f, 0f),
+                origin + new Vector2(-2.75f, 6.9f),
+                origin + new Vector2(2.75f, 6.9f),
+                origin + new Vector2(-2.75f, -6.9f),
+                origin + new Vector2(2.75f, -6.9f)
+            };
+
+            TerritoryKind[] kinds = new[]
+            {
+                TerritoryKind.Damage,
+                TerritoryKind.Range,
+                TerritoryKind.Recovery,
+                TerritoryKind.Confluence
+            };
+
+            for (int i = 0; i < activeZoneCount; i++)
+            {
+                SetZone(i, kinds[i % kinds.Length], positions[i]);
+            }
         }
 
         private void SetZone(int index, TerritoryKind kind, Vector2 position)
@@ -108,7 +166,7 @@ namespace Heroic.Systems
             float recovery = 1f;
             Vector2 playerPosition = transform.position;
 
-            for (int i = 0; i < zones.Length; i++)
+            for (int i = 0; i < activeZoneCount; i++)
             {
                 TerritoryZone zone = zones[i];
                 if (zone.Visual == null || Vector2.Distance(playerPosition, zone.Position) > zone.Radius)

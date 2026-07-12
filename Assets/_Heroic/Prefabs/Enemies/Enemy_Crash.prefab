@@ -176,11 +176,31 @@ MonoBehaviour:
   preset: 2
   applyOnAwake: 1
   crashLevel1Texture: {fileID: 0}
-  crashLevel2Texture: {fileID: 2800000, guid: 8101c8c03e4486543987c8d97c3cdafe, type: 3}
-  crashLevel3Texture: {fileID: 2800000, guid: 546958371c4379a47843674c602b6ae4, type: 3}
-  crashLevel4Texture: {fileID: 2800000, guid: b12c93f36cae4a2ab3f3d4a0a7fa29b1, type: 3}
-  crashLevel5Texture: {fileID: 2800000, guid: 86e1f5ce4b39489f87a0d1d05e3b3bc6, type: 3}
-  wallLevel1Texture: {fileID: 2800000, guid: 7db0b0c7d98c4c908d4dcb8d4e4dd0b9, type: 3}
+  crashLevel2Texture: {fileID: 0}
+  crashLevel3Texture: {fileID: 0}
+  crashLevel4Texture: {fileID: 0}
+  crashLevel5Texture: {fileID: 0}
+  wallLevel1Texture: {fileID: 0}
+  throwerLevel1Texture: {fileID: 0}
+  crashLevel1Frames: []
+  crashLevel2Frames:
+  - {fileID: 2800000, guid: 762ba318a8fe41a3b3255dd1a42a8d2e, type: 3}
+  - {fileID: 2800000, guid: f8afb4d88fcd4a0f9d5129a948c50376, type: 3}
+  crashLevel3Frames:
+  - {fileID: 2800000, guid: ec2709ec370e4f2f9676ba345fcabeb1, type: 3}
+  - {fileID: 2800000, guid: ae9dd777c88944599dd39cafe89f5551, type: 3}
+  crashLevel4Frames:
+  - {fileID: 2800000, guid: cf1c515a72134c50a504a529413b3b01, type: 3}
+  - {fileID: 2800000, guid: 377330932cfd4f329c3607d3b1477083, type: 3}
+  crashLevel5Frames:
+  - {fileID: 2800000, guid: 71298781844c46adaa94b69c21b34abf, type: 3}
+  - {fileID: 2800000, guid: 89c8a53110d140f28ef633242cfcc10c, type: 3}
+  wallLevel1Frames:
+  - {fileID: 2800000, guid: 1f71ba8dcc334ec8a9d0f755e3c805ec, type: 3}
+  - {fileID: 2800000, guid: 966f697667114b8f95f8b6714b9edde5, type: 3}
+  throwerLevel1Frames:
+  - {fileID: 2800000, guid: 8b2109838bc247639aa10f7b273945de, type: 3}
+  - {fileID: 2800000, guid: c71188a33d1d4ac986a5a23519012b1b, type: 3}
 --- !u!212 &4175852406067866859
 SpriteRenderer:
   serializedVersion: 3
@@ -253,7 +273,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 34ca3ab1d6dc4062a4dd1e55678bf6a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Visuals.CrashSpriteAnimator
-  sourceTexture: {fileID: 2800000, guid: deb62806925440fdaa60dcdfa00d204c, type: 3}
+  sourceTexture: {fileID: 0}
+  sourceFrames:
+  - {fileID: 2800000, guid: 1fc227f14aa843ca86d1480f2cd9cf34, type: 3}
+  - {fileID: 2800000, guid: 61f4937314a44d0fa0b305982c9ff657, type: 3}
   frameWidth: 384
   frameHeight: 512
   secondsPerFrame: 0.35

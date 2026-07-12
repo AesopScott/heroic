@@ -16,6 +16,7 @@ namespace Heroic.Visuals
             WallLevel1,
             ThrowerLevel1,
             EnemyMissile,
+            ColdProjectile,
             FastEnemy,
             TankEnemy,
             Boss,
@@ -35,6 +36,14 @@ namespace Heroic.Visuals
         [SerializeField] private Texture2D crashLevel4Texture;
         [SerializeField] private Texture2D crashLevel5Texture;
         [SerializeField] private Texture2D wallLevel1Texture;
+        [SerializeField] private Texture2D throwerLevel1Texture;
+        [SerializeField] private Texture2D[] crashLevel1Frames;
+        [SerializeField] private Texture2D[] crashLevel2Frames;
+        [SerializeField] private Texture2D[] crashLevel3Frames;
+        [SerializeField] private Texture2D[] crashLevel4Frames;
+        [SerializeField] private Texture2D[] crashLevel5Frames;
+        [SerializeField] private Texture2D[] wallLevel1Frames;
+        [SerializeField] private Texture2D[] throwerLevel1Frames;
 
         private void Awake()
         {
@@ -94,13 +103,25 @@ namespace Heroic.Visuals
                 case Preset.CrashLevel4:
                 case Preset.CrashLevel5:
                 case Preset.WallLevel1:
+                    TextureSpriteVisual textureVisual = GetComponent<TextureSpriteVisual>();
+                    if (textureVisual == null)
+                    {
+                        textureVisual = gameObject.AddComponent<TextureSpriteVisual>();
+                    }
+
+                    textureVisual.Configure(ResolveTextureFrames(selectedPreset), 20, 384f, new Vector2(0.5f, 0.18f), new Vector2(1.12f, 1.12f), true);
                     break;
                 case Preset.ThrowerLevel1:
-                    ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(0.58f, 0.62f, 0.64f), new Vector2(0.86f, 0.86f), 10, true, false, 0.04f, 2.4f);
-                    EnsureLayer("ThrowerRing", AutoSpriteVisual.Shape.Ring, new Color(0.82f, 0.88f, 0.9f, 0.58f), new Vector2(1.06f, 1.06f), 9, true, true, Vector2.zero, 0f, 0.04f, 2.8f, 45f);
-                    EnsureLayer("ThrowerCore", AutoSpriteVisual.Shape.Circle, new Color(0.16f, 0.18f, 0.2f, 0.92f), new Vector2(0.28f, 0.28f), 11, false, false);
+                    TextureSpriteVisual throwerVisual = GetComponent<TextureSpriteVisual>();
+                    if (throwerVisual == null)
+                    {
+                        throwerVisual = gameObject.AddComponent<TextureSpriteVisual>();
+                    }
+
+                    throwerVisual.Configure(throwerLevel1Frames, 20, 384f, new Vector2(0.5f, 0.18f), new Vector2(1.12f, 1.12f), true);
                     break;
                 case Preset.EnemyMissile:
+                case Preset.ColdProjectile:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(0.86f, 0.9f, 0.92f), new Vector2(0.22f, 0.22f), 28, false, false);
                     EnsureLayer("EnemyMissileHalo", AutoSpriteVisual.Shape.Ring, new Color(0.7f, 0.76f, 0.8f, 0.62f), new Vector2(0.42f, 0.42f), 27, true, true, Vector2.zero, 0f, 0.08f, 4f, 180f);
                     EnsureTrail(new Color(0.74f, 0.8f, 0.84f, 0.62f));
@@ -173,8 +194,8 @@ namespace Heroic.Visuals
 
         private bool TryApplyTexturePreset()
         {
-            Texture2D texture = ResolveTexturePreset(preset);
-            if (texture == null)
+            Texture2D[] frames = ResolveTextureFrames(preset);
+            if (frames == null || frames.Length == 0)
             {
                 return false;
             }
@@ -185,20 +206,21 @@ namespace Heroic.Visuals
                 textureVisual = gameObject.AddComponent<TextureSpriteVisual>();
             }
 
-            textureVisual.Configure(texture, 20, 384f, new Vector2(0.5f, 0.18f), new Vector2(1.12f, 1.12f));
+            textureVisual.Configure(frames, 20, 384f, new Vector2(0.5f, 0.18f), new Vector2(1.12f, 1.12f), true);
             return true;
         }
 
-        private Texture2D ResolveTexturePreset(Preset selectedPreset)
+        private Texture2D[] ResolveTextureFrames(Preset selectedPreset)
         {
             return selectedPreset switch
             {
-                Preset.CrashLevel1 => crashLevel1Texture,
-                Preset.CrashLevel2 => crashLevel2Texture,
-                Preset.CrashLevel3 => crashLevel3Texture,
-                Preset.CrashLevel4 => crashLevel4Texture,
-                Preset.CrashLevel5 => crashLevel5Texture,
-                Preset.WallLevel1 => wallLevel1Texture,
+                Preset.CrashLevel1 => crashLevel1Frames,
+                Preset.CrashLevel2 => crashLevel2Frames,
+                Preset.CrashLevel3 => crashLevel3Frames,
+                Preset.CrashLevel4 => crashLevel4Frames,
+                Preset.CrashLevel5 => crashLevel5Frames,
+                Preset.WallLevel1 => wallLevel1Frames,
+                Preset.ThrowerLevel1 => throwerLevel1Frames,
                 _ => null
             };
         }
@@ -254,4 +276,3 @@ namespace Heroic.Visuals
         }
     }
 }
-

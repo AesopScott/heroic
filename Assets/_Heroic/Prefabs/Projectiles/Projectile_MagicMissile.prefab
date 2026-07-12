@@ -112,7 +112,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78509d5ab041a2743a132bd1e1af710f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Visuals.VisualPresetApplier
-  preset: 13
+  preset: 14
   applyOnAwake: 1
   crashLevel1Texture: {fileID: 0}
   crashLevel2Texture: {fileID: 0}
@@ -120,3 +120,11 @@ MonoBehaviour:
   crashLevel4Texture: {fileID: 0}
   crashLevel5Texture: {fileID: 0}
   wallLevel1Texture: {fileID: 0}
+  throwerLevel1Texture: {fileID: 0}
+  crashLevel1Frames: []
+  crashLevel2Frames: []
+  crashLevel3Frames: []
+  crashLevel4Frames: []
+  crashLevel5Frames: []
+  wallLevel1Frames: []
+  throwerLevel1Frames: []

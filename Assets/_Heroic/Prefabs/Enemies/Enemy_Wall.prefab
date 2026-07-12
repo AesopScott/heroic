@@ -180,6 +180,14 @@ MonoBehaviour:
   crashLevel4Texture: {fileID: 0}
   crashLevel5Texture: {fileID: 0}
   wallLevel1Texture: {fileID: 2800000, guid: 7db0b0c7d98c4c908d4dcb8d4e4dd0b9, type: 3}
+  throwerLevel1Texture: {fileID: 0}
+  crashLevel1Frames: []
+  crashLevel2Frames: []
+  crashLevel3Frames: []
+  crashLevel4Frames: []
+  crashLevel5Frames: []
+  wallLevel1Frames: []
+  throwerLevel1Frames: []
 --- !u!212 &3700509322019752070
 SpriteRenderer:
   serializedVersion: 3

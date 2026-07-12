@@ -19,6 +19,6 @@ MonoBehaviour:
   moveSpeed: 1.6
   contactDamage: 18
   experienceValue: 30
-  visualPreset: 12
+  visualPreset: 13
   boss: 1
   description: 

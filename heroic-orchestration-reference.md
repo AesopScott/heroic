@@ -35,7 +35,7 @@ Heroic is a browser-playable bullet heaven where the player is a living spellboo
 - Blink, Lunge, Teleport, Whirlwind, and Cloud Walk exist in current references.
 - Territory Casting is the first standalone system lane choice.
 - Loot drops include health restore, XP boost, speed boost, and invulnerability.
-- Current enemies include Crash I-IV, Thrower I, and Arcane Warden.
+- Current enemies include Crash I-V, Wall I, Thrower I, and Arcane Warden; crash and thrower notes should reference the actual art filenames in Obsidian.
 - Remaining product work centers on balance, school breadth, defense lane, burn/status depth, visual polish, and longer run tuning.
 
 ## Coordination Status
@@ -75,3 +75,10 @@ Important reviewed sources:
 
 No Git, Unity regeneration, WebGL build, preview update, code change, or asset handling was performed for this evaluation.
 
+
+## Current Art Truth
+
+- 2026-07-12T13:40:14-06:00: Player and mob visuals now use explicit cropped frame assets instead of sheet slicing. Player level 1/2/6 use four frame exports; Crash and Thrower/Wall use two frame exports; crash shields still face the player horizontally.
+- 2026-07-12T13:40:14-06:00: Player and mob art were rebuilt with clean single-frame sprite exports; later build sessions must use a fresh port rather than reusing prior WebGL sessions.
+- 2026-07-12T14:16:09-06:00: Movement skill UI now uses square icon tiles instead of rectangular text windows, with cooldown tint handled by icon graying instead of an overlay.
+- 2026-07-12T14:16:09-06:00: Current local WebGL session for this rebuild is http://127.0.0.1:5244/ and responded with HTTP 200.

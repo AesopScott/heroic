@@ -7,6 +7,7 @@ namespace Heroic.Visuals
     public class CrashSpriteAnimator : MonoBehaviour
     {
         [SerializeField] private Texture2D sourceTexture;
+        [SerializeField] private Texture2D[] sourceFrames;
         [SerializeField] private int frameWidth = 384;
         [SerializeField] private int frameHeight = 512;
         [SerializeField] private float secondsPerFrame = 0.35f;
@@ -54,6 +55,24 @@ namespace Heroic.Visuals
 
         private void BuildFrames()
         {
+            if (sourceFrames != null && sourceFrames.Length > 0)
+            {
+                frames = new Sprite[sourceFrames.Length];
+                Vector2 pivot = new Vector2(Mathf.Clamp01(pivotNormalized.x), Mathf.Clamp01(pivotNormalized.y));
+                for (int i = 0; i < sourceFrames.Length; i++)
+                {
+                    Texture2D texture = sourceFrames[i];
+                    if (texture == null)
+                    {
+                        continue;
+                    }
+
+                    frames[i] = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), pivot, pixelsPerUnit);
+                }
+
+                return;
+            }
+
             if (sourceTexture == null || frameWidth <= 0 || frameHeight <= 0)
             {
                 frames = new Sprite[0];
