@@ -472,8 +472,8 @@ namespace Heroic.Editor
 
             DraftPresenter draft = draftRoot.AddComponent<DraftPresenter>();
             SetObject(draft, "upgradeManager", upgradeManager);
-            TMP_Text header = CreateText("Header", draftRoot.transform, "Choose an upgrade", new Vector2(640f, 46f), new Vector2(0f, 190f));
-            header.fontSize = 28f;
+            TMP_Text header = CreateText("Header", draftRoot.transform, "Choose an upgrade", new Vector2(840f, 56f), new Vector2(0f, 322f));
+            header.fontSize = 38f;
             header.color = new Color(0.82f, 0.96f, 1f);
             SetObject(draft, "headerText", header);
 
@@ -481,7 +481,7 @@ namespace Heroic.Editor
             TMP_Text[] labels = new TMP_Text[5];
             for (int i = 0; i < buttons.Length; i++)
             {
-                Button button = CreateButton("Choice" + (i + 1), draftRoot.transform, new Vector2(560f, 82f), new Vector2(0f, 132f - i * 92f));
+                Button button = CreateButton("Choice" + (i + 1), draftRoot.transform, new Vector2(840f, 123f), new Vector2(0f, 246f - i * 128f));
                 Image buttonImage = button.GetComponent<Image>();
                 if (buttonImage != null)
                 {
@@ -489,11 +489,11 @@ namespace Heroic.Editor
                 }
 
                 TMP_Text label = button.GetComponentInChildren<TMP_Text>();
-                label.fontSize = 17f;
+                label.fontSize = 26f;
                 label.alignment = TextAlignmentOptions.MidlineLeft;
                 label.textWrappingMode = TextWrappingModes.Normal;
                 label.overflowMode = TextOverflowModes.Ellipsis;
-                label.margin = new Vector4(18f, 0f, 18f, 0f);
+                label.margin = new Vector4(28f, 0f, 28f, 0f);
                 buttons[i] = button;
                 labels[i] = label;
             }

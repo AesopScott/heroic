@@ -96,10 +96,10 @@ namespace Heroic.UI
             string category = choice.Category.ToString().ToUpperInvariant();
             if (string.IsNullOrWhiteSpace(choice.Description))
             {
-                return $"<size=70%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>";
+                return $"<size=82%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>";
             }
 
-            return $"<size=70%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>\n<size=72%><color=#C7E6F5>{choice.Description}</color></size>";
+            return $"<size=82%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>\n<size=86%><color=#C7E6F5>{choice.Description}</color></size>";
         }
     }
 }
