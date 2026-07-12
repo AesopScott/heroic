@@ -10,6 +10,7 @@ namespace Heroic.Spells
         private float radius;
         private float rotationSpeed;
         private int damage;
+        private bool consumed;
 
         public void Initialize(Transform center, float startAngle, float orbitRadius, float speed, int hitDamage)
         {
@@ -52,9 +53,11 @@ namespace Heroic.Spells
         private void OnTriggerEnter2D(Collider2D other)
         {
             var damageable = other.GetComponent<Damageable>();
-            if (damageable != null)
+            if (damageable != null && !consumed)
             {
+                consumed = true;
                 damageable.ApplyDamage(damage);
+                Destroy(gameObject);
             }
         }
     }
