@@ -1,7 +1,6 @@
 using Heroic.Enemies;
 using Heroic.Player;
 using Heroic.Spells;
-using Heroic.Systems;
 using TMPro;
 using UnityEngine;
 
@@ -11,7 +10,6 @@ namespace Heroic.Core
     {
         [SerializeField] private bool enabledForPrototype = true;
         [SerializeField] private SpellCaster spellCaster;
-        [SerializeField] private ArcaneUpgradeApplier arcaneUpgradeApplier;
         [SerializeField] private MovementCaster movementCaster;
         [SerializeField] private PlayerExperience playerExperience;
         [SerializeField] private BossSpawner bossSpawner;
@@ -32,14 +30,6 @@ namespace Heroic.Core
         private void ApplyShowcaseLoadout()
         {
             spellCaster?.EnableSkill("arcane_magic_missile");
-            spellCaster?.EnableSkill("arcane_arcane_blast");
-            spellCaster?.EnableSkill("arcane_warp_pulse");
-            spellCaster?.EnableSkill("arcane_spell_echo");
-            spellCaster?.EnableSkill("arcane_arcane_orbit");
-
-            arcaneUpgradeApplier?.Apply("upgrade_arcane_magic_missile_seeking_shot", 2);
-            arcaneUpgradeApplier?.Apply("upgrade_arcane_arcane_blast_scatter", 2);
-            arcaneUpgradeApplier?.Apply("upgrade_arcane_arcane_orbit_more_orbs", 1);
 
             if (movementCaster != null)
             {

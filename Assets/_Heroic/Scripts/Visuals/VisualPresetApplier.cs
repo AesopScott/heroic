@@ -54,7 +54,6 @@ namespace Heroic.Visuals
             {
                 case Preset.Player:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Diamond, new Color(0.08f, 0.22f, 0.3f), new Vector2(0.85f, 0.85f), 20, true, false, 0.025f, 2.4f);
-                    EnsureLayer("SpellbookAura", AutoSpriteVisual.Shape.Ring, new Color(0.35f, 0.95f, 1f, 0.55f), new Vector2(1.08f, 1.08f), 18, true, true, Vector2.zero, 0f, 0.04f, 2.1f, 28f);
                     EnsureLayer("SpellbookPages", AutoSpriteVisual.Shape.Diamond, new Color(0.58f, 0.9f, 1f, 0.9f), new Vector2(0.5f, 0.66f), 21, true, false, Vector2.zero, 45f, 0.025f, 3.2f);
                     EnsureLayer("SpellbookGem", AutoSpriteVisual.Shape.Circle, new Color(0.92f, 1f, 1f), new Vector2(0.22f, 0.22f), 22, true, false, Vector2.zero, 0f, 0.09f, 5.4f);
                     break;

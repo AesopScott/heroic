@@ -13,11 +13,6 @@ namespace Heroic.Spells
         private bool spawned;
         private readonly System.Collections.Generic.List<ArcaneOrbitOrb> spawnedOrbs = new System.Collections.Generic.List<ArcaneOrbitOrb>();
 
-        private void Start()
-        {
-            SpawnOrbs();
-        }
-
         public void SpawnOrbs()
         {
             if (spawned || orbPrefab == null)

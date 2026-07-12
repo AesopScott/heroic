@@ -14,6 +14,7 @@ namespace Heroic.Enemies
         [SerializeField] private WaveDefinition[] waves = new WaveDefinition[0];
         [SerializeField] private float spawnRadius = 8f;
         [SerializeField] private float spawnInterval = 2f;
+        [SerializeField] private float packSpacing = 0.9f;
 
         private float nextSpawnTime;
 
@@ -39,9 +40,13 @@ namespace Heroic.Enemies
 
             WaveDefinition activeWave = GetActiveWave();
             int spawnCount = GetCurrentSpawnCount(activeWave);
+            Vector2 packCenter = GetSpawnOffset();
+            Vector2 packSide = new Vector2(-packCenter.y, packCenter.x).normalized;
             for (int i = 0; i < spawnCount; i++)
             {
-                SpawnEnemy(activeWave);
+                float centeredIndex = i - ((spawnCount - 1) * 0.5f);
+                Vector2 packOffset = packCenter + (packSide * centeredIndex * packSpacing);
+                SpawnEnemy(activeWave, packOffset);
             }
 
             nextSpawnTime = Time.time + GetCurrentSpawnInterval(activeWave);
@@ -64,7 +69,7 @@ namespace Heroic.Enemies
             spawnInterval = Mathf.Max(0.1f, interval);
         }
 
-        private void SpawnEnemy(WaveDefinition activeWave)
+        private void SpawnEnemy(WaveDefinition activeWave, Vector2 spawnOffset)
         {
             EnemyDefinition enemyDefinition = ChooseEnemy(activeWave);
             EnemyController prefab = ResolveEnemyPrefab(enemyDefinition);
@@ -73,11 +78,21 @@ namespace Heroic.Enemies
                 return;
             }
 
-            Vector2 offset = Random.insideUnitCircle.normalized * spawnRadius;
-            Vector3 spawnPosition = playerTarget.position + new Vector3(offset.x, offset.y, 0f);
+            Vector3 spawnPosition = playerTarget.position + new Vector3(spawnOffset.x, spawnOffset.y, 0f);
             EnemyController enemy = Instantiate(prefab, spawnPosition, Quaternion.identity);
             enemy.SetTarget(playerTarget);
             ApplyDefinition(enemy, enemyDefinition);
+        }
+
+        private Vector2 GetSpawnOffset()
+        {
+            Vector2 direction = Random.insideUnitCircle.normalized;
+            if (direction.sqrMagnitude <= 0.001f)
+            {
+                direction = Vector2.right;
+            }
+
+            return direction * spawnRadius;
         }
 
         private WaveDefinition GetActiveWave()

@@ -301,7 +301,7 @@ namespace Heroic.Editor
             SetObject(enemySpawner, "enemyPrefab", enemy.GetComponent<EnemyController>());
             SetObject(enemySpawner, "playerTarget", player.transform);
             SetObject(enemySpawner, "runManager", runManager);
-            SetObjectArray(enemySpawner, "waves", waves);
+            SetObjectArray(enemySpawner, "waves", LoadWaveAssets(waves));
 
             SetObject(bossSpawner, "runManager", runManager);
             SetObject(bossSpawner, "runEndWatcher", runEndWatcher);
@@ -333,7 +333,6 @@ namespace Heroic.Editor
 
             TMP_Text showcaseLabel = CreateGameUi(uiManager, runManager, upgradeManager, playerHealth, playerExperience, movementCaster, bossSpawner);
             SetObject(showcaseMode, "spellCaster", spellCaster);
-            SetObject(showcaseMode, "arcaneUpgradeApplier", arcaneUpgradeApplier);
             SetObject(showcaseMode, "movementCaster", movementCaster);
             SetObject(showcaseMode, "playerExperience", playerExperience);
             SetObject(showcaseMode, "bossSpawner", bossSpawner);
@@ -883,6 +882,27 @@ namespace Heroic.Editor
             return SaveAsset(wave, ScriptableObjects + "/Waves/" + assetName + ".asset");
         }
 
+        private static WaveDefinition[] LoadWaveAssets(WaveDefinition[] waves)
+        {
+            WaveDefinition[] loadedWaves = new WaveDefinition[waves.Length];
+            for (int i = 0; i < waves.Length; i++)
+            {
+                string path = waves[i] != null ? AssetDatabase.GetAssetPath(waves[i]) : string.Empty;
+                if (string.IsNullOrEmpty(path))
+                {
+                    path = ScriptableObjects + "/Waves/Wave_" + (i + 1).ToString("000") + ".asset";
+                }
+
+                loadedWaves[i] = AssetDatabase.LoadAssetAtPath<WaveDefinition>(path);
+                if (loadedWaves[i] == null)
+                {
+                    Debug.LogError($"Could not load wave asset for scene spawner: {path}");
+                }
+            }
+
+            return loadedWaves;
+        }
+
         private static void UpdateBuildSettings()
         {
             EditorBuildSettings.scenes = new[]
@@ -904,6 +924,8 @@ namespace Heroic.Editor
         {
             AssetDatabase.DeleteAsset(path);
             AssetDatabase.CreateAsset(asset, path);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.SaveAssets();
             return AssetDatabase.LoadAssetAtPath<T>(path);
         }
 
@@ -946,6 +968,7 @@ namespace Heroic.Editor
                 array.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
             }
             serialized.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(target);
         }
 
         private static void SetInt(Object target, string property, int value)
