@@ -706,6 +706,7 @@ namespace Heroic.Editor
             TMP_Text[] categoryIconLabels = new TMP_Text[5];
             Image[] skillIconBackdrops = new Image[5];
             TMP_Text[] skillIconLabels = new TMP_Text[5];
+            TMP_Text[] elementNameLabels = new TMP_Text[5];
             for (int i = 0; i < buttons.Length; i++)
             {
                 Button button = CreateButton("Choice" + (i + 1), draftRoot.transform, new Vector2(390f, 123f), new Vector2(0f, 246f - i * 128f));
@@ -735,6 +736,12 @@ namespace Heroic.Editor
                 skillLabel.alignment = TextAlignmentOptions.Center;
                 skillLabel.raycastTarget = false;
 
+                TMP_Text elementLabel = CreateText("ElementName", button.transform, "Arcane", new Vector2(112f, 22f), new Vector2(-121f, -39f));
+                elementLabel.fontSize = 15f;
+                elementLabel.fontStyle = FontStyles.Bold;
+                elementLabel.alignment = TextAlignmentOptions.Center;
+                elementLabel.raycastTarget = false;
+
                 TMP_Text label = button.GetComponentInChildren<TMP_Text>();
                 label.fontSize = 21f;
                 label.alignment = TextAlignmentOptions.MidlineLeft;
@@ -751,6 +758,7 @@ namespace Heroic.Editor
                 categoryIconLabels[i] = categoryLabel;
                 skillIconBackdrops[i] = skillIcon;
                 skillIconLabels[i] = skillLabel;
+                elementNameLabels[i] = elementLabel;
             }
             SetObjectArray(draft, "choiceButtons", buttons);
             SetObjectArray(draft, "choiceLabels", labels);
@@ -759,6 +767,7 @@ namespace Heroic.Editor
             SetObjectArray(draft, "categoryIconLabels", categoryIconLabels);
             SetObjectArray(draft, "skillIconBackdrops", skillIconBackdrops);
             SetObjectArray(draft, "skillIconLabels", skillIconLabels);
+            SetObjectArray(draft, "elementNameLabels", elementNameLabels);
 
             CreatePausePanel(pauseRoot.transform);
 

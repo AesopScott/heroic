@@ -30,7 +30,7 @@ namespace Heroic.Systems
         [SerializeField] private float zoneRadius = 2.45f;
         [SerializeField] private float zoneLifetime = 10f;
         [SerializeField] private float initialSpawnSpacing = 2f;
-        [SerializeField] private int activeZoneCount = 6;
+        [SerializeField] private int activeZoneCount = 4;
         [SerializeField] private int maximumActiveZoneCount = 12;
         [SerializeField] private float screenEdgePadding = 1f;
         [SerializeField] private float minimumDistanceBetweenZones = 2.8f;
@@ -95,7 +95,7 @@ namespace Heroic.Systems
 
         public void SetActiveZoneCount(int count)
         {
-            activeZoneCount = Mathf.Clamp(count, 6, maximumActiveZoneCount);
+            activeZoneCount = Mathf.Clamp(count, 4, maximumActiveZoneCount);
             if (enabledTerritory)
             {
                 EnsureZoneSlots();
@@ -151,7 +151,7 @@ namespace Heroic.Systems
 
         private void EnsureZoneSlots()
         {
-            int desiredCount = Mathf.Clamp(activeZoneCount, 6, maximumActiveZoneCount);
+            int desiredCount = Mathf.Clamp(activeZoneCount, 4, maximumActiveZoneCount);
             int startingCount = zones.Count;
             while (zones.Count < desiredCount)
             {
@@ -238,7 +238,7 @@ namespace Heroic.Systems
 
         private static TerritoryKind KindForSlot(int index)
         {
-            switch (index % 6)
+            switch (index % 4)
             {
                 case 0:
                     return TerritoryKind.Damage;
@@ -246,12 +246,8 @@ namespace Heroic.Systems
                     return TerritoryKind.Range;
                 case 2:
                     return TerritoryKind.Recovery;
-                case 3:
-                    return TerritoryKind.Confluence;
-                case 4:
-                    return TerritoryKind.Damage;
                 default:
-                    return TerritoryKind.Range;
+                    return TerritoryKind.Confluence;
             }
         }
 

@@ -17,6 +17,7 @@ namespace Heroic.UI
         [SerializeField] private TMP_Text[] categoryIconLabels = new TMP_Text[0];
         [SerializeField] private Image[] skillIconBackdrops = new Image[0];
         [SerializeField] private TMP_Text[] skillIconLabels = new TMP_Text[0];
+        [SerializeField] private TMP_Text[] elementNameLabels = new TMP_Text[0];
         [SerializeField] private TMP_Text headerText;
 
         private IReadOnlyList<UpgradeManager.DraftChoice> currentChoices;
@@ -213,53 +214,60 @@ namespace Heroic.UI
                 skillIconLabels[index].text = ResolveSkillIcon(choice.Id);
                 skillIconLabels[index].color = IsBright(tierColor) ? new Color(0.03f, 0.04f, 0.05f) : Color.white;
             }
+
+            if (index < elementNameLabels.Length && elementNameLabels[index] != null)
+            {
+                elementNameLabels[index].text = ResolveElementName(choice);
+                elementNameLabels[index].color = barColor;
+            }
         }
 
         private Color ResolveBarColor(UpgradeManager.DraftChoice choice)
         {
             string id = choice.Id.ToLowerInvariant();
+            string skillId = ResolveSkillId(choice.Id).ToLowerInvariant();
 
-            if (choice.Category == UpgradeManager.UpgradeCategory.Movement || id.StartsWith("movement_"))
+            if (choice.Category == UpgradeManager.UpgradeCategory.Movement || id.StartsWith("movement_") || skillId.StartsWith("movement_"))
             {
                 return Hex("88F7B0");
             }
 
-            if (choice.Category == UpgradeManager.UpgradeCategory.System || id.StartsWith("system_") || id.StartsWith("upgrade_system_"))
+            if (choice.Category == UpgradeManager.UpgradeCategory.System || id.StartsWith("system_") || id.StartsWith("upgrade_system_") || skillId.StartsWith("system_"))
             {
                 return Hex("C8C3FF");
             }
 
-            if (id.Contains("_fire_") || id.StartsWith("fire_"))
+            if (id.Contains("_fire_") || id.StartsWith("fire_") || skillId.StartsWith("fire_"))
             {
                 return Hex("FF6A2A");
             }
 
-            if (id.Contains("_cold_") || id.StartsWith("cold_"))
+            if (id.Contains("_cold_") || id.StartsWith("cold_") || skillId.StartsWith("cold_"))
             {
                 return Hex("7FE7FF");
             }
 
-            if (id.Contains("_lightning_") || id.StartsWith("lightning_"))
+            if (id.Contains("_lightning_") || id.StartsWith("lightning_") || skillId.StartsWith("lightning_"))
             {
                 return Hex("F5E84B");
             }
 
-            if (id.Contains("_earth_") || id.StartsWith("earth_"))
+            if (id.Contains("_earth_") || id.StartsWith("earth_") || skillId.StartsWith("earth_"))
             {
                 return Hex("A8743D");
             }
 
-            if (id.Contains("_mind_") || id.StartsWith("mind_"))
+            if (id.Contains("_mind_") || id.StartsWith("mind_") || skillId.StartsWith("mind_"))
             {
                 return Hex("D889FF");
             }
 
-            if (id.Contains("_blood_") || id.StartsWith("blood_"))
+            if (id.Contains("_blood_") || id.StartsWith("blood_") || skillId.StartsWith("blood_"))
             {
                 return Hex("C0263E");
             }
 
-            if (id.Contains("_poison_") || id.StartsWith("poison_"))
+            if (id.Contains("_poison_") || id.StartsWith("poison_") || skillId.StartsWith("poison_"))
             {
                 return Hex("76D94E");
             }
@@ -283,6 +291,62 @@ namespace Heroic.UI
                 default:
                     return Hex("FFD45A");
             }
+        }
+
+        private static string ResolveElementName(UpgradeManager.DraftChoice choice)
+        {
+            string id = ResolveSkillId(choice.Id).ToLowerInvariant();
+            if (choice.Category == UpgradeManager.UpgradeCategory.Movement || id.StartsWith("movement_"))
+            {
+                return "Movement";
+            }
+
+            if (choice.Category == UpgradeManager.UpgradeCategory.System || id.StartsWith("system_"))
+            {
+                return "System";
+            }
+
+            if (id.StartsWith("arcane_"))
+            {
+                return "Arcane";
+            }
+
+            if (id.StartsWith("fire_"))
+            {
+                return "Fire";
+            }
+
+            if (id.StartsWith("cold_"))
+            {
+                return "Cold";
+            }
+
+            if (id.StartsWith("lightning_"))
+            {
+                return "Lightning";
+            }
+
+            if (id.StartsWith("earth_"))
+            {
+                return "Earth";
+            }
+
+            if (id.StartsWith("mind_"))
+            {
+                return "Mind";
+            }
+
+            if (id.StartsWith("blood_"))
+            {
+                return "Blood";
+            }
+
+            if (id.StartsWith("poison_"))
+            {
+                return "Poison";
+            }
+
+            return choice.Category.ToString();
         }
 
         private int ResolveDisplayedTier(UpgradeManager.DraftChoice choice)

@@ -47,6 +47,7 @@ namespace Heroic.Systems
         [SerializeField] private bool usePrototypeDraftPoolWhenEmpty = true;
         [SerializeField] private int minimumChoices = 3;
         [SerializeField] private int maximumChoices = 5;
+        [SerializeField] private int movementChoicesOnMovementDraft = 3;
         [SerializeField] private RunManager runManager;
         [SerializeField] private RunBuildState buildState;
 
@@ -157,9 +158,11 @@ namespace Heroic.Systems
             int eligibleCount = movementEligible.Count + abilityEligible.Count + systemEligible.Count;
             int lowerChoiceCount = Mathf.Clamp(minimumChoices, 1, Mathf.Max(1, maximumChoices));
             int upperChoiceCount = Mathf.Max(lowerChoiceCount, maximumChoices);
+            int desiredMovementChoices = includeMovementChoice ? Mathf.Min(Mathf.Max(1, movementChoicesOnMovementDraft), movementEligible.Count) : 0;
             int targetCount = Mathf.Min(UnityEngine.Random.Range(lowerChoiceCount, upperChoiceCount + 1), eligibleCount);
+            targetCount = Mathf.Min(eligibleCount, Mathf.Max(targetCount, desiredMovementChoices));
 
-            if (includeMovementChoice && movementEligible.Count > 0 && targetCount > 0)
+            while (movementEligible.Count > 0 && currentChoices.Count < desiredMovementChoices)
             {
                 AddRandomChoice(movementEligible);
             }
