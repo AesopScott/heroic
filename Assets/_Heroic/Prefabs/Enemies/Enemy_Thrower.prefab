@@ -159,7 +159,135 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Enemies.ExperienceDropper
   pickupPrefab: {fileID: 5784620583280495773, guid: 73f2a172788c4434ea46f29cafd61a37, type: 3}
+  healthRestorePrefab: {fileID: 0}
+  experienceBoostPrefab: {fileID: 0}
+  speedBoostPrefab: {fileID: 0}
+  invulnerabilityPrefab: {fileID: 0}
   experienceValue: 1
+  healthRestoreTiers:
+  - tier: 1
+    minimumPlayerLevel: 1
+    dropChance: 0.1
+    value: 8
+    duration: 0
+    multiplier: 1
+  - tier: 2
+    minimumPlayerLevel: 3
+    dropChance: 0.08
+    value: 14
+    duration: 0
+    multiplier: 1
+  - tier: 3
+    minimumPlayerLevel: 5
+    dropChance: 0.06
+    value: 22
+    duration: 0
+    multiplier: 1
+  - tier: 4
+    minimumPlayerLevel: 8
+    dropChance: 0.04
+    value: 35
+    duration: 0
+    multiplier: 1
+  - tier: 5
+    minimumPlayerLevel: 12
+    dropChance: 0.025
+    value: 55
+    duration: 0
+    multiplier: 1
+  experienceBoostTiers:
+  - tier: 1
+    minimumPlayerLevel: 1
+    dropChance: 0.04
+    value: 0
+    duration: 10
+    multiplier: 1.5
+  - tier: 2
+    minimumPlayerLevel: 3
+    dropChance: 0.035
+    value: 0
+    duration: 10
+    multiplier: 2
+  - tier: 3
+    minimumPlayerLevel: 5
+    dropChance: 0.025
+    value: 0
+    duration: 10
+    multiplier: 2.5
+  - tier: 4
+    minimumPlayerLevel: 8
+    dropChance: 0.015
+    value: 0
+    duration: 10
+    multiplier: 3
+  - tier: 5
+    minimumPlayerLevel: 12
+    dropChance: 0.01
+    value: 0
+    duration: 10
+    multiplier: 3.5
+  speedBoostTiers:
+  - tier: 1
+    minimumPlayerLevel: 1
+    dropChance: 0.035
+    value: 0
+    duration: 3
+    multiplier: 1.2
+  - tier: 2
+    minimumPlayerLevel: 3
+    dropChance: 0.03
+    value: 0
+    duration: 3.5
+    multiplier: 1.3
+  - tier: 3
+    minimumPlayerLevel: 5
+    dropChance: 0.022
+    value: 0
+    duration: 4
+    multiplier: 1.45
+  - tier: 4
+    minimumPlayerLevel: 8
+    dropChance: 0.014
+    value: 0
+    duration: 4.5
+    multiplier: 1.6
+  - tier: 5
+    minimumPlayerLevel: 12
+    dropChance: 0.008
+    value: 0
+    duration: 5
+    multiplier: 1.8
+  invulnerabilityTiers:
+  - tier: 1
+    minimumPlayerLevel: 2
+    dropChance: 0.015
+    value: 0
+    duration: 1.25
+    multiplier: 1
+  - tier: 2
+    minimumPlayerLevel: 4
+    dropChance: 0.012
+    value: 0
+    duration: 1.75
+    multiplier: 1
+  - tier: 3
+    minimumPlayerLevel: 6
+    dropChance: 0.009
+    value: 0
+    duration: 2.25
+    multiplier: 1
+  - tier: 4
+    minimumPlayerLevel: 9
+    dropChance: 0.006
+    value: 0
+    duration: 3
+    multiplier: 1
+  - tier: 5
+    minimumPlayerLevel: 13
+    dropChance: 0.003
+    value: 0
+    duration: 4
+    multiplier: 1
 --- !u!114 &1779027567111554458
 MonoBehaviour:
   m_ObjectHideFlags: 0
