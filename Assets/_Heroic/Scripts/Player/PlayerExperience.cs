@@ -58,7 +58,7 @@ namespace Heroic.Player
 
         private int CalculateExperienceThreshold(int targetLevel)
         {
-            return Mathf.Max(1, Mathf.RoundToInt(baseExperienceToLevel * Mathf.Pow(thresholdGrowth, targetLevel - 1)));
+            return Mathf.Max(1, baseExperienceToLevel * targetLevel);
         }
     }
 }

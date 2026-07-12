@@ -46,7 +46,7 @@ namespace Heroic.Editor
             GameObject enemy = CreateEnemyPrefab(xpPickup);
             GameObject boss = CreateBossPrefab(xpPickup);
 
-            EnemyDefinition basicEnemyDefinition = CreateEnemyDefinition("Enemy_Basic", "Basic Enemy", enemy, 30, 2f, 10, 1, VisualPresetApplier.Preset.BasicEnemy, false);
+            EnemyDefinition basicEnemyDefinition = CreateEnemyDefinition("Enemy_Basic", "Basic Enemy", enemy, 10, 2f, 10, 1, VisualPresetApplier.Preset.BasicEnemy, false);
             EnemyDefinition fastEnemyDefinition = CreateEnemyDefinition("Enemy_Fast", "Fast Enemy", enemy, 18, 3.4f, 7, 1, VisualPresetApplier.Preset.FastEnemy, false);
             EnemyDefinition tankEnemyDefinition = CreateEnemyDefinition("Enemy_Tank", "Tank Enemy", enemy, 80, 1.25f, 16, 3, VisualPresetApplier.Preset.TankEnemy, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
@@ -256,7 +256,9 @@ namespace Heroic.Editor
             body.freezeRotation = true;
             go.AddComponent<CircleCollider2D>();
             go.AddComponent<Damageable>();
-            go.AddComponent<EnemyController>();
+            EnemyController controller = go.AddComponent<EnemyController>();
+            SetBool(controller, "destroyAfterContactDamage", false);
+            SetBool(controller, "suppressExperienceOnContactDamage", false);
             go.AddComponent<BossController>();
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
@@ -395,6 +397,7 @@ namespace Heroic.Editor
             SetObject(magicMissile, "projectilePrefab", projectile.GetComponent<Projectile>());
             SetObject(magicMissile, "firePoint", firePoint.transform);
             SetObject(magicMissile, "spellEcho", spellEcho);
+            SetInt(magicMissile, "damage", 10);
             SetObject(arcaneBlast, "spellEcho", spellEcho);
             SetObject(warpPulse, "spellEcho", spellEcho);
             SetObject(arcaneOrbit, "orbPrefab", orb.GetComponent<ArcaneOrbitOrb>());

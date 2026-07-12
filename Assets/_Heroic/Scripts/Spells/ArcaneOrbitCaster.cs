@@ -1,4 +1,5 @@
 using UnityEngine;
+using Heroic.Visuals;
 
 namespace Heroic.Spells
 {
@@ -22,6 +23,7 @@ namespace Heroic.Spells
 
             spawned = true;
             ClearOrbs();
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.45f, 0.82f, 1f, 0.32f), radius * 1.25f, 0.24f);
             for (int i = 0; i < orbCount; i++)
             {
                 float angle = i * (360f / orbCount);

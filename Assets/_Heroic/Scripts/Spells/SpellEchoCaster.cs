@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using Heroic.Visuals;
 
 namespace Heroic.Spells
 {
@@ -25,6 +26,7 @@ namespace Heroic.Spells
             for (int i = 0; i < echoCount; i++)
             {
                 yield return new WaitForSeconds(echoDelay);
+                TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.72f, 0.92f, 1f, 0.24f), 1.05f + i * 0.12f, 0.16f);
                 castAction.Invoke();
             }
         }
@@ -32,6 +34,10 @@ namespace Heroic.Spells
         public void SetEchoEnabled(bool enabled)
         {
             echoEnabled = enabled;
+            if (echoEnabled)
+            {
+                TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.58f, 0.85f, 1f, 0.36f), 1.25f, 0.22f);
+            }
         }
 
         public void SetEchoCount(int value)

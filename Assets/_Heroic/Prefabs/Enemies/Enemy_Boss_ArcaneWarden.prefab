@@ -136,8 +136,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Enemies.EnemyController
   moveSpeed: 2
   contactDamage: 10
-  contactRange: 0.5
+  contactRange: 0.85
   contactDamageInterval: 1
+  destroyAfterContactDamage: 0
+  suppressExperienceOnContactDamage: 0
 --- !u!114 &7153313872011756394
 MonoBehaviour:
   m_ObjectHideFlags: 0

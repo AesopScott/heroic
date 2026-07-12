@@ -11,6 +11,7 @@ namespace Heroic.Enemies
         [SerializeField] private int experienceValue = 1;
 
         private Damageable damageable;
+        private bool suppressNextDrop;
 
         private void Awake()
         {
@@ -35,6 +36,12 @@ namespace Heroic.Enemies
 
         private void HandleDied(Damageable dead)
         {
+            if (suppressNextDrop)
+            {
+                suppressNextDrop = false;
+                return;
+            }
+
             if (pickupPrefab == null || experienceValue <= 0)
             {
                 return;
@@ -47,6 +54,11 @@ namespace Heroic.Enemies
         public void SetExperienceValue(int value)
         {
             experienceValue = Mathf.Max(0, value);
+        }
+
+        public void SuppressNextDrop()
+        {
+            suppressNextDrop = true;
         }
     }
 }

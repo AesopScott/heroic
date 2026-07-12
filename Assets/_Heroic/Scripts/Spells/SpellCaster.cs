@@ -53,6 +53,7 @@ namespace Heroic.Spells
                     break;
                 case "arcane_spell_echo":
                     SetOptionalCasterEnabled(spellEchoCaster, true);
+                    spellEchoCaster?.SetEchoEnabled(true);
                     break;
                 case "arcane_arcane_orbit":
                     SetOptionalCasterEnabled(arcaneOrbitCaster, true);

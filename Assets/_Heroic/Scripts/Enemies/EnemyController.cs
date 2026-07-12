@@ -9,8 +9,10 @@ namespace Heroic.Enemies
     {
         [SerializeField] private float moveSpeed = 2f;
         [SerializeField] private int contactDamage = 10;
-        [SerializeField] private float contactRange = 0.5f;
+        [SerializeField] private float contactRange = 0.85f;
         [SerializeField] private float contactDamageInterval = 1f;
+        [SerializeField] private bool destroyAfterContactDamage = true;
+        [SerializeField] private bool suppressExperienceOnContactDamage = true;
 
         private Transform target;
         private float nextContactDamageTime;
@@ -55,6 +57,24 @@ namespace Heroic.Enemies
                 {
                     playerHealth.TakeDamage(contactDamage);
                     nextContactDamageTime = Time.time + contactDamageInterval;
+                    if (destroyAfterContactDamage)
+                    {
+                        if (suppressExperienceOnContactDamage)
+                        {
+                            ExperienceDropper dropper = GetComponent<ExperienceDropper>();
+                            dropper?.SuppressNextDrop();
+                        }
+
+                        Damageable damageable = GetComponent<Damageable>();
+                        if (damageable != null)
+                        {
+                            damageable.ApplyDamage(damageable.CurrentHealth);
+                        }
+                        else
+                        {
+                            Destroy(gameObject);
+                        }
+                    }
                 }
             }
         }
