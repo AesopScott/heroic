@@ -10,7 +10,7 @@ namespace Heroic.Enemies
         public enum EnemyBehavior
         {
             Crash,
-            Shooter
+            Thrower
         }
 
         [SerializeField] private EnemyBehavior behavior = EnemyBehavior.Crash;
@@ -21,10 +21,10 @@ namespace Heroic.Enemies
         [SerializeField] private bool destroyAfterContactDamage = true;
         [SerializeField] private bool suppressExperienceOnContactDamage = true;
         [SerializeField] private EnemyProjectile projectilePrefab;
-        [SerializeField] private float shooterRange = 50f;
-        [SerializeField] private float shooterFireInterval = 5f;
-        [SerializeField] private float shooterProjectileSpeed = 4f;
-        [SerializeField] private int shooterProjectileDamage = 15;
+        [SerializeField] private float ThrowerRange = 50f;
+        [SerializeField] private float ThrowerFireInterval = 5f;
+        [SerializeField] private float ThrowerProjectileSpeed = 4f;
+        [SerializeField] private int ThrowerProjectileDamage = 15;
         [SerializeField] private Transform firePoint;
 
         private Transform target;
@@ -34,18 +34,25 @@ namespace Heroic.Enemies
         private float slowEndsAt;
         private float freezeEndsAt;
         private float stunEndsAt;
+        private float fearEndsAt;
+        private float confuseEndsAt;
+        private float nextConfuseDirectionTime;
+        private Vector2 fearSource;
+        private Vector2 confusedDirection = Vector2.right;
 
         public bool IsSlowed => Time.time < slowEndsAt && slowMultiplier < 0.99f;
         public bool IsFrozen => Time.time < freezeEndsAt;
         public bool IsStunned => Time.time < stunEndsAt;
         public bool IsColdControlled => IsSlowed || IsFrozen;
+        public bool IsFeared => Time.time < fearEndsAt;
+        public bool IsConfused => Time.time < confuseEndsAt;
 
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
-            if (behavior == EnemyBehavior.Shooter)
+            if (behavior == EnemyBehavior.Thrower)
             {
-                nextShotTime = Time.time + shooterFireInterval;
+                nextShotTime = Time.time + ThrowerFireInterval;
             }
         }
 
@@ -78,9 +85,9 @@ namespace Heroic.Enemies
                 return;
             }
 
-            if (behavior == EnemyBehavior.Shooter)
+            if (behavior == EnemyBehavior.Thrower)
             {
-                UpdateShooter();
+                UpdateThrower();
                 return;
             }
 
@@ -90,8 +97,34 @@ namespace Heroic.Enemies
 
         private void MoveTowardTarget()
         {
-            Vector3 direction = (target.position - transform.position).normalized;
+            Vector3 direction = ResolveMovementDirection();
             transform.position += direction * (moveSpeed * CurrentMovementMultiplier() * Time.deltaTime);
+        }
+
+        private Vector2 ResolveMovementDirection()
+        {
+            if (IsFeared)
+            {
+                return ((Vector2)transform.position - fearSource).normalized;
+            }
+
+            if (IsConfused)
+            {
+                if (Time.time >= nextConfuseDirectionTime)
+                {
+                    confusedDirection = UnityEngine.Random.insideUnitCircle.normalized;
+                    if (confusedDirection.sqrMagnitude <= 0.001f)
+                    {
+                        confusedDirection = Vector2.right;
+                    }
+
+                    nextConfuseDirectionTime = Time.time + 0.45f;
+                }
+
+                return confusedDirection;
+            }
+
+            return ((Vector2)target.position - (Vector2)transform.position).normalized;
         }
 
         private void TryApplyContactDamage()
@@ -130,18 +163,24 @@ namespace Heroic.Enemies
             }
         }
 
-        private void UpdateShooter()
+        private void UpdateThrower()
         {
             float distance = Vector3.Distance(transform.position, target.position);
-            if (distance > shooterRange)
+            if (distance > ThrowerRange)
             {
                 MoveTowardTarget();
             }
 
-            if (Time.time >= nextShotTime && distance <= shooterRange)
+            if (Time.time >= nextShotTime && distance <= ThrowerRange)
             {
+                if (IsFeared || IsConfused)
+                {
+                    nextShotTime = Time.time + ThrowerFireInterval;
+                    return;
+                }
+
                 FireAtCurrentPlayerPosition();
-                nextShotTime = Time.time + shooterFireInterval;
+                nextShotTime = Time.time + ThrowerFireInterval;
             }
         }
 
@@ -155,7 +194,7 @@ namespace Heroic.Enemies
             Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
             Vector2 direction = (target.position - spawnPosition).normalized;
             EnemyProjectile projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-            projectile.Launch(direction, shooterProjectileSpeed, shooterProjectileDamage);
+            projectile.Launch(direction, ThrowerProjectileSpeed, ThrowerProjectileDamage);
         }
 
         public void Push(Vector2 direction, float distance)
@@ -185,9 +224,22 @@ namespace Heroic.Enemies
             stunEndsAt = Mathf.Max(stunEndsAt, Time.time + Mathf.Max(0f, duration));
         }
 
+        public void ApplyFear(Vector2 source, float duration)
+        {
+            fearSource = source;
+            fearEndsAt = Mathf.Max(fearEndsAt, Time.time + Mathf.Max(0f, duration));
+        }
+
+        public void ApplyConfuse(float duration)
+        {
+            confuseEndsAt = Mathf.Max(confuseEndsAt, Time.time + Mathf.Max(0f, duration));
+            nextConfuseDirectionTime = 0f;
+        }
+
         private float CurrentMovementMultiplier()
         {
             return IsFrozen || IsStunned ? 0f : slowMultiplier;
         }
     }
 }
+

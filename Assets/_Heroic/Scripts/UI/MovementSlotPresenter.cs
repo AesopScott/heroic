@@ -26,7 +26,9 @@ namespace Heroic.UI
 
             if (skillNameText != null)
             {
-                skillNameText.text = skill == MovementCaster.MovementSkillId.None ? "-" : skill.ToString();
+                bool isActive = movementCaster.IsSlotActive(slotIndex);
+                skillNameText.text = skill == MovementCaster.MovementSkillId.None ? "-" : (isActive ? "> " : string.Empty) + skill;
+                skillNameText.fontStyle = isActive ? FontStyles.Bold : FontStyles.Normal;
             }
 
             if (cooldownText != null)

@@ -434,6 +434,106 @@ namespace Heroic.UI
                 return "SC";
             }
 
+            if (id.Contains("stone_spike"))
+            {
+                return "SP";
+            }
+
+            if (id.Contains("boulder_toss"))
+            {
+                return "BT";
+            }
+
+            if (id.Contains("earth_wall"))
+            {
+                return "EW";
+            }
+
+            if (id.Contains("quake"))
+            {
+                return "QK";
+            }
+
+            if (id.Contains("mud_trap"))
+            {
+                return "MT";
+            }
+
+            if (id.Contains("psychic_lance"))
+            {
+                return "PL";
+            }
+
+            if (id.Contains("fear_wave"))
+            {
+                return "FE";
+            }
+
+            if (id.Contains("illusion_clone"))
+            {
+                return "IC";
+            }
+
+            if (id.Contains("confuse"))
+            {
+                return "CF";
+            }
+
+            if (id.Contains("mind_crush"))
+            {
+                return "MC";
+            }
+
+            if (id.Contains("blood_bolt"))
+            {
+                return "BB";
+            }
+
+            if (id.Contains("sanguine_pact"))
+            {
+                return "SG";
+            }
+
+            if (id.Contains("blood_nova"))
+            {
+                return "BN";
+            }
+
+            if (id.Contains("leech_bind"))
+            {
+                return "LB";
+            }
+
+            if (id.Contains("crimson_frenzy"))
+            {
+                return "CZ";
+            }
+
+            if (id.Contains("poison_dart"))
+            {
+                return "PD";
+            }
+
+            if (id.Contains("toxic_cloud"))
+            {
+                return "TX";
+            }
+
+            if (id.Contains("venom_trail"))
+            {
+                return "VT";
+            }
+
+            if (id.Contains("infection"))
+            {
+                return "IN";
+            }
+
+            if (id.Contains("rot_bloom"))
+            {
+                return "RB";
+            }
+
             return "??";
         }
 
@@ -527,6 +627,106 @@ namespace Heroic.UI
             if (choiceId.StartsWith("upgrade_lightning_storm_call"))
             {
                 return "lightning_storm_call";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_stone_spike"))
+            {
+                return "earth_stone_spike";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_boulder_toss"))
+            {
+                return "earth_boulder_toss";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_earth_wall"))
+            {
+                return "earth_earth_wall";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_quake"))
+            {
+                return "earth_quake";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_mud_trap"))
+            {
+                return "earth_mud_trap";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_psychic_lance"))
+            {
+                return "mind_psychic_lance";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_fear_wave"))
+            {
+                return "mind_fear_wave";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_illusion_clone"))
+            {
+                return "mind_illusion_clone";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_confuse"))
+            {
+                return "mind_confuse";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_mind_crush"))
+            {
+                return "mind_mind_crush";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_blood_bolt"))
+            {
+                return "blood_blood_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_sanguine_pact"))
+            {
+                return "blood_sanguine_pact";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_blood_nova"))
+            {
+                return "blood_blood_nova";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_leech_bind"))
+            {
+                return "blood_leech_bind";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_crimson_frenzy"))
+            {
+                return "blood_crimson_frenzy";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_poison_dart"))
+            {
+                return "poison_poison_dart";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_toxic_cloud"))
+            {
+                return "poison_toxic_cloud";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_venom_trail"))
+            {
+                return "poison_venom_trail";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_infection"))
+            {
+                return "poison_infection";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_rot_bloom"))
+            {
+                return "poison_rot_bloom";
             }
 
             if (choiceId.StartsWith("upgrade_system_territory_casting"))

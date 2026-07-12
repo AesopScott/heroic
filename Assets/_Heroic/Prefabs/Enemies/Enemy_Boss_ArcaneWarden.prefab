@@ -142,10 +142,10 @@ MonoBehaviour:
   destroyAfterContactDamage: 0
   suppressExperienceOnContactDamage: 0
   projectilePrefab: {fileID: 0}
-  shooterRange: 50
-  shooterFireInterval: 5
-  shooterProjectileSpeed: 4
-  shooterProjectileDamage: 15
+  ThrowerRange: 50
+  ThrowerFireInterval: 5
+  ThrowerProjectileSpeed: 4
+  ThrowerProjectileDamage: 15
   firePoint: {fileID: 0}
 --- !u!114 &7153313872011756394
 MonoBehaviour:
@@ -557,3 +557,4 @@ MonoBehaviour:
   preset: 2
   volume: 0.5
   minimumGlobalInterval: 0.035
+

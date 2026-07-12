@@ -50,19 +50,19 @@ namespace Heroic.Editor
             GameObject enemyMissile = CreateEnemyMissilePrefab();
             GameObject orb = CreateArcaneOrbPrefab();
             GameObject enemy = CreateEnemyPrefab(xpPickup, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup);
-            GameObject shooter = CreateShooterEnemyPrefab(xpPickup, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup, enemyMissile);
+            GameObject Thrower = CreateThrowerEnemyPrefab(xpPickup, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup, enemyMissile);
             GameObject boss = CreateBossPrefab(xpPickup, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup);
 
             EnemyDefinition crashOneDefinition = CreateEnemyDefinition("Enemy_Crash_01", "Crash I", enemy, 10, 2f, 10, 1, VisualPresetApplier.Preset.CrashLevel1, false);
             EnemyDefinition crashTwoDefinition = CreateEnemyDefinition("Enemy_Crash_02", "Crash II", enemy, 12, 2.15f, 10, 1, VisualPresetApplier.Preset.CrashLevel2, false);
             EnemyDefinition crashThreeDefinition = CreateEnemyDefinition("Enemy_Crash_03", "Crash III", enemy, 15, 2.3f, 10, 1, VisualPresetApplier.Preset.CrashLevel3, false);
             EnemyDefinition crashFourDefinition = CreateEnemyDefinition("Enemy_Crash_04", "Crash IV", enemy, 15, 2.875f, 10, 1, VisualPresetApplier.Preset.CrashLevel4, false);
-            EnemyDefinition shooterDefinition = CreateEnemyDefinition("Enemy_Shooter_01", "Shooter I", shooter, 25, 1.5f, 15, 2, VisualPresetApplier.Preset.ShooterLevel1, false);
+            EnemyDefinition ThrowerDefinition = CreateEnemyDefinition("Enemy_Thrower_01", "Thrower I", Thrower, 25, 1.5f, 15, 2, VisualPresetApplier.Preset.ThrowerLevel1, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
 
-            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 1, 2, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
-            WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
-            WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
+            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 1, 2, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, ThrowerDefinition);
+            WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, ThrowerDefinition);
+            WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, ThrowerDefinition);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
@@ -325,34 +325,34 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Crash.prefab");
         }
 
-        private static GameObject CreateShooterEnemyPrefab(GameObject xpPickup, GameObject healthPickup, GameObject experienceBoostPickup, GameObject speedBoostPickup, GameObject invulnerabilityPickup, GameObject enemyMissile)
+        private static GameObject CreateThrowerEnemyPrefab(GameObject xpPickup, GameObject healthPickup, GameObject experienceBoostPickup, GameObject speedBoostPickup, GameObject invulnerabilityPickup, GameObject enemyMissile)
         {
-            GameObject go = new GameObject("Enemy_Shooter");
+            GameObject go = new GameObject("Enemy_Thrower");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
             body.gravityScale = 0f;
             body.freezeRotation = true;
             go.AddComponent<CircleCollider2D>();
             go.AddComponent<Damageable>();
             EnemyController controller = go.AddComponent<EnemyController>();
-            SetEnum(controller, "behavior", EnemyController.EnemyBehavior.Shooter);
+            SetEnum(controller, "behavior", EnemyController.EnemyBehavior.Thrower);
             SetObject(controller, "projectilePrefab", enemyMissile.GetComponent<EnemyProjectile>());
-            SetFloat(controller, "shooterRange", 50f);
-            SetFloat(controller, "shooterFireInterval", 5f);
-            SetFloat(controller, "shooterProjectileSpeed", 4f);
-            SetInt(controller, "shooterProjectileDamage", 15);
+            SetFloat(controller, "ThrowerRange", 50f);
+            SetFloat(controller, "ThrowerFireInterval", 5f);
+            SetFloat(controller, "ThrowerProjectileSpeed", 4f);
+            SetInt(controller, "ThrowerProjectileDamage", 15);
             SetBool(controller, "destroyAfterContactDamage", false);
             SetBool(controller, "suppressExperienceOnContactDamage", false);
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
             WireExtraLootPrefabs(dropper, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
-            SetEnum(visual, "preset", VisualPresetApplier.Preset.ShooterLevel1);
+            SetEnum(visual, "preset", VisualPresetApplier.Preset.ThrowerLevel1);
             go.AddComponent<HitFlashVisual>();
             go.AddComponent<DeathBurstVisual>();
             go.AddComponent<WorldHealthBar>();
             go.AddComponent<DamageNumberEmitter>();
             AddAudioFeedback(go, ProceduralAudioFeedback.Preset.Enemy, 0.32f);
-            return SavePrefab(go, Prefabs + "/Enemies/Enemy_Shooter.prefab");
+            return SavePrefab(go, Prefabs + "/Enemies/Enemy_Thrower.prefab");
         }
 
         private static GameObject CreateBossPrefab(GameObject xpPickup, GameObject healthPickup, GameObject experienceBoostPickup, GameObject speedBoostPickup, GameObject invulnerabilityPickup)
@@ -416,6 +416,10 @@ namespace Heroic.Editor
             FireUpgradeApplier fireUpgradeApplier = managers.AddComponent<FireUpgradeApplier>();
             ColdUpgradeApplier coldUpgradeApplier = managers.AddComponent<ColdUpgradeApplier>();
             LightningUpgradeApplier lightningUpgradeApplier = managers.AddComponent<LightningUpgradeApplier>();
+            EarthUpgradeApplier earthUpgradeApplier = managers.AddComponent<EarthUpgradeApplier>();
+            MindUpgradeApplier mindUpgradeApplier = managers.AddComponent<MindUpgradeApplier>();
+            BloodUpgradeApplier bloodUpgradeApplier = managers.AddComponent<BloodUpgradeApplier>();
+            PoisonUpgradeApplier poisonUpgradeApplier = managers.AddComponent<PoisonUpgradeApplier>();
             UIManager uiManager = managers.AddComponent<UIManager>();
             BackgroundMusicPlayer music = managers.AddComponent<BackgroundMusicPlayer>();
             SetString(music, "resourcesClipPath", "Audio/Music/HeroicDemoLoop");
@@ -458,11 +462,19 @@ namespace Heroic.Editor
             SetObject(choiceApplier, "fireUpgradeApplier", fireUpgradeApplier);
             SetObject(choiceApplier, "coldUpgradeApplier", coldUpgradeApplier);
             SetObject(choiceApplier, "lightningUpgradeApplier", lightningUpgradeApplier);
+            SetObject(choiceApplier, "earthUpgradeApplier", earthUpgradeApplier);
+            SetObject(choiceApplier, "mindUpgradeApplier", mindUpgradeApplier);
+            SetObject(choiceApplier, "bloodUpgradeApplier", bloodUpgradeApplier);
+            SetObject(choiceApplier, "poisonUpgradeApplier", poisonUpgradeApplier);
 
             WireArcaneUpgradeApplier(arcaneUpgradeApplier, player);
             WireFireUpgradeApplier(fireUpgradeApplier, player);
             WireColdUpgradeApplier(coldUpgradeApplier, player);
             WireLightningUpgradeApplier(lightningUpgradeApplier, player);
+            WireEarthUpgradeApplier(earthUpgradeApplier, player);
+            WireMindUpgradeApplier(mindUpgradeApplier, player);
+            WireBloodUpgradeApplier(bloodUpgradeApplier, player);
+            WirePoisonUpgradeApplier(poisonUpgradeApplier, player);
 
             GameObject cameraObject = new GameObject("Main Camera");
             Camera camera = cameraObject.AddComponent<Camera>();
@@ -521,6 +533,26 @@ namespace Heroic.Editor
             ThunderLanceCaster thunderLance = player.AddComponent<ThunderLanceCaster>();
             SparkSurgeCaster sparkSurge = player.AddComponent<SparkSurgeCaster>();
             StormCallCaster stormCall = player.AddComponent<StormCallCaster>();
+            EarthAbilityCaster stoneSpike = player.AddComponent<EarthAbilityCaster>();
+            EarthAbilityCaster boulderToss = player.AddComponent<EarthAbilityCaster>();
+            EarthAbilityCaster earthWall = player.AddComponent<EarthAbilityCaster>();
+            EarthAbilityCaster quake = player.AddComponent<EarthAbilityCaster>();
+            EarthAbilityCaster mudTrap = player.AddComponent<EarthAbilityCaster>();
+            MindAbilityCaster psychicLance = player.AddComponent<MindAbilityCaster>();
+            MindAbilityCaster fearWave = player.AddComponent<MindAbilityCaster>();
+            MindAbilityCaster illusionClone = player.AddComponent<MindAbilityCaster>();
+            MindAbilityCaster confuse = player.AddComponent<MindAbilityCaster>();
+            MindAbilityCaster mindCrush = player.AddComponent<MindAbilityCaster>();
+            BloodAbilityCaster bloodBolt = player.AddComponent<BloodAbilityCaster>();
+            BloodAbilityCaster sanguinePact = player.AddComponent<BloodAbilityCaster>();
+            BloodAbilityCaster bloodNova = player.AddComponent<BloodAbilityCaster>();
+            BloodAbilityCaster leechBind = player.AddComponent<BloodAbilityCaster>();
+            BloodAbilityCaster crimsonFrenzy = player.AddComponent<BloodAbilityCaster>();
+            PoisonAbilityCaster poisonDart = player.AddComponent<PoisonAbilityCaster>();
+            PoisonAbilityCaster toxicCloud = player.AddComponent<PoisonAbilityCaster>();
+            PoisonAbilityCaster venomTrail = player.AddComponent<PoisonAbilityCaster>();
+            PoisonAbilityCaster infection = player.AddComponent<PoisonAbilityCaster>();
+            PoisonAbilityCaster rotBloom = player.AddComponent<PoisonAbilityCaster>();
             SpellCaster spellCaster = player.AddComponent<SpellCaster>();
             player.AddComponent<MovementCaster>();
             VisualPresetApplier visual = player.AddComponent<VisualPresetApplier>();
@@ -558,6 +590,46 @@ namespace Heroic.Editor
             SetObject(thunderLance, "spellEcho", spellEcho);
             SetObject(sparkSurge, "spellEcho", spellEcho);
             SetObject(stormCall, "spellEcho", spellEcho);
+            SetEnum(stoneSpike, "skill", EarthAbilityCaster.EarthSkill.StoneSpike);
+            SetEnum(boulderToss, "skill", EarthAbilityCaster.EarthSkill.BoulderToss);
+            SetEnum(earthWall, "skill", EarthAbilityCaster.EarthSkill.EarthWall);
+            SetEnum(quake, "skill", EarthAbilityCaster.EarthSkill.Quake);
+            SetEnum(mudTrap, "skill", EarthAbilityCaster.EarthSkill.MudTrap);
+            SetEnum(psychicLance, "skill", MindAbilityCaster.MindSkill.PsychicLance);
+            SetEnum(fearWave, "skill", MindAbilityCaster.MindSkill.FearWave);
+            SetEnum(illusionClone, "skill", MindAbilityCaster.MindSkill.IllusionClone);
+            SetEnum(confuse, "skill", MindAbilityCaster.MindSkill.Confuse);
+            SetEnum(mindCrush, "skill", MindAbilityCaster.MindSkill.MindCrush);
+            SetEnum(bloodBolt, "skill", BloodAbilityCaster.BloodSkill.BloodBolt);
+            SetEnum(sanguinePact, "skill", BloodAbilityCaster.BloodSkill.SanguinePact);
+            SetEnum(bloodNova, "skill", BloodAbilityCaster.BloodSkill.BloodNova);
+            SetEnum(leechBind, "skill", BloodAbilityCaster.BloodSkill.LeechBind);
+            SetEnum(crimsonFrenzy, "skill", BloodAbilityCaster.BloodSkill.CrimsonFrenzy);
+            SetEnum(poisonDart, "skill", PoisonAbilityCaster.PoisonSkill.PoisonDart);
+            SetEnum(toxicCloud, "skill", PoisonAbilityCaster.PoisonSkill.ToxicCloud);
+            SetEnum(venomTrail, "skill", PoisonAbilityCaster.PoisonSkill.VenomTrail);
+            SetEnum(infection, "skill", PoisonAbilityCaster.PoisonSkill.Infection);
+            SetEnum(rotBloom, "skill", PoisonAbilityCaster.PoisonSkill.RotBloom);
+            SetObject(stoneSpike, "spellEcho", spellEcho);
+            SetObject(boulderToss, "spellEcho", spellEcho);
+            SetObject(earthWall, "spellEcho", spellEcho);
+            SetObject(quake, "spellEcho", spellEcho);
+            SetObject(mudTrap, "spellEcho", spellEcho);
+            SetObject(psychicLance, "spellEcho", spellEcho);
+            SetObject(fearWave, "spellEcho", spellEcho);
+            SetObject(illusionClone, "spellEcho", spellEcho);
+            SetObject(confuse, "spellEcho", spellEcho);
+            SetObject(mindCrush, "spellEcho", spellEcho);
+            SetObject(bloodBolt, "spellEcho", spellEcho);
+            SetObject(sanguinePact, "spellEcho", spellEcho);
+            SetObject(bloodNova, "spellEcho", spellEcho);
+            SetObject(leechBind, "spellEcho", spellEcho);
+            SetObject(crimsonFrenzy, "spellEcho", spellEcho);
+            SetObject(poisonDart, "spellEcho", spellEcho);
+            SetObject(toxicCloud, "spellEcho", spellEcho);
+            SetObject(venomTrail, "spellEcho", spellEcho);
+            SetObject(infection, "spellEcho", spellEcho);
+            SetObject(rotBloom, "spellEcho", spellEcho);
             SetObject(spellCaster, "magicMissileCaster", magicMissile);
             SetObject(spellCaster, "arcaneBlastCaster", arcaneBlast);
             SetObject(spellCaster, "warpPulseCaster", warpPulse);
@@ -576,6 +648,26 @@ namespace Heroic.Editor
             SetObject(spellCaster, "thunderLanceCaster", thunderLance);
             SetObject(spellCaster, "sparkSurgeCaster", sparkSurge);
             SetObject(spellCaster, "stormCallCaster", stormCall);
+            SetObject(spellCaster, "stoneSpikeCaster", stoneSpike);
+            SetObject(spellCaster, "boulderTossCaster", boulderToss);
+            SetObject(spellCaster, "earthWallCaster", earthWall);
+            SetObject(spellCaster, "quakeCaster", quake);
+            SetObject(spellCaster, "mudTrapCaster", mudTrap);
+            SetObject(spellCaster, "psychicLanceCaster", psychicLance);
+            SetObject(spellCaster, "fearWaveCaster", fearWave);
+            SetObject(spellCaster, "illusionCloneCaster", illusionClone);
+            SetObject(spellCaster, "confuseCaster", confuse);
+            SetObject(spellCaster, "mindCrushCaster", mindCrush);
+            SetObject(spellCaster, "bloodBoltCaster", bloodBolt);
+            SetObject(spellCaster, "sanguinePactCaster", sanguinePact);
+            SetObject(spellCaster, "bloodNovaCaster", bloodNova);
+            SetObject(spellCaster, "leechBindCaster", leechBind);
+            SetObject(spellCaster, "crimsonFrenzyCaster", crimsonFrenzy);
+            SetObject(spellCaster, "poisonDartCaster", poisonDart);
+            SetObject(spellCaster, "toxicCloudCaster", toxicCloud);
+            SetObject(spellCaster, "venomTrailCaster", venomTrail);
+            SetObject(spellCaster, "infectionCaster", infection);
+            SetObject(spellCaster, "rotBloomCaster", rotBloom);
             return player;
         }
 
@@ -623,6 +715,48 @@ namespace Heroic.Editor
             SetObject(applier, "thunderLance", player.GetComponent<ThunderLanceCaster>());
             SetObject(applier, "sparkSurge", player.GetComponent<SparkSurgeCaster>());
             SetObject(applier, "stormCall", player.GetComponent<StormCallCaster>());
+        }
+
+        private static void WireEarthUpgradeApplier(EarthUpgradeApplier applier, GameObject player)
+        {
+            SetObject(applier, "stoneSpike", GetComponentAt<EarthAbilityCaster>(player, 0));
+            SetObject(applier, "boulderToss", GetComponentAt<EarthAbilityCaster>(player, 1));
+            SetObject(applier, "earthWall", GetComponentAt<EarthAbilityCaster>(player, 2));
+            SetObject(applier, "quake", GetComponentAt<EarthAbilityCaster>(player, 3));
+            SetObject(applier, "mudTrap", GetComponentAt<EarthAbilityCaster>(player, 4));
+        }
+
+        private static void WireMindUpgradeApplier(MindUpgradeApplier applier, GameObject player)
+        {
+            SetObject(applier, "psychicLance", GetComponentAt<MindAbilityCaster>(player, 0));
+            SetObject(applier, "fearWave", GetComponentAt<MindAbilityCaster>(player, 1));
+            SetObject(applier, "illusionClone", GetComponentAt<MindAbilityCaster>(player, 2));
+            SetObject(applier, "confuse", GetComponentAt<MindAbilityCaster>(player, 3));
+            SetObject(applier, "mindCrush", GetComponentAt<MindAbilityCaster>(player, 4));
+        }
+
+        private static void WireBloodUpgradeApplier(BloodUpgradeApplier applier, GameObject player)
+        {
+            SetObject(applier, "bloodBolt", GetComponentAt<BloodAbilityCaster>(player, 0));
+            SetObject(applier, "sanguinePact", GetComponentAt<BloodAbilityCaster>(player, 1));
+            SetObject(applier, "bloodNova", GetComponentAt<BloodAbilityCaster>(player, 2));
+            SetObject(applier, "leechBind", GetComponentAt<BloodAbilityCaster>(player, 3));
+            SetObject(applier, "crimsonFrenzy", GetComponentAt<BloodAbilityCaster>(player, 4));
+        }
+
+        private static void WirePoisonUpgradeApplier(PoisonUpgradeApplier applier, GameObject player)
+        {
+            SetObject(applier, "poisonDart", GetComponentAt<PoisonAbilityCaster>(player, 0));
+            SetObject(applier, "toxicCloud", GetComponentAt<PoisonAbilityCaster>(player, 1));
+            SetObject(applier, "venomTrail", GetComponentAt<PoisonAbilityCaster>(player, 2));
+            SetObject(applier, "infection", GetComponentAt<PoisonAbilityCaster>(player, 3));
+            SetObject(applier, "rotBloom", GetComponentAt<PoisonAbilityCaster>(player, 4));
+        }
+
+        private static T GetComponentAt<T>(GameObject source, int index) where T : Component
+        {
+            T[] components = source.GetComponents<T>();
+            return index >= 0 && index < components.Length ? components[index] : null;
         }
 
         private static TMP_Text CreateGameUi(UIManager uiManager, RunManager runManager, UpgradeManager upgradeManager, RunBuildState buildState, PlayerHealth health, PlayerExperience experience, MovementCaster movement, PlayerTemporaryBuffs temporaryBuffs, SpellStatModifier spellStats, TerritoryCastingController territoryCasting, BossSpawner bossSpawner)
@@ -1371,3 +1505,4 @@ namespace Heroic.Editor
         }
     }
 }
+

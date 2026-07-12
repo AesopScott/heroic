@@ -57,7 +57,7 @@ namespace Heroic.Enemies
                 SpawnEnemy(ChooseCrashDefinition(activeWave), packOffset);
             }
 
-            SpawnSupplementalShooters(activeWave, packCenter, packSide, spawnCount);
+            SpawnSupplementalThrowers(activeWave, packCenter, packSide, spawnCount);
 
             nextSpawnTime = Time.time + GetCurrentSpawnInterval(activeWave);
         }
@@ -93,26 +93,26 @@ namespace Heroic.Enemies
             ApplyDefinition(enemy, enemyDefinition);
         }
 
-        private void SpawnSupplementalShooters(WaveDefinition activeWave, Vector2 packCenter, Vector2 packSide, int crashSpawnCount)
+        private void SpawnSupplementalThrowers(WaveDefinition activeWave, Vector2 packCenter, Vector2 packSide, int crashSpawnCount)
         {
             if (playerExperience == null || playerExperience.Level < 4)
             {
                 return;
             }
 
-            EnemyDefinition shooterDefinition = FindEnemyDefinition(activeWave, "enemy_shooter_01");
-            if (shooterDefinition == null)
+            EnemyDefinition ThrowerDefinition = FindEnemyDefinition(activeWave, "Enemy_Thrower_01");
+            if (ThrowerDefinition == null)
             {
                 return;
             }
 
-            int shooterCount = Random.Range(0, 2);
-            for (int i = 0; i < shooterCount; i++)
+            int ThrowerCount = Random.Range(0, 2);
+            for (int i = 0; i < ThrowerCount; i++)
             {
                 float side = Random.value < 0.5f ? -1f : 1f;
                 float spacingIndex = (crashSpawnCount * 0.5f) + 1f + i;
-                Vector2 shooterOffset = packCenter + packSide * side * spacingIndex * packSpacing;
-                SpawnEnemy(shooterDefinition, shooterOffset);
+                Vector2 ThrowerOffset = packCenter + packSide * side * spacingIndex * packSpacing;
+                SpawnEnemy(ThrowerDefinition, ThrowerOffset);
             }
         }
 
@@ -321,3 +321,4 @@ namespace Heroic.Enemies
         }
     }
 }
+

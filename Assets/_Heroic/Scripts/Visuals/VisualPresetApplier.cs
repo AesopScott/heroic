@@ -12,7 +12,7 @@ namespace Heroic.Visuals
             CrashLevel2,
             CrashLevel3,
             CrashLevel4,
-            ShooterLevel1,
+            ThrowerLevel1,
             EnemyMissile,
             FastEnemy,
             TankEnemy,
@@ -87,10 +87,10 @@ namespace Heroic.Visuals
                 case Preset.CrashLevel4:
                     ApplyCrashVisual(visual, new Color(0.68f, 0.24f, 1f), new Vector2(1.13f, 1.13f), new Color(0.9f, 0.55f, 1f, 0.62f));
                     break;
-                case Preset.ShooterLevel1:
+                case Preset.ThrowerLevel1:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(0.58f, 0.62f, 0.64f), new Vector2(0.86f, 0.86f), 10, true, false, 0.04f, 2.4f);
-                    EnsureLayer("ShooterRing", AutoSpriteVisual.Shape.Ring, new Color(0.82f, 0.88f, 0.9f, 0.58f), new Vector2(1.06f, 1.06f), 9, true, true, Vector2.zero, 0f, 0.04f, 2.8f, 45f);
-                    EnsureLayer("ShooterCore", AutoSpriteVisual.Shape.Circle, new Color(0.16f, 0.18f, 0.2f, 0.92f), new Vector2(0.28f, 0.28f), 11, false, false);
+                    EnsureLayer("ThrowerRing", AutoSpriteVisual.Shape.Ring, new Color(0.82f, 0.88f, 0.9f, 0.58f), new Vector2(1.06f, 1.06f), 9, true, true, Vector2.zero, 0f, 0.04f, 2.8f, 45f);
+                    EnsureLayer("ThrowerCore", AutoSpriteVisual.Shape.Circle, new Color(0.16f, 0.18f, 0.2f, 0.92f), new Vector2(0.28f, 0.28f), 11, false, false);
                     break;
                 case Preset.EnemyMissile:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(0.86f, 0.9f, 0.92f), new Vector2(0.22f, 0.22f), 28, false, false);
@@ -241,3 +241,4 @@ namespace Heroic.Visuals
         }
     }
 }
+
