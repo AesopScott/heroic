@@ -9,6 +9,9 @@ namespace Heroic.Spells
         [SerializeField] private WarpPulseCaster warpPulseCaster;
         [SerializeField] private SpellEchoCaster spellEchoCaster;
         [SerializeField] private ArcaneOrbitCaster arcaneOrbitCaster;
+        [SerializeField] private ArcaneUtilityCaster forceFieldCaster;
+        [SerializeField] private ArcaneUtilityCaster timeWarpCaster;
+        [SerializeField] private ArcaneUtilityCaster hasteCaster;
         [SerializeField] private FireBoltCaster fireBoltCaster;
         [SerializeField] private FlameWaveCaster flameWaveCaster;
         [SerializeField] private BurningGroundCaster burningGroundCaster;
@@ -52,6 +55,9 @@ namespace Heroic.Spells
             SetOptionalCasterEnabled(arcaneBlastCaster, false);
             SetOptionalCasterEnabled(warpPulseCaster, false);
             SetOptionalCasterEnabled(arcaneOrbitCaster, false);
+            SetOptionalCasterEnabled(forceFieldCaster, false);
+            SetOptionalCasterEnabled(timeWarpCaster, false);
+            SetOptionalCasterEnabled(hasteCaster, false);
             SetOptionalCasterEnabled(fireBoltCaster, false);
             SetOptionalCasterEnabled(flameWaveCaster, false);
             SetOptionalCasterEnabled(burningGroundCaster, false);
@@ -122,6 +128,15 @@ namespace Heroic.Spells
                 case "arcane_arcane_orbit":
                     SetOptionalCasterEnabled(arcaneOrbitCaster, true);
                     arcaneOrbitCaster?.SpawnOrbs();
+                    break;
+                case "arcane_force_field":
+                    SetOptionalCasterEnabled(forceFieldCaster, true);
+                    break;
+                case "arcane_time_warp":
+                    SetOptionalCasterEnabled(timeWarpCaster, true);
+                    break;
+                case "arcane_haste":
+                    SetOptionalCasterEnabled(hasteCaster, true);
                     break;
                 case "fire_fire_bolt":
                     SetOptionalCasterEnabled(fireBoltCaster, true);

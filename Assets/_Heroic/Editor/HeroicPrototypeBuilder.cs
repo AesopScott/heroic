@@ -539,6 +539,9 @@ namespace Heroic.Editor
             ArcaneBlastCaster arcaneBlast = player.AddComponent<ArcaneBlastCaster>();
             WarpPulseCaster warpPulse = player.AddComponent<WarpPulseCaster>();
             ArcaneOrbitCaster arcaneOrbit = player.AddComponent<ArcaneOrbitCaster>();
+            ArcaneUtilityCaster forceField = player.AddComponent<ArcaneUtilityCaster>();
+            ArcaneUtilityCaster timeWarp = player.AddComponent<ArcaneUtilityCaster>();
+            ArcaneUtilityCaster haste = player.AddComponent<ArcaneUtilityCaster>();
             FireBoltCaster fireBolt = player.AddComponent<FireBoltCaster>();
             FlameWaveCaster flameWave = player.AddComponent<FlameWaveCaster>();
             BurningGroundCaster burningGround = player.AddComponent<BurningGroundCaster>();
@@ -567,6 +570,22 @@ namespace Heroic.Editor
             SetObject(arcaneBlast, "spellEcho", spellEcho);
             SetObject(warpPulse, "spellEcho", spellEcho);
             SetObject(arcaneOrbit, "orbPrefab", orb.GetComponent<ArcaneOrbitOrb>());
+            SetEnum(forceField, "mode", ArcaneUtilityCaster.ArcaneUtilityMode.ForceField);
+            SetFloat(forceField, "castInterval", 4f);
+            SetFloat(forceField, "radius", 1.45f);
+            SetInt(forceField, "damage", 14);
+            SetObject(forceField, "spellEcho", spellEcho);
+            SetEnum(timeWarp, "mode", ArcaneUtilityCaster.ArcaneUtilityMode.TimeWarp);
+            SetFloat(timeWarp, "castInterval", 5.5f);
+            SetFloat(timeWarp, "range", 8.5f);
+            SetFloat(timeWarp, "radius", 1.7f);
+            SetInt(timeWarp, "damage", 8);
+            SetObject(timeWarp, "spellEcho", spellEcho);
+            SetEnum(haste, "mode", ArcaneUtilityCaster.ArcaneUtilityMode.Haste);
+            SetFloat(haste, "castInterval", 6f);
+            SetFloat(haste, "duration", 2.8f);
+            SetFloat(haste, "speedMultiplier", 1.45f);
+            SetObject(haste, "spellEcho", spellEcho);
             SetObject(fireBolt, "projectilePrefab", fireProjectile.GetComponent<Projectile>());
             SetObject(fireBolt, "firePoint", firePoint.transform);
             SetObject(fireBolt, "spellEcho", spellEcho);
@@ -579,6 +598,9 @@ namespace Heroic.Editor
             SetObject(spellCaster, "warpPulseCaster", warpPulse);
             SetObject(spellCaster, "spellEchoCaster", spellEcho);
             SetObject(spellCaster, "arcaneOrbitCaster", arcaneOrbit);
+            SetObject(spellCaster, "forceFieldCaster", forceField);
+            SetObject(spellCaster, "timeWarpCaster", timeWarp);
+            SetObject(spellCaster, "hasteCaster", haste);
             SetObject(spellCaster, "fireBoltCaster", fireBolt);
             SetObject(spellCaster, "flameWaveCaster", flameWave);
             SetObject(spellCaster, "burningGroundCaster", burningGround);
@@ -606,6 +628,14 @@ namespace Heroic.Editor
             SetObject(applier, "warpPulse", player.GetComponent<WarpPulseCaster>());
             SetObject(applier, "spellEcho", player.GetComponent<SpellEchoCaster>());
             SetObject(applier, "arcaneOrbit", player.GetComponent<ArcaneOrbitCaster>());
+            SetObject(applier, "forceField", player.GetComponent<ArcaneUtilityCaster>());
+            ArcaneUtilityCaster[] utilityCasters = player.GetComponents<ArcaneUtilityCaster>();
+            if (utilityCasters.Length >= 3)
+            {
+                SetObject(applier, "forceField", utilityCasters[0]);
+                SetObject(applier, "timeWarp", utilityCasters[1]);
+                SetObject(applier, "haste", utilityCasters[2]);
+            }
         }
 
         private static void WireFireUpgradeApplier(FireUpgradeApplier applier, GameObject player)
@@ -661,7 +691,8 @@ namespace Heroic.Editor
             SetObject(hud, "healthFillRect", GetSliderFillRect(healthSlider));
             SetObject(hud, "experienceFillRect", GetSliderFillRect(experienceSlider));
 
-            CreateObjectivePanel(gameRoot.transform, runManager, experience, bossSpawner);
+            SkillSideHudPresenter sideHud = gameRoot.AddComponent<SkillSideHudPresenter>();
+            SetObject(sideHud, "buildState", buildState);
 
             for (int i = 0; i < 3; i++)
             {
@@ -685,6 +716,7 @@ namespace Heroic.Editor
                 cooldownText.fontStyle = FontStyles.Bold;
                 MovementSlotPresenter presenter = slot.AddComponent<MovementSlotPresenter>();
                 SetObject(presenter, "movementCaster", movement);
+                SetObject(presenter, "buildState", buildState);
                 SetInt(presenter, "displayIndex", i);
                 SetObject(presenter, "skillNameText", slotText);
                 SetObject(presenter, "cooldownText", cooldownText);
@@ -706,6 +738,7 @@ namespace Heroic.Editor
             TMP_Text[] categoryIconLabels = new TMP_Text[5];
             Image[] skillIconBackdrops = new Image[5];
             TMP_Text[] skillIconLabels = new TMP_Text[5];
+            TMP_Text[] elementNameLabels = new TMP_Text[5];
             for (int i = 0; i < buttons.Length; i++)
             {
                 Button button = CreateButton("Choice" + (i + 1), draftRoot.transform, new Vector2(390f, 123f), new Vector2(0f, 246f - i * 128f));
@@ -735,6 +768,12 @@ namespace Heroic.Editor
                 skillLabel.alignment = TextAlignmentOptions.Center;
                 skillLabel.raycastTarget = false;
 
+                TMP_Text elementLabel = CreateText("ElementName", button.transform, "Arcane", new Vector2(112f, 22f), new Vector2(-121f, -39f));
+                elementLabel.fontSize = 15f;
+                elementLabel.fontStyle = FontStyles.Bold;
+                elementLabel.alignment = TextAlignmentOptions.Center;
+                elementLabel.raycastTarget = false;
+
                 TMP_Text label = button.GetComponentInChildren<TMP_Text>();
                 label.fontSize = 21f;
                 label.alignment = TextAlignmentOptions.MidlineLeft;
@@ -751,6 +790,7 @@ namespace Heroic.Editor
                 categoryIconLabels[i] = categoryLabel;
                 skillIconBackdrops[i] = skillIcon;
                 skillIconLabels[i] = skillLabel;
+                elementNameLabels[i] = elementLabel;
             }
             SetObjectArray(draft, "choiceButtons", buttons);
             SetObjectArray(draft, "choiceLabels", labels);
@@ -759,6 +799,7 @@ namespace Heroic.Editor
             SetObjectArray(draft, "categoryIconLabels", categoryIconLabels);
             SetObjectArray(draft, "skillIconBackdrops", skillIconBackdrops);
             SetObjectArray(draft, "skillIconLabels", skillIconLabels);
+            SetObjectArray(draft, "elementNameLabels", elementNameLabels);
 
             CreatePausePanel(pauseRoot.transform);
 
@@ -826,46 +867,6 @@ namespace Heroic.Editor
             controls.fontSize = 17f;
             controls.color = new Color(0.72f, 0.88f, 0.92f);
             controls.textWrappingMode = TextWrappingModes.Normal;
-        }
-
-        private static void CreateObjectivePanel(Transform parent, RunManager runManager, PlayerExperience experience, BossSpawner bossSpawner)
-        {
-            GameObject panel = new GameObject("ObjectivePanel");
-            panel.transform.SetParent(parent, false);
-            RectTransform panelRect = panel.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0f, 1f);
-            panelRect.anchorMax = new Vector2(0f, 1f);
-            panelRect.pivot = new Vector2(0f, 1f);
-            panelRect.sizeDelta = new Vector2(340f, 132f);
-            panelRect.anchoredPosition = new Vector2(18f, -18f);
-            Image panelImage = panel.AddComponent<Image>();
-            panelImage.color = new Color(0.005f, 0.014f, 0.02f, 0.64f);
-
-            TMP_Text goalText = CreateText("GoalText", panel.transform, "DEMO GOAL\nSurvive. Build the spellbook.\nKill the Arcane Warden.", new Vector2(312f, 60f), new Vector2(14f, -12f));
-            AnchorTopLeft(goalText.rectTransform, new Vector2(14f, -12f));
-            goalText.alignment = TextAlignmentOptions.TopLeft;
-            goalText.fontSize = 14f;
-            goalText.color = new Color(0.82f, 0.96f, 1f);
-
-            TMP_Text bossText = CreateText("BossText", panel.transform, "Boss in 02:00", new Vector2(312f, 24f), new Vector2(14f, -72f));
-            AnchorTopLeft(bossText.rectTransform, new Vector2(14f, -74f));
-            bossText.alignment = TextAlignmentOptions.Left;
-            bossText.fontSize = 15f;
-            bossText.color = new Color(1f, 0.72f, 0.9f);
-
-            TMP_Text upgradeText = CreateText("UpgradeText", panel.transform, "Next draft: 0/5 XP", new Vector2(312f, 24f), new Vector2(14f, -100f));
-            AnchorTopLeft(upgradeText.rectTransform, new Vector2(14f, -102f));
-            upgradeText.alignment = TextAlignmentOptions.Left;
-            upgradeText.fontSize = 15f;
-            upgradeText.color = new Color(0.72f, 1f, 0.78f);
-
-            ObjectivePresenter objective = panel.AddComponent<ObjectivePresenter>();
-            SetObject(objective, "runManager", runManager);
-            SetObject(objective, "playerExperience", experience);
-            SetObject(objective, "bossSpawner", bossSpawner);
-            SetObject(objective, "goalText", goalText);
-            SetObject(objective, "bossText", bossText);
-            SetObject(objective, "upgradeText", upgradeText);
         }
 
         private static Canvas CreateCanvas(string name)

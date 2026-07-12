@@ -17,6 +17,7 @@ namespace Heroic.UI
         [SerializeField] private TMP_Text[] categoryIconLabels = new TMP_Text[0];
         [SerializeField] private Image[] skillIconBackdrops = new Image[0];
         [SerializeField] private TMP_Text[] skillIconLabels = new TMP_Text[0];
+        [SerializeField] private TMP_Text[] elementNameLabels = new TMP_Text[0];
         [SerializeField] private TMP_Text headerText;
 
         private IReadOnlyList<UpgradeManager.DraftChoice> currentChoices;
@@ -187,6 +188,7 @@ namespace Heroic.UI
         {
             Color barColor = ResolveBarColor(choice);
             Color tierColor = ResolveTierColor(choice);
+            string skillId = SkillIconRegistry.ResolveSkillId(choice);
 
             if (index < choiceBars.Length && choiceBars[index] != null)
             {
@@ -205,61 +207,71 @@ namespace Heroic.UI
 
             if (index < skillIconBackdrops.Length && skillIconBackdrops[index] != null)
             {
+                skillIconBackdrops[index].sprite = SkillIconRegistry.GetIcon(skillId);
+                skillIconBackdrops[index].preserveAspect = true;
+                skillIconBackdrops[index].type = Image.Type.Simple;
                 skillIconBackdrops[index].color = tierColor;
             }
 
             if (index < skillIconLabels.Length && skillIconLabels[index] != null)
             {
-                skillIconLabels[index].text = ResolveSkillIcon(choice.Id);
-                skillIconLabels[index].color = IsBright(tierColor) ? new Color(0.03f, 0.04f, 0.05f) : Color.white;
+                skillIconLabels[index].text = string.Empty;
+                skillIconLabels[index].color = Color.clear;
+            }
+
+            if (index < elementNameLabels.Length && elementNameLabels[index] != null)
+            {
+                elementNameLabels[index].text = SkillIconRegistry.GetElementName(skillId);
+                elementNameLabels[index].color = barColor;
             }
         }
 
         private Color ResolveBarColor(UpgradeManager.DraftChoice choice)
         {
             string id = choice.Id.ToLowerInvariant();
+            string skillId = SkillIconRegistry.ResolveSkillId(choice.Id).ToLowerInvariant();
 
-            if (choice.Category == UpgradeManager.UpgradeCategory.Movement || id.StartsWith("movement_"))
+            if (choice.Category == UpgradeManager.UpgradeCategory.Movement || id.StartsWith("movement_") || skillId.StartsWith("movement_"))
             {
                 return Hex("88F7B0");
             }
 
-            if (choice.Category == UpgradeManager.UpgradeCategory.System || id.StartsWith("system_") || id.StartsWith("upgrade_system_"))
+            if (choice.Category == UpgradeManager.UpgradeCategory.System || id.StartsWith("system_") || id.StartsWith("upgrade_system_") || skillId.StartsWith("system_"))
             {
                 return Hex("C8C3FF");
             }
 
-            if (id.Contains("_fire_") || id.StartsWith("fire_"))
+            if (id.Contains("_fire_") || id.StartsWith("fire_") || skillId.StartsWith("fire_"))
             {
                 return Hex("FF6A2A");
             }
 
-            if (id.Contains("_cold_") || id.StartsWith("cold_"))
+            if (id.Contains("_cold_") || id.StartsWith("cold_") || skillId.StartsWith("cold_"))
             {
                 return Hex("7FE7FF");
             }
 
-            if (id.Contains("_lightning_") || id.StartsWith("lightning_"))
+            if (id.Contains("_lightning_") || id.StartsWith("lightning_") || skillId.StartsWith("lightning_"))
             {
                 return Hex("F5E84B");
             }
 
-            if (id.Contains("_earth_") || id.StartsWith("earth_"))
+            if (id.Contains("_earth_") || id.StartsWith("earth_") || skillId.StartsWith("earth_"))
             {
                 return Hex("A8743D");
             }
 
-            if (id.Contains("_mind_") || id.StartsWith("mind_"))
+            if (id.Contains("_mind_") || id.StartsWith("mind_") || skillId.StartsWith("mind_"))
             {
                 return Hex("D889FF");
             }
 
-            if (id.Contains("_blood_") || id.StartsWith("blood_"))
+            if (id.Contains("_blood_") || id.StartsWith("blood_") || skillId.StartsWith("blood_"))
             {
                 return Hex("C0263E");
             }
 
-            if (id.Contains("_poison_") || id.StartsWith("poison_"))
+            if (id.Contains("_poison_") || id.StartsWith("poison_") || skillId.StartsWith("poison_"))
             {
                 return Hex("76D94E");
             }
@@ -292,7 +304,7 @@ namespace Heroic.UI
                 return 1;
             }
 
-            string skillId = ResolveSkillId(choice.Id);
+            string skillId = SkillIconRegistry.ResolveSkillId(choice.Id);
             int currentTier = buildState.GetSkillPathTier(skillId, choice.Id);
             return Mathf.Clamp(currentTier + 1, 1, 5);
         }

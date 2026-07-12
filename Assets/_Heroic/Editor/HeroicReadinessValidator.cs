@@ -137,7 +137,7 @@ namespace Heroic.Editor
             RequireSceneObject<WorldHealthBar>("WorldHealthBar", ref errors);
             RequireSceneObject<DamageNumberEmitter>("DamageNumberEmitter", ref errors);
             RequireSceneObject<HudPresenter>("HudPresenter", ref errors);
-            RequireSceneObject<ObjectivePresenter>("ObjectivePresenter", ref errors);
+            RequireSceneObject<SkillSideHudPresenter>("SkillSideHudPresenter", ref errors);
             RequireSceneObject<DraftPresenter>("DraftPresenter", ref errors);
             RequireSceneObject<ResultsPresenter>("ResultsPresenter", ref errors);
             RequireSceneObject<ProceduralAudioFeedback>("ProceduralAudioFeedback", ref errors);
@@ -171,10 +171,8 @@ namespace Heroic.Editor
             RequireSerializedObjectReference(uiManager, "resultsRoot", "UI manager results root", ref errors);
             RequireImageAlpha("Pause", 0.5f, "pause backdrop", ref errors);
 
-            ObjectivePresenter objective = FindSceneComponent<ObjectivePresenter>();
-            RequireSerializedObjectReference(objective, "goalText", "objective goal text", ref errors);
-            RequireSerializedObjectReference(objective, "bossText", "objective boss text", ref errors);
-            RequireSerializedObjectReference(objective, "upgradeText", "objective upgrade text", ref errors);
+            SkillSideHudPresenter sideHud = FindSceneComponent<SkillSideHudPresenter>();
+            RequireSerializedObjectReference(sideHud, "buildState", "skill side HUD build state", ref errors);
 
             DraftPresenter draft = FindSceneComponent<DraftPresenter>();
             RequireSerializedArrayLength(draft, "choiceButtons", 3, "draft choice buttons", ref errors);
@@ -526,4 +524,3 @@ namespace Heroic.Editor
         }
     }
 }
-

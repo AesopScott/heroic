@@ -10,6 +10,9 @@ namespace Heroic.Systems
         [SerializeField] private WarpPulseCaster warpPulse;
         [SerializeField] private SpellEchoCaster spellEcho;
         [SerializeField] private ArcaneOrbitCaster arcaneOrbit;
+        [SerializeField] private ArcaneUtilityCaster forceField;
+        [SerializeField] private ArcaneUtilityCaster timeWarp;
+        [SerializeField] private ArcaneUtilityCaster haste;
 
         public bool Apply(string choiceId, int tier)
         {
@@ -73,6 +76,36 @@ namespace Heroic.Systems
                     return true;
                 case "upgrade_arcane_arcane_orbit_larger_orbs":
                     arcaneOrbit?.SetRadius(Value(clampedTier, 1.6f, 1.9f, 2.2f, 2.6f, 3.1f));
+                    return true;
+
+                case "upgrade_arcane_force_field_stronger_field":
+                    forceField?.SetDamage(Value(clampedTier, 18, 26, 36, 50, 70));
+                    return true;
+                case "upgrade_arcane_force_field_wider_field":
+                    forceField?.SetRadius(Value(clampedTier, 1.7f, 2.1f, 2.6f, 3.2f, 4f));
+                    return true;
+                case "upgrade_arcane_force_field_quick_field":
+                    forceField?.SetCastInterval(Value(clampedTier, 3.5f, 3f, 2.5f, 2f, 1.5f));
+                    return true;
+
+                case "upgrade_arcane_time_warp_deeper_warp":
+                    timeWarp?.SetSlowMultiplier(Value(clampedTier, 0.4f, 0.34f, 0.28f, 0.22f, 0.16f));
+                    return true;
+                case "upgrade_arcane_time_warp_longer_warp":
+                    timeWarp?.SetDuration(Value(clampedTier, 3f, 3.6f, 4.3f, 5.2f, 6.5f));
+                    return true;
+                case "upgrade_arcane_time_warp_wider_warp":
+                    timeWarp?.SetRadius(Value(clampedTier, 1.8f, 2.2f, 2.7f, 3.3f, 4.1f));
+                    return true;
+
+                case "upgrade_arcane_haste_faster_haste":
+                    haste?.SetSpeedMultiplier(Value(clampedTier, 1.55f, 1.7f, 1.85f, 2.05f, 2.3f));
+                    return true;
+                case "upgrade_arcane_haste_longer_haste":
+                    haste?.SetDuration(Value(clampedTier, 3f, 3.8f, 4.8f, 6f, 7.5f));
+                    return true;
+                case "upgrade_arcane_haste_quick_haste":
+                    haste?.SetCastInterval(Value(clampedTier, 5.5f, 4.8f, 4.1f, 3.4f, 2.6f));
                     return true;
                 default:
                     return false;
