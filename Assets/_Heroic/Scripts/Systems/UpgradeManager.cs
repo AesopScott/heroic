@@ -118,6 +118,7 @@ namespace Heroic.Systems
             currentChoices.Clear();
 
             List<DraftChoice> eligible = new List<DraftChoice>();
+            List<DraftChoice> movementEligible = new List<DraftChoice>();
             foreach (DraftChoice choice in draftPool)
             {
                 if (choice == null)
@@ -128,12 +129,24 @@ namespace Heroic.Systems
                 if (IsChoiceEligible(choice, includeMovementChoice))
                 {
                     eligible.Add(choice);
+                    if (choice.Category == UpgradeCategory.Movement)
+                    {
+                        movementEligible.Add(choice);
+                    }
                 }
             }
 
             int lowerChoiceCount = Mathf.Clamp(minimumChoices, 1, Mathf.Max(1, maximumChoices));
             int upperChoiceCount = Mathf.Max(lowerChoiceCount, maximumChoices);
             int targetCount = Mathf.Min(UnityEngine.Random.Range(lowerChoiceCount, upperChoiceCount + 1), eligible.Count);
+
+            if (includeMovementChoice && movementEligible.Count > 0 && targetCount > 0)
+            {
+                DraftChoice movementChoice = movementEligible[UnityEngine.Random.Range(0, movementEligible.Count)];
+                currentChoices.Add(movementChoice);
+                eligible.Remove(movementChoice);
+            }
+
             while (eligible.Count > 0 && currentChoices.Count < targetCount)
             {
                 int index = UnityEngine.Random.Range(0, eligible.Count);

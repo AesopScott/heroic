@@ -16,7 +16,7 @@ MonoBehaviour:
   enemyName: Crash IV
   prefab: {fileID: 5540489990661272454, guid: 2b5a1b40c6b8b3c499cde4cf43ecd09e, type: 3}
   maxHealth: 15
-  moveSpeed: 2.35
+  moveSpeed: 2.875
   contactDamage: 10
   experienceValue: 1
   visualPreset: 5

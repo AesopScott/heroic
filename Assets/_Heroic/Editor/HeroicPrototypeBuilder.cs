@@ -51,7 +51,7 @@ namespace Heroic.Editor
             EnemyDefinition crashOneDefinition = CreateEnemyDefinition("Enemy_Crash_01", "Crash I", enemy, 10, 2f, 10, 1, VisualPresetApplier.Preset.CrashLevel1, false);
             EnemyDefinition crashTwoDefinition = CreateEnemyDefinition("Enemy_Crash_02", "Crash II", enemy, 12, 2.15f, 10, 1, VisualPresetApplier.Preset.CrashLevel2, false);
             EnemyDefinition crashThreeDefinition = CreateEnemyDefinition("Enemy_Crash_03", "Crash III", enemy, 15, 2.3f, 10, 1, VisualPresetApplier.Preset.CrashLevel3, false);
-            EnemyDefinition crashFourDefinition = CreateEnemyDefinition("Enemy_Crash_04", "Crash IV", enemy, 15, 2.35f, 10, 1, VisualPresetApplier.Preset.CrashLevel4, false);
+            EnemyDefinition crashFourDefinition = CreateEnemyDefinition("Enemy_Crash_04", "Crash IV", enemy, 15, 2.875f, 10, 1, VisualPresetApplier.Preset.CrashLevel4, false);
             EnemyDefinition shooterDefinition = CreateEnemyDefinition("Enemy_Shooter_01", "Shooter I", shooter, 25, 1.5f, 15, 2, VisualPresetApplier.Preset.ShooterLevel1, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
 
