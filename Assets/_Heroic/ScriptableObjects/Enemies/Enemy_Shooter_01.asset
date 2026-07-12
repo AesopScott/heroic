@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7eb1f653a63965498382e4a0c3f754b, type: 3}
-  m_Name: Enemy_Tank
+  m_Name: Enemy_Shooter_01
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Data.EnemyDefinition
-  id: enemy_tank
-  enemyName: Tank Enemy
-  prefab: {fileID: 2382942959256605664, guid: 986c3d01ea532fc48a4eba023f2f197e, type: 3}
-  maxHealth: 80
-  moveSpeed: 1.25
-  contactDamage: 16
-  experienceValue: 3
-  visualPreset: 3
+  id: enemy_shooter_01
+  enemyName: Shooter I
+  prefab: {fileID: 2077700866199972033, guid: a5c11f1e5db077c428f2c7d5ef03c7a2, type: 3}
+  maxHealth: 25
+  moveSpeed: 1.5
+  contactDamage: 15
+  experienceValue: 2
+  visualPreset: 6
   boss: 0
   description: 

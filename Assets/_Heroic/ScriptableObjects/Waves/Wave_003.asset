@@ -19,9 +19,13 @@ MonoBehaviour:
   minSpawnCount: 1
   maxSpawnCount: 1
   spawnEntries:
-  - enemy: {fileID: 11400000, guid: 896624b63be165d448e1ffb3b90412ee, type: 2}
+  - enemy: {fileID: 11400000, guid: 61b727b65554f9e458717bb8f01dd305, type: 2}
     weight: 1
-  - enemy: {fileID: 11400000, guid: 8d9fadbdf930fed429ab24928c430637, type: 2}
+  - enemy: {fileID: 11400000, guid: 788f76e6ff8698f43b70302827e44be3, type: 2}
     weight: 1
-  - enemy: {fileID: 11400000, guid: f4cf9c7f1fa87344785ddeca9c5a012a, type: 2}
+  - enemy: {fileID: 11400000, guid: 84d4e2f6baaafbd4fbe6b6622a2b4b7a, type: 2}
+    weight: 1
+  - enemy: {fileID: 11400000, guid: c285e0011f34e3d469b3b7fd18a8f8cf, type: 2}
+    weight: 1
+  - enemy: {fileID: 11400000, guid: c049bff8dea216d4dba54d2fe835db1e, type: 2}
     weight: 1

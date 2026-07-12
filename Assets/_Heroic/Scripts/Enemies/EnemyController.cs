@@ -7,27 +7,51 @@ namespace Heroic.Enemies
     [RequireComponent(typeof(Damageable))]
     public class EnemyController : MonoBehaviour
     {
+        public enum EnemyBehavior
+        {
+            Crash,
+            Shooter
+        }
+
+        [SerializeField] private EnemyBehavior behavior = EnemyBehavior.Crash;
         [SerializeField] private float moveSpeed = 2f;
         [SerializeField] private int contactDamage = 10;
         [SerializeField] private float contactRange = 0.85f;
         [SerializeField] private float contactDamageInterval = 1f;
         [SerializeField] private bool destroyAfterContactDamage = true;
         [SerializeField] private bool suppressExperienceOnContactDamage = true;
+        [SerializeField] private EnemyProjectile projectilePrefab;
+        [SerializeField] private float shooterRange = 50f;
+        [SerializeField] private float shooterFireInterval = 5f;
+        [SerializeField] private float shooterProjectileSpeed = 4f;
+        [SerializeField] private int shooterProjectileDamage = 15;
+        [SerializeField] private Transform firePoint;
 
         private Transform target;
         private float nextContactDamageTime;
+        private float nextShotTime;
         private float slowMultiplier = 1f;
         private float slowEndsAt;
 
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
+            if (behavior == EnemyBehavior.Shooter)
+            {
+                nextShotTime = Time.time + shooterFireInterval;
+            }
         }
 
         public void Configure(float newMoveSpeed, int newContactDamage)
         {
             moveSpeed = Mathf.Max(0f, newMoveSpeed);
             contactDamage = Mathf.Max(0, newContactDamage);
+        }
+
+        public void ConfigureContactBehavior(bool destroyOnContactDamage, bool suppressExperienceDrop)
+        {
+            destroyAfterContactDamage = destroyOnContactDamage;
+            suppressExperienceOnContactDamage = suppressExperienceDrop;
         }
 
         private void Update()
@@ -42,9 +66,24 @@ namespace Heroic.Enemies
                 slowMultiplier = 1f;
             }
 
+            if (behavior == EnemyBehavior.Shooter)
+            {
+                UpdateShooter();
+                return;
+            }
+
+            MoveTowardTarget();
+            TryApplyContactDamage();
+        }
+
+        private void MoveTowardTarget()
+        {
             Vector3 direction = (target.position - transform.position).normalized;
             transform.position += direction * (moveSpeed * slowMultiplier * Time.deltaTime);
+        }
 
+        private void TryApplyContactDamage()
+        {
             if (Vector3.Distance(transform.position, target.position) <= contactRange)
             {
                 if (Time.time < nextContactDamageTime)
@@ -77,6 +116,34 @@ namespace Heroic.Enemies
                     }
                 }
             }
+        }
+
+        private void UpdateShooter()
+        {
+            float distance = Vector3.Distance(transform.position, target.position);
+            if (distance > shooterRange)
+            {
+                MoveTowardTarget();
+            }
+
+            if (Time.time >= nextShotTime && distance <= shooterRange)
+            {
+                FireAtCurrentPlayerPosition();
+                nextShotTime = Time.time + shooterFireInterval;
+            }
+        }
+
+        private void FireAtCurrentPlayerPosition()
+        {
+            if (projectilePrefab == null || target == null)
+            {
+                return;
+            }
+
+            Vector3 spawnPosition = firePoint != null ? firePoint.position : transform.position;
+            Vector2 direction = (target.position - spawnPosition).normalized;
+            EnemyProjectile projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
+            projectile.Launch(direction, shooterProjectileSpeed, shooterProjectileDamage);
         }
 
         public void Push(Vector2 direction, float distance)

@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7eb1f653a63965498382e4a0c3f754b, type: 3}
-  m_Name: Enemy_Boss_ArcaneWarden
+  m_Name: Enemy_Crash_04
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Data.EnemyDefinition
-  id: enemy_boss_arcanewarden
-  enemyName: Arcane Warden
-  prefab: {fileID: 6835940534997612918, guid: 55ad2b9395f3f9c4a897d2b3d925a050, type: 3}
-  maxHealth: 900
-  moveSpeed: 1.6
-  contactDamage: 18
-  experienceValue: 30
-  visualPreset: 10
-  boss: 1
+  id: enemy_crash_04
+  enemyName: Crash IV
+  prefab: {fileID: 5540489990661272454, guid: 2b5a1b40c6b8b3c499cde4cf43ecd09e, type: 3}
+  maxHealth: 15
+  moveSpeed: 2.35
+  contactDamage: 10
+  experienceValue: 1
+  visualPreset: 5
+  boss: 0
   description: 

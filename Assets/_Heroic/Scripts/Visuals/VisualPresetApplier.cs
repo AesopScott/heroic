@@ -8,6 +8,12 @@ namespace Heroic.Visuals
         {
             Player,
             BasicEnemy,
+            CrashLevel1,
+            CrashLevel2,
+            CrashLevel3,
+            CrashLevel4,
+            ShooterLevel1,
+            EnemyMissile,
             FastEnemy,
             TankEnemy,
             Boss,
@@ -63,6 +69,28 @@ namespace Heroic.Visuals
                     EnsureLayer("EnemyOutline", AutoSpriteVisual.Shape.Ring, new Color(1f, 0.48f, 0.26f, 0.62f), new Vector2(0.94f, 0.94f), 9, false, true, Vector2.zero, 0f, 0.08f, 3.5f, -55f);
                     EnsureLayer("EnemyCore", AutoSpriteVisual.Shape.Circle, new Color(1f, 0.82f, 0.38f), new Vector2(0.24f, 0.24f), 11, true, false, Vector2.zero, 0f, 0.08f, 5.2f);
                     EnsureLayer("EnemyEye", AutoSpriteVisual.Shape.Diamond, new Color(0.16f, 0.02f, 0.025f, 0.95f), new Vector2(0.18f, 0.11f), 12, false, false);
+                    break;
+                case Preset.CrashLevel1:
+                    ApplyCrashVisual(visual, new Color(0.62f, 0.66f, 0.68f), new Vector2(0.78f, 0.78f), new Color(0.86f, 0.9f, 0.92f, 0.55f));
+                    break;
+                case Preset.CrashLevel2:
+                    ApplyCrashVisual(visual, new Color(0.2f, 0.82f, 0.38f), new Vector2(0.94f, 0.94f), new Color(0.62f, 1f, 0.68f, 0.55f));
+                    break;
+                case Preset.CrashLevel3:
+                    ApplyCrashVisual(visual, new Color(0.22f, 0.5f, 1f), new Vector2(1.13f, 1.13f), new Color(0.58f, 0.78f, 1f, 0.6f));
+                    break;
+                case Preset.CrashLevel4:
+                    ApplyCrashVisual(visual, new Color(0.68f, 0.24f, 1f), new Vector2(1.13f, 1.13f), new Color(0.9f, 0.55f, 1f, 0.62f));
+                    break;
+                case Preset.ShooterLevel1:
+                    ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(0.58f, 0.62f, 0.64f), new Vector2(0.86f, 0.86f), 10, true, false, 0.04f, 2.4f);
+                    EnsureLayer("ShooterRing", AutoSpriteVisual.Shape.Ring, new Color(0.82f, 0.88f, 0.9f, 0.58f), new Vector2(1.06f, 1.06f), 9, true, true, Vector2.zero, 0f, 0.04f, 2.8f, 45f);
+                    EnsureLayer("ShooterCore", AutoSpriteVisual.Shape.Circle, new Color(0.16f, 0.18f, 0.2f, 0.92f), new Vector2(0.28f, 0.28f), 11, false, false);
+                    break;
+                case Preset.EnemyMissile:
+                    ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(0.86f, 0.9f, 0.92f), new Vector2(0.22f, 0.22f), 28, false, false);
+                    EnsureLayer("EnemyMissileHalo", AutoSpriteVisual.Shape.Ring, new Color(0.7f, 0.76f, 0.8f, 0.62f), new Vector2(0.42f, 0.42f), 27, true, true, Vector2.zero, 0f, 0.08f, 4f, 180f);
+                    EnsureTrail(new Color(0.74f, 0.8f, 0.84f, 0.62f));
                     break;
                 case Preset.FastEnemy:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Triangle, new Color(1f, 0.86f, 0.08f), new Vector2(0.48f, 0.82f), 12, false, true, 0.08f, 3f, 190f);
@@ -121,6 +149,13 @@ namespace Heroic.Visuals
         private void ApplyVisual(AutoSpriteVisual visual, AutoSpriteVisual.Shape shape, Color color, Vector2 size, int sortingOrder, bool pulse, bool rotate, float pulseAmount = 0.08f, float pulseSpeed = 3f, float rotationSpeed = 90f)
         {
             visual.Configure(shape, color, size, sortingOrder, pulse, rotate, pulseAmount, pulseSpeed, rotationSpeed);
+        }
+
+        private void ApplyCrashVisual(AutoSpriteVisual visual, Color bodyColor, Vector2 size, Color ringColor)
+        {
+            ApplyVisual(visual, AutoSpriteVisual.Shape.Triangle, bodyColor, size, 10, false, false);
+            EnsureLayer("CrashOutline", AutoSpriteVisual.Shape.Ring, ringColor, size * 1.18f, 9, true, true, Vector2.zero, 0f, 0.05f, 3f, 90f);
+            EnsureLayer("CrashCore", AutoSpriteVisual.Shape.Triangle, new Color(0.08f, 0.09f, 0.1f, 0.82f), size * 0.38f, 11, false, false, Vector2.zero, 0f);
         }
 
         private AutoSpriteVisual EnsureLayer(string key, AutoSpriteVisual.Shape shape, Color color, Vector2 size, int sortingOrder, bool pulse, bool rotate, Vector2 offset = default, float rotationDegrees = 0f, float pulseAmount = 0.08f, float pulseSpeed = 3f, float rotationSpeed = 90f)

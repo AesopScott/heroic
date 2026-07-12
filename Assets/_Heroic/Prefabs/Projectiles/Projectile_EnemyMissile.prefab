@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &8203042647749291115
+--- !u!1 &7788720294340817926
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,25 +8,24 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4567003157340946899}
-  - component: {fileID: 8648364543363811428}
-  - component: {fileID: 1915653270607963544}
-  - component: {fileID: 5944360898991633725}
-  - component: {fileID: 980455796693985428}
+  - component: {fileID: 7339212933231123023}
+  - component: {fileID: 8956702198302469626}
+  - component: {fileID: 7913512299637599637}
+  - component: {fileID: 5875210177367769073}
   m_Layer: 0
-  m_Name: Projectile_FireBolt
+  m_Name: Projectile_EnemyMissile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4567003157340946899
+--- !u!4 &7339212933231123023
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8203042647749291115}
+  m_GameObject: {fileID: 7788720294340817926}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -35,13 +34,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!58 &8648364543363811428
+--- !u!58 &8956702198302469626
 CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8203042647749291115}
+  m_GameObject: {fileID: 7788720294340817926}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -71,46 +70,32 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
---- !u!114 &1915653270607963544
+--- !u!114 &7913512299637599637
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8203042647749291115}
+  m_GameObject: {fileID: 7788720294340817926}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8ee507daf58fba54087ba2db5de6971d, type: 3}
+  m_Script: {fileID: 11500000, guid: a15e5cf0b570f364c85ba891405989e0, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Heroic.Combat.Projectile
-  speed: 10
-  homingStrength: 0
---- !u!114 &5944360898991633725
+  m_EditorClassIdentifier: Assembly-CSharp::Heroic.Enemies.EnemyProjectile
+  speed: 4
+  damage: 15
+  lifetime: 12
+--- !u!114 &5875210177367769073
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8203042647749291115}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 270f7744642346847a5950ba13585cba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Heroic.Combat.ProjectileHit
-  damage: 10
-  lifetime: 5
-  pierceCount: 0
---- !u!114 &980455796693985428
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8203042647749291115}
+  m_GameObject: {fileID: 7788720294340817926}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 78509d5ab041a2743a132bd1e1af710f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Visuals.VisualPresetApplier
-  preset: 12
+  preset: 7
   applyOnAwake: 1

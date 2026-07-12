@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7eb1f653a63965498382e4a0c3f754b, type: 3}
-  m_Name: Enemy_Basic
+  m_Name: Enemy_Crash_01
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Data.EnemyDefinition
-  id: enemy_basic
-  enemyName: Basic Enemy
-  prefab: {fileID: 2382942959256605664, guid: 986c3d01ea532fc48a4eba023f2f197e, type: 3}
+  id: enemy_crash_01
+  enemyName: Crash I
+  prefab: {fileID: 5540489990661272454, guid: 2b5a1b40c6b8b3c499cde4cf43ecd09e, type: 3}
   maxHealth: 10
   moveSpeed: 2
   contactDamage: 10
   experienceValue: 1
-  visualPreset: 1
+  visualPreset: 2
   boss: 0
   description: 

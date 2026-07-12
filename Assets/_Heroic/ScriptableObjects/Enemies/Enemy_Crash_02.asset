@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7eb1f653a63965498382e4a0c3f754b, type: 3}
-  m_Name: Enemy_Fast
+  m_Name: Enemy_Crash_02
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Data.EnemyDefinition
-  id: enemy_fast
-  enemyName: Fast Enemy
-  prefab: {fileID: 2382942959256605664, guid: 986c3d01ea532fc48a4eba023f2f197e, type: 3}
-  maxHealth: 18
-  moveSpeed: 3.4
-  contactDamage: 7
+  id: enemy_crash_02
+  enemyName: Crash II
+  prefab: {fileID: 5540489990661272454, guid: 2b5a1b40c6b8b3c499cde4cf43ecd09e, type: 3}
+  maxHealth: 12
+  moveSpeed: 2.15
+  contactDamage: 10
   experienceValue: 1
-  visualPreset: 2
+  visualPreset: 3
   boss: 0
   description: 

@@ -53,8 +53,10 @@ namespace Heroic.Enemies
             {
                 float centeredIndex = i - ((spawnCount - 1) * 0.5f);
                 Vector2 packOffset = packCenter + (packSide * centeredIndex * packSpacing);
-                SpawnEnemy(activeWave, packOffset);
+                SpawnEnemy(ChooseCrashDefinition(activeWave), packOffset);
             }
+
+            SpawnSupplementalShooters(activeWave, packCenter, packSide, spawnCount);
 
             nextSpawnTime = Time.time + GetCurrentSpawnInterval(activeWave);
         }
@@ -76,9 +78,8 @@ namespace Heroic.Enemies
             spawnInterval = Mathf.Max(0.1f, interval);
         }
 
-        private void SpawnEnemy(WaveDefinition activeWave, Vector2 spawnOffset)
+        private void SpawnEnemy(EnemyDefinition enemyDefinition, Vector2 spawnOffset)
         {
-            EnemyDefinition enemyDefinition = ChooseEnemy(activeWave);
             EnemyController prefab = ResolveEnemyPrefab(enemyDefinition);
             if (prefab == null)
             {
@@ -89,6 +90,29 @@ namespace Heroic.Enemies
             EnemyController enemy = Instantiate(prefab, spawnPosition, Quaternion.identity);
             enemy.SetTarget(playerTarget);
             ApplyDefinition(enemy, enemyDefinition);
+        }
+
+        private void SpawnSupplementalShooters(WaveDefinition activeWave, Vector2 packCenter, Vector2 packSide, int crashSpawnCount)
+        {
+            if (playerExperience == null || playerExperience.Level < 4)
+            {
+                return;
+            }
+
+            EnemyDefinition shooterDefinition = FindEnemyDefinition(activeWave, "enemy_shooter_01");
+            if (shooterDefinition == null)
+            {
+                return;
+            }
+
+            int shooterCount = Random.Range(0, 2);
+            for (int i = 0; i < shooterCount; i++)
+            {
+                float side = Random.value < 0.5f ? -1f : 1f;
+                float spacingIndex = (crashSpawnCount * 0.5f) + 1f + i;
+                Vector2 shooterOffset = packCenter + packSide * side * spacingIndex * packSpacing;
+                SpawnEnemy(shooterDefinition, shooterOffset);
+            }
         }
 
         private Vector2 GetSpawnOffset()
@@ -148,6 +172,37 @@ namespace Heroic.Enemies
             return Random.Range(minSpawnCount, maxSpawnCount + 1);
         }
 
+        private EnemyDefinition ChooseCrashDefinition(WaveDefinition activeWave)
+        {
+            int level = playerExperience != null ? playerExperience.Level : 1;
+            int crashLevel = Mathf.Clamp(level, 1, 4);
+            EnemyDefinition crashDefinition = FindEnemyDefinition(activeWave, "enemy_crash_" + crashLevel.ToString("00"));
+            if (crashDefinition != null)
+            {
+                return crashDefinition;
+            }
+
+            return ChooseEnemy(activeWave);
+        }
+
+        private EnemyDefinition FindEnemyDefinition(WaveDefinition activeWave, string enemyId)
+        {
+            if (activeWave == null || activeWave.SpawnEntries == null)
+            {
+                return null;
+            }
+
+            foreach (WaveDefinition.SpawnEntry entry in activeWave.SpawnEntries)
+            {
+                if (entry != null && entry.Enemy != null && entry.Enemy.Id == enemyId)
+                {
+                    return entry.Enemy;
+                }
+            }
+
+            return null;
+        }
+
         private EnemyDefinition ChooseEnemy(WaveDefinition activeWave)
         {
             if (activeWave == null || activeWave.SpawnEntries == null || activeWave.SpawnEntries.Length == 0)
@@ -205,6 +260,16 @@ namespace Heroic.Enemies
             }
 
             enemy.Configure(definition.MoveSpeed, definition.ContactDamage);
+            if (definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel4)
+            {
+                enemy.ConfigureContactBehavior(false, false);
+            }
+            else if (definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel1 ||
+                     definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel2 ||
+                     definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel3)
+            {
+                enemy.ConfigureContactBehavior(true, true);
+            }
 
             var damageable = enemy.GetComponent<Damageable>();
             if (damageable != null)

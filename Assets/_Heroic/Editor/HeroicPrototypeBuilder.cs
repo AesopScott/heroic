@@ -42,18 +42,25 @@ namespace Heroic.Editor
             GameObject xpPickup = CreateXpPickupPrefab();
             GameObject projectile = CreateMagicMissilePrefab();
             GameObject fireProjectile = CreateFireProjectilePrefab();
+            GameObject enemyMissile = CreateEnemyMissilePrefab();
             GameObject orb = CreateArcaneOrbPrefab();
             GameObject enemy = CreateEnemyPrefab(xpPickup);
+            GameObject shooter = CreateShooterEnemyPrefab(xpPickup, enemyMissile);
             GameObject boss = CreateBossPrefab(xpPickup);
 
-            EnemyDefinition basicEnemyDefinition = CreateEnemyDefinition("Enemy_Basic", "Basic Enemy", enemy, 10, 2f, 10, 1, VisualPresetApplier.Preset.BasicEnemy, false);
-            EnemyDefinition fastEnemyDefinition = CreateEnemyDefinition("Enemy_Fast", "Fast Enemy", enemy, 18, 3.4f, 7, 1, VisualPresetApplier.Preset.FastEnemy, false);
-            EnemyDefinition tankEnemyDefinition = CreateEnemyDefinition("Enemy_Tank", "Tank Enemy", enemy, 80, 1.25f, 16, 3, VisualPresetApplier.Preset.TankEnemy, false);
+            EnemyDefinition crashOneDefinition = CreateEnemyDefinition("Enemy_Crash_01", "Crash I", enemy, 10, 2f, 10, 1, VisualPresetApplier.Preset.CrashLevel1, false);
+            EnemyDefinition crashTwoDefinition = CreateEnemyDefinition("Enemy_Crash_02", "Crash II", enemy, 12, 2.15f, 10, 1, VisualPresetApplier.Preset.CrashLevel2, false);
+            EnemyDefinition crashThreeDefinition = CreateEnemyDefinition("Enemy_Crash_03", "Crash III", enemy, 15, 2.3f, 10, 1, VisualPresetApplier.Preset.CrashLevel3, false);
+            EnemyDefinition crashFourDefinition = CreateEnemyDefinition("Enemy_Crash_04", "Crash IV", enemy, 15, 2.35f, 10, 1, VisualPresetApplier.Preset.CrashLevel4, false);
+            EnemyDefinition shooterDefinition = CreateEnemyDefinition("Enemy_Shooter_01", "Shooter I", shooter, 25, 1.5f, 15, 2, VisualPresetApplier.Preset.ShooterLevel1, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
 
-            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 1, 2, basicEnemyDefinition);
-            WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, 1, 1, basicEnemyDefinition, fastEnemyDefinition);
-            WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, 1, 1, basicEnemyDefinition, fastEnemyDefinition, tankEnemyDefinition);
+            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 1, 2, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
+            WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
+            WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, 1, 1, crashOneDefinition, crashTwoDefinition, crashThreeDefinition, crashFourDefinition, shooterDefinition);
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
 
             CreateGameScene(projectile, fireProjectile, orb, enemy, boss, xpPickup, bossDefinition, new[] { waveOne, waveTwo, waveThree });
             CreateMenuScene("MainMenu");
@@ -202,6 +209,17 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Projectiles/Projectile_FireBolt.prefab");
         }
 
+        private static GameObject CreateEnemyMissilePrefab()
+        {
+            GameObject go = new GameObject("Projectile_EnemyMissile");
+            CircleCollider2D collider = go.AddComponent<CircleCollider2D>();
+            collider.isTrigger = true;
+            go.AddComponent<EnemyProjectile>();
+            VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
+            SetEnum(visual, "preset", VisualPresetApplier.Preset.EnemyMissile);
+            return SavePrefab(go, Prefabs + "/Projectiles/Projectile_EnemyMissile.prefab");
+        }
+
         private static GameObject CreateArcaneOrbPrefab()
         {
             GameObject go = new GameObject("ArcaneOrbitOrb");
@@ -229,7 +247,7 @@ namespace Heroic.Editor
 
         private static GameObject CreateEnemyPrefab(GameObject xpPickup)
         {
-            GameObject go = new GameObject("Enemy_Basic");
+            GameObject go = new GameObject("Enemy_Crash");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
             body.gravityScale = 0f;
             body.freezeRotation = true;
@@ -239,13 +257,42 @@ namespace Heroic.Editor
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
-            SetEnum(visual, "preset", VisualPresetApplier.Preset.BasicEnemy);
+            SetEnum(visual, "preset", VisualPresetApplier.Preset.CrashLevel1);
             go.AddComponent<HitFlashVisual>();
             go.AddComponent<DeathBurstVisual>();
             go.AddComponent<WorldHealthBar>();
             go.AddComponent<DamageNumberEmitter>();
             AddAudioFeedback(go, ProceduralAudioFeedback.Preset.Enemy, 0.32f);
-            return SavePrefab(go, Prefabs + "/Enemies/Enemy_Basic.prefab");
+            return SavePrefab(go, Prefabs + "/Enemies/Enemy_Crash.prefab");
+        }
+
+        private static GameObject CreateShooterEnemyPrefab(GameObject xpPickup, GameObject enemyMissile)
+        {
+            GameObject go = new GameObject("Enemy_Shooter");
+            Rigidbody2D body = go.AddComponent<Rigidbody2D>();
+            body.gravityScale = 0f;
+            body.freezeRotation = true;
+            go.AddComponent<CircleCollider2D>();
+            go.AddComponent<Damageable>();
+            EnemyController controller = go.AddComponent<EnemyController>();
+            SetEnum(controller, "behavior", EnemyController.EnemyBehavior.Shooter);
+            SetObject(controller, "projectilePrefab", enemyMissile.GetComponent<EnemyProjectile>());
+            SetFloat(controller, "shooterRange", 50f);
+            SetFloat(controller, "shooterFireInterval", 5f);
+            SetFloat(controller, "shooterProjectileSpeed", 4f);
+            SetInt(controller, "shooterProjectileDamage", 15);
+            SetBool(controller, "destroyAfterContactDamage", false);
+            SetBool(controller, "suppressExperienceOnContactDamage", false);
+            ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
+            SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
+            SetEnum(visual, "preset", VisualPresetApplier.Preset.ShooterLevel1);
+            go.AddComponent<HitFlashVisual>();
+            go.AddComponent<DeathBurstVisual>();
+            go.AddComponent<WorldHealthBar>();
+            go.AddComponent<DamageNumberEmitter>();
+            AddAudioFeedback(go, ProceduralAudioFeedback.Preset.Enemy, 0.32f);
+            return SavePrefab(go, Prefabs + "/Enemies/Enemy_Shooter.prefab");
         }
 
         private static GameObject CreateBossPrefab(GameObject xpPickup)
