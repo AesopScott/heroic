@@ -19,12 +19,16 @@ namespace Heroic.Data
         [SerializeField] private float startsAtSeconds;
         [SerializeField] private float durationSeconds = 30f;
         [SerializeField] private float spawnInterval = 2f;
+        [SerializeField] private int minSpawnCount = 1;
+        [SerializeField] private int maxSpawnCount = 1;
         [SerializeField] private SpawnEntry[] spawnEntries = new SpawnEntry[0];
 
         public int WaveIndex => waveIndex;
         public float StartsAtSeconds => startsAtSeconds;
         public float DurationSeconds => durationSeconds;
         public float SpawnInterval => spawnInterval;
+        public int MinSpawnCount => Mathf.Max(1, minSpawnCount);
+        public int MaxSpawnCount => Mathf.Max(MinSpawnCount, maxSpawnCount);
         public SpawnEntry[] SpawnEntries => spawnEntries;
 
         public bool IsActiveAt(float runTimeSeconds)

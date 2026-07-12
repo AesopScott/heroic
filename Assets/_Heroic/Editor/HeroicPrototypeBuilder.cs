@@ -50,9 +50,9 @@ namespace Heroic.Editor
             EnemyDefinition tankEnemyDefinition = CreateEnemyDefinition("Enemy_Tank", "Tank Enemy", enemy, 80, 1.25f, 16, 3, VisualPresetApplier.Preset.TankEnemy, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
 
-            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, basicEnemyDefinition);
-            WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, basicEnemyDefinition, fastEnemyDefinition);
-            WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, basicEnemyDefinition, fastEnemyDefinition, tankEnemyDefinition);
+            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, 2, 4, basicEnemyDefinition);
+            WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, 1, 1, basicEnemyDefinition, fastEnemyDefinition);
+            WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, 1, 1, basicEnemyDefinition, fastEnemyDefinition, tankEnemyDefinition);
 
             CreateGameScene(projectile, orb, enemy, boss, xpPickup, bossDefinition, new[] { waveOne, waveTwo, waveThree });
             CreateMenuScene("MainMenu");
@@ -859,13 +859,15 @@ namespace Heroic.Editor
             return SaveAsset(definition, ScriptableObjects + "/Enemies/" + assetName + ".asset");
         }
 
-        private static WaveDefinition CreateWave(string assetName, int index, float startsAt, float duration, float interval, params EnemyDefinition[] enemies)
+        private static WaveDefinition CreateWave(string assetName, int index, float startsAt, float duration, float interval, int minSpawnCount, int maxSpawnCount, params EnemyDefinition[] enemies)
         {
             WaveDefinition wave = ScriptableObject.CreateInstance<WaveDefinition>();
             SetInt(wave, "waveIndex", index);
             SetFloat(wave, "startsAtSeconds", startsAt);
             SetFloat(wave, "durationSeconds", duration);
             SetFloat(wave, "spawnInterval", interval);
+            SetInt(wave, "minSpawnCount", minSpawnCount);
+            SetInt(wave, "maxSpawnCount", maxSpawnCount);
 
             SerializedObject serialized = new SerializedObject(wave);
             SerializedProperty entries = serialized.FindProperty("spawnEntries");

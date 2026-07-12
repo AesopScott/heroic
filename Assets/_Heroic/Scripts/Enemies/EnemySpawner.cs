@@ -38,7 +38,12 @@ namespace Heroic.Enemies
             }
 
             WaveDefinition activeWave = GetActiveWave();
-            SpawnEnemy(activeWave);
+            int spawnCount = GetCurrentSpawnCount(activeWave);
+            for (int i = 0; i < spawnCount; i++)
+            {
+                SpawnEnemy(activeWave);
+            }
+
             nextSpawnTime = Time.time + GetCurrentSpawnInterval(activeWave);
         }
 
@@ -101,6 +106,16 @@ namespace Heroic.Enemies
             }
 
             return Mathf.Max(0.1f, activeWave.SpawnInterval);
+        }
+
+        private int GetCurrentSpawnCount(WaveDefinition activeWave)
+        {
+            if (activeWave == null)
+            {
+                return 1;
+            }
+
+            return Random.Range(activeWave.MinSpawnCount, activeWave.MaxSpawnCount + 1);
         }
 
         private EnemyDefinition ChooseEnemy(WaveDefinition activeWave)

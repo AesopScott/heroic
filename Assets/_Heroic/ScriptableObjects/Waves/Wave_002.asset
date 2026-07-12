@@ -16,6 +16,8 @@ MonoBehaviour:
   startsAtSeconds: 120
   durationSeconds: 180
   spawnInterval: 1.15
+  minSpawnCount: 1
+  maxSpawnCount: 1
   spawnEntries:
   - enemy: {fileID: 11400000, guid: 896624b63be165d448e1ffb3b90412ee, type: 2}
     weight: 1
