@@ -50,7 +50,7 @@ namespace Heroic.Editor
             EnemyDefinition tankEnemyDefinition = CreateEnemyDefinition("Enemy_Tank", "Tank Enemy", enemy, 80, 1.25f, 16, 3, VisualPresetApplier.Preset.TankEnemy, false);
             EnemyDefinition bossDefinition = CreateEnemyDefinition("Enemy_Boss_ArcaneWarden", "Arcane Warden", boss, 900, 1.6f, 18, 30, VisualPresetApplier.Preset.Boss, true);
 
-            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.53f, basicEnemyDefinition);
+            WaveDefinition waveOne = CreateWave("Wave_001", 1, 0f, 120f, 0.18f, basicEnemyDefinition);
             WaveDefinition waveTwo = CreateWave("Wave_002", 2, 120f, 180f, 1.15f, basicEnemyDefinition, fastEnemyDefinition);
             WaveDefinition waveThree = CreateWave("Wave_003", 3, 300f, 240f, 0.8f, basicEnemyDefinition, fastEnemyDefinition, tankEnemyDefinition);
 
