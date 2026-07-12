@@ -355,6 +355,21 @@ namespace Heroic.Systems
                 return "arcane_arcane_orbit";
             }
 
+            if (choiceId.StartsWith("upgrade_arcane_force_field"))
+            {
+                return "arcane_force_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_arcane_time_warp"))
+            {
+                return "arcane_time_warp";
+            }
+
+            if (choiceId.StartsWith("upgrade_arcane_haste"))
+            {
+                return "arcane_haste";
+            }
+
             return "arcane_unknown";
         }
 

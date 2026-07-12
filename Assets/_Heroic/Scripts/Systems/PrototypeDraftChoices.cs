@@ -10,6 +10,9 @@ namespace Heroic.Systems
                 Skill("arcane_warp_pulse", "Warp Pulse", "Unlock a close Arcane control pulse."),
                 Skill("arcane_spell_echo", "Spell Echo", "Unlock delayed Arcane repeat support."),
                 Skill("arcane_arcane_orbit", "Arcane Orbit", "Unlock orbiting Arcane damage."),
+                Skill("arcane_force_field", "Force Field", "Unlock a protective Arcane burst that pushes enemies back."),
+                Skill("arcane_time_warp", "Time Warp", "Unlock a slowing Arcane field around clustered enemies."),
+                Skill("arcane_haste", "Haste", "Unlock periodic Arcane speed surges."),
                 Skill("fire_fire_bolt", "Fire Bolt", "Unlock high-damage burning projectiles."),
                 Skill("fire_flame_wave", "Flame Wave", "Unlock a sweeping cone of Fire damage."),
                 Skill("fire_burning_ground", "Burning Ground", "Unlock lingering Fire zones."),
@@ -120,6 +123,18 @@ namespace Heroic.Systems
                 Boost("upgrade_arcane_arcane_orbit_more_orbs", "Arcane Orbit: More Orbs", "Add orbiting projectiles."),
                 Boost("upgrade_arcane_arcane_orbit_faster_orbs", "Arcane Orbit: Faster Orbs", "Increase orbit speed."),
                 Boost("upgrade_arcane_arcane_orbit_larger_orbs", "Arcane Orbit: Larger Orbs", "Increase orbit radius and hit size."),
+
+                Boost("upgrade_arcane_force_field_stronger_field", "Force Field: Stronger Field", "Increase force field damage."),
+                Boost("upgrade_arcane_force_field_wider_field", "Force Field: Wider Field", "Increase force field radius."),
+                Boost("upgrade_arcane_force_field_quick_field", "Force Field: Quick Field", "Reduce force field cooldown."),
+
+                Boost("upgrade_arcane_time_warp_deeper_warp", "Time Warp: Deeper Warp", "Strengthen time warp slow."),
+                Boost("upgrade_arcane_time_warp_longer_warp", "Time Warp: Longer Warp", "Increase time warp duration."),
+                Boost("upgrade_arcane_time_warp_wider_warp", "Time Warp: Wider Warp", "Increase time warp radius."),
+
+                Boost("upgrade_arcane_haste_faster_haste", "Haste: Faster Haste", "Increase haste movement speed."),
+                Boost("upgrade_arcane_haste_longer_haste", "Haste: Longer Haste", "Increase haste duration."),
+                Boost("upgrade_arcane_haste_quick_haste", "Haste: Quick Haste", "Reduce haste cooldown."),
 
                 Boost("upgrade_fire_fire_bolt_power", "Fire Bolt: Power", "Increase bolt damage."),
                 Boost("upgrade_fire_fire_bolt_fork", "Fire Bolt: Fork", "Add more fire bolts."),

@@ -539,6 +539,9 @@ namespace Heroic.Editor
             ArcaneBlastCaster arcaneBlast = player.AddComponent<ArcaneBlastCaster>();
             WarpPulseCaster warpPulse = player.AddComponent<WarpPulseCaster>();
             ArcaneOrbitCaster arcaneOrbit = player.AddComponent<ArcaneOrbitCaster>();
+            ArcaneUtilityCaster forceField = player.AddComponent<ArcaneUtilityCaster>();
+            ArcaneUtilityCaster timeWarp = player.AddComponent<ArcaneUtilityCaster>();
+            ArcaneUtilityCaster haste = player.AddComponent<ArcaneUtilityCaster>();
             FireBoltCaster fireBolt = player.AddComponent<FireBoltCaster>();
             FlameWaveCaster flameWave = player.AddComponent<FlameWaveCaster>();
             BurningGroundCaster burningGround = player.AddComponent<BurningGroundCaster>();
@@ -567,6 +570,22 @@ namespace Heroic.Editor
             SetObject(arcaneBlast, "spellEcho", spellEcho);
             SetObject(warpPulse, "spellEcho", spellEcho);
             SetObject(arcaneOrbit, "orbPrefab", orb.GetComponent<ArcaneOrbitOrb>());
+            SetEnum(forceField, "mode", ArcaneUtilityCaster.ArcaneUtilityMode.ForceField);
+            SetFloat(forceField, "castInterval", 4f);
+            SetFloat(forceField, "radius", 1.45f);
+            SetInt(forceField, "damage", 14);
+            SetObject(forceField, "spellEcho", spellEcho);
+            SetEnum(timeWarp, "mode", ArcaneUtilityCaster.ArcaneUtilityMode.TimeWarp);
+            SetFloat(timeWarp, "castInterval", 5.5f);
+            SetFloat(timeWarp, "range", 8.5f);
+            SetFloat(timeWarp, "radius", 1.7f);
+            SetInt(timeWarp, "damage", 8);
+            SetObject(timeWarp, "spellEcho", spellEcho);
+            SetEnum(haste, "mode", ArcaneUtilityCaster.ArcaneUtilityMode.Haste);
+            SetFloat(haste, "castInterval", 6f);
+            SetFloat(haste, "duration", 2.8f);
+            SetFloat(haste, "speedMultiplier", 1.45f);
+            SetObject(haste, "spellEcho", spellEcho);
             SetObject(fireBolt, "projectilePrefab", fireProjectile.GetComponent<Projectile>());
             SetObject(fireBolt, "firePoint", firePoint.transform);
             SetObject(fireBolt, "spellEcho", spellEcho);
@@ -579,6 +598,9 @@ namespace Heroic.Editor
             SetObject(spellCaster, "warpPulseCaster", warpPulse);
             SetObject(spellCaster, "spellEchoCaster", spellEcho);
             SetObject(spellCaster, "arcaneOrbitCaster", arcaneOrbit);
+            SetObject(spellCaster, "forceFieldCaster", forceField);
+            SetObject(spellCaster, "timeWarpCaster", timeWarp);
+            SetObject(spellCaster, "hasteCaster", haste);
             SetObject(spellCaster, "fireBoltCaster", fireBolt);
             SetObject(spellCaster, "flameWaveCaster", flameWave);
             SetObject(spellCaster, "burningGroundCaster", burningGround);
@@ -606,6 +628,14 @@ namespace Heroic.Editor
             SetObject(applier, "warpPulse", player.GetComponent<WarpPulseCaster>());
             SetObject(applier, "spellEcho", player.GetComponent<SpellEchoCaster>());
             SetObject(applier, "arcaneOrbit", player.GetComponent<ArcaneOrbitCaster>());
+            SetObject(applier, "forceField", player.GetComponent<ArcaneUtilityCaster>());
+            ArcaneUtilityCaster[] utilityCasters = player.GetComponents<ArcaneUtilityCaster>();
+            if (utilityCasters.Length >= 3)
+            {
+                SetObject(applier, "forceField", utilityCasters[0]);
+                SetObject(applier, "timeWarp", utilityCasters[1]);
+                SetObject(applier, "haste", utilityCasters[2]);
+            }
         }
 
         private static void WireFireUpgradeApplier(FireUpgradeApplier applier, GameObject player)
@@ -686,6 +716,7 @@ namespace Heroic.Editor
                 cooldownText.fontStyle = FontStyles.Bold;
                 MovementSlotPresenter presenter = slot.AddComponent<MovementSlotPresenter>();
                 SetObject(presenter, "movementCaster", movement);
+                SetObject(presenter, "buildState", buildState);
                 SetInt(presenter, "displayIndex", i);
                 SetObject(presenter, "skillNameText", slotText);
                 SetObject(presenter, "cooldownText", cooldownText);
