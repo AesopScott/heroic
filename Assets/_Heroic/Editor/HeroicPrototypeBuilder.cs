@@ -322,7 +322,7 @@ namespace Heroic.Editor
             GameObject cameraObject = new GameObject("Main Camera");
             Camera camera = cameraObject.AddComponent<Camera>();
             camera.orthographic = true;
-            camera.orthographicSize = 7f;
+            camera.orthographicSize = 9.1f;
             cameraObject.transform.position = new Vector3(0f, 0f, -10f);
             CameraFollow2D follow = cameraObject.AddComponent<CameraFollow2D>();
             SetObject(follow, "target", player.transform);
@@ -767,7 +767,7 @@ namespace Heroic.Editor
             scene.name = sceneName;
             Camera camera = new GameObject("Main Camera").AddComponent<Camera>();
             camera.orthographic = true;
-            camera.orthographicSize = 7f;
+            camera.orthographicSize = 9.1f;
             camera.backgroundColor = new Color(0.015f, 0.025f, 0.04f);
             camera.transform.position = new Vector3(0f, 0f, -10f);
 
