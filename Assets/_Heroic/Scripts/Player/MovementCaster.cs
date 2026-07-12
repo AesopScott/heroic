@@ -15,7 +15,11 @@ namespace Heroic.Player
             Lunge,
             Teleport,
             Whirlwind,
-            CloudWalk
+            CloudWalk,
+            Invisibility,
+            Stoneskin,
+            Tunnel,
+            Flight
         }
 
         [Serializable]
@@ -52,6 +56,9 @@ namespace Heroic.Player
                 damage = Mathf.Max(0, newDamage);
             }
 
+            public void SetCooldown(float newCooldown) => cooldown = Mathf.Max(0.1f, newCooldown);
+            public void SetRange(float newRange) => range = Mathf.Max(0f, newRange);
+
             private void ApplyDefaultsForSkill()
             {
                 switch (skill)
@@ -81,6 +88,26 @@ namespace Heroic.Player
                         range = 5f;
                         damage = 0;
                         break;
+                    case MovementSkillId.Invisibility:
+                        cooldown = 10f;
+                        range = 3f;
+                        damage = 0;
+                        break;
+                    case MovementSkillId.Stoneskin:
+                        cooldown = 11f;
+                        range = 4f;
+                        damage = 16;
+                        break;
+                    case MovementSkillId.Tunnel:
+                        cooldown = 10f;
+                        range = 5f;
+                        damage = 18;
+                        break;
+                    case MovementSkillId.Flight:
+                        cooldown = 10f;
+                        range = 6f;
+                        damage = 12;
+                        break;
                     default:
                         cooldown = 0f;
                         range = 0f;
@@ -106,12 +133,27 @@ namespace Heroic.Player
         [SerializeField] private float whirlwindTickInterval = 0.3f;
         [SerializeField] private float whirlwindSpeedMultiplier = 0.75f;
         [SerializeField] private float whirlwindVisualSpinSpeed = 720f;
+        [SerializeField] private float invisibilityDuration = 2.4f;
+        [SerializeField] private float invisibilitySpeedMultiplier = 1.2f;
+        [SerializeField] private int invisibilityExitDamage;
+        [SerializeField] private float stoneskinDuration = 3.2f;
+        [SerializeField] private float stoneskinSpeedMultiplier = 0.72f;
+        [SerializeField] private float stoneskinPulseInterval = 0.5f;
+        [SerializeField] private float tunnelDuration = 0.7f;
+        [SerializeField] private float tunnelEruptionRadius = 1.1f;
+        [SerializeField] private float flightDuration = 0.55f;
+        [SerializeField] private float flightLandingRadius = 0.9f;
         [SerializeField] private bool equipPrototypeMovementSetOnStart = true;
 
         private PlayerController playerController;
         private CloudWalkController cloudWalkController;
+        private PlayerHealth playerHealth;
         private Coroutine activeLunge;
         private Coroutine activeWhirlwind;
+        private Coroutine activeInvisibility;
+        private Coroutine activeStoneskin;
+        private Coroutine activeTunnel;
+        private Coroutine activeFlight;
         private int activeSlotIndex;
 
         public event Action<MovementSkillId> MovementActivated;
@@ -121,6 +163,7 @@ namespace Heroic.Player
         {
             playerController = GetComponent<PlayerController>();
             cloudWalkController = GetComponent<CloudWalkController>();
+            playerHealth = GetComponent<PlayerHealth>();
 
             if (movementSlots.Length != 3)
             {
@@ -188,6 +231,8 @@ namespace Heroic.Player
                 playerController.SetMovementLocked(false);
                 playerController.SetTemporarySpeedMultiplier(1f);
             }
+
+            playerHealth?.SetInvulnerable(false);
         }
 
         public void EquipMovementSkill(int slotIndex, MovementSkillId skillId)
@@ -308,6 +353,14 @@ namespace Heroic.Player
                     return Whirlwind(slot);
                 case MovementSkillId.CloudWalk:
                     return CloudWalk(slot);
+                case MovementSkillId.Invisibility:
+                    return Invisibility(slot);
+                case MovementSkillId.Stoneskin:
+                    return Stoneskin(slot);
+                case MovementSkillId.Tunnel:
+                    return Tunnel(slot);
+                case MovementSkillId.Flight:
+                    return Flight(slot);
                 default:
                     return false;
             }
@@ -370,6 +423,54 @@ namespace Heroic.Player
             return true;
         }
 
+        private bool Invisibility(MovementSlot slot)
+        {
+            if (activeInvisibility != null)
+            {
+                return false;
+            }
+
+            activeInvisibility = StartCoroutine(InvisibilityRoutine(slot));
+            return true;
+        }
+
+        private bool Stoneskin(MovementSlot slot)
+        {
+            if (activeStoneskin != null)
+            {
+                return false;
+            }
+
+            activeStoneskin = StartCoroutine(StoneskinRoutine(slot));
+            return true;
+        }
+
+        private bool Tunnel(MovementSlot slot)
+        {
+            if (activeTunnel != null)
+            {
+                return false;
+            }
+
+            Vector2 direction = GetFacingDirection();
+            Vector2 destination = FindValidDestination(transform.position, direction, slot.Range);
+            activeTunnel = StartCoroutine(TunnelRoutine(destination, slot.Damage));
+            return true;
+        }
+
+        private bool Flight(MovementSlot slot)
+        {
+            if (activeFlight != null)
+            {
+                return false;
+            }
+
+            Vector2 direction = GetFacingDirection();
+            Vector2 destination = (Vector2)transform.position + direction.normalized * slot.Range;
+            activeFlight = StartCoroutine(FlightRoutine(destination, slot.Damage));
+            return true;
+        }
+
         public void SetCloudWalkStandardMovementTier(int tier)
         {
             cloudWalkController?.SetStandardMovementTier(tier);
@@ -394,6 +495,52 @@ namespace Heroic.Player
             whirlwindSpeedMultiplier = speedMultipliers[clampedTier];
             SetEquippedMovementDamage(MovementSkillId.Whirlwind, damages[clampedTier]);
         }
+
+        public void SetWhirlwindRadiusTier(int tier)
+        {
+            whirlwindHitRadius = Value(tier, 1.35f, 1.55f, 1.8f, 2.1f, 2.5f);
+        }
+
+        public void SetMovementRangeTier(MovementSkillId skillId, int tier)
+        {
+            float multiplier = Value(tier, 1.12f, 1.25f, 1.4f, 1.6f, 1.85f);
+            foreach (MovementSlot slot in movementSlots)
+            {
+                if (slot != null && slot.Skill == skillId)
+                {
+                    slot.SetRange(DefaultRange(skillId) * multiplier);
+                }
+            }
+        }
+
+        public void SetMovementCooldownTier(MovementSkillId skillId, int tier)
+        {
+            float multiplier = Value(tier, 0.9f, 0.82f, 0.74f, 0.66f, 0.58f);
+            foreach (MovementSlot slot in movementSlots)
+            {
+                if (slot != null && slot.Skill == skillId)
+                {
+                    slot.SetCooldown(DefaultCooldown(skillId) * multiplier);
+                }
+            }
+        }
+
+        public void SetMovementDamageTier(MovementSkillId skillId, int tier)
+        {
+            int damage = Mathf.RoundToInt(DefaultDamage(skillId) * Value(tier, 1.3f, 1.65f, 2f, 2.4f, 2.9f));
+            SetEquippedMovementDamage(skillId, damage);
+        }
+
+        public void SetInvisibilityDurationTier(int tier) => invisibilityDuration = Value(tier, 3f, 3.6f, 4.3f, 5.1f, 6f);
+        public void SetInvisibilitySpeedTier(int tier) => invisibilitySpeedMultiplier = Value(tier, 1.28f, 1.38f, 1.5f, 1.65f, 1.85f);
+        public void SetInvisibilityExitDamageTier(int tier) => invisibilityExitDamage = Value(tier, 16, 24, 34, 48, 66);
+        public void SetStoneskinDurationTier(int tier) => stoneskinDuration = Value(tier, 3.8f, 4.6f, 5.5f, 6.6f, 8f);
+        public void SetStoneskinSpeedTier(int tier) => stoneskinSpeedMultiplier = Value(tier, 0.78f, 0.86f, 0.95f, 1.05f, 1.18f);
+        public void SetStoneskinPulseDamageTier(int tier) => SetMovementDamageTier(MovementSkillId.Stoneskin, tier);
+        public void SetTunnelDurationTier(int tier) => tunnelDuration = Value(tier, 0.85f, 1f, 1.18f, 1.38f, 1.65f);
+        public void SetTunnelEruptionRadiusTier(int tier) => tunnelEruptionRadius = Value(tier, 1.25f, 1.45f, 1.7f, 2f, 2.4f);
+        public void SetFlightDurationTier(int tier) => flightDuration = Value(tier, 0.48f, 0.42f, 0.36f, 0.3f, 0.24f);
+        public void SetFlightLandingRadiusTier(int tier) => flightLandingRadius = Value(tier, 1.05f, 1.25f, 1.5f, 1.85f, 2.25f);
 
         private IEnumerator LungeRoutine(Vector2 destination, int damage)
         {
@@ -456,6 +603,103 @@ namespace Heroic.Player
             activeWhirlwind = null;
         }
 
+        private IEnumerator InvisibilityRoutine(MovementSlot slot)
+        {
+            float elapsed = 0f;
+            playerHealth?.SetInvulnerable(true);
+            playerController?.SetTemporarySpeedMultiplier(invisibilitySpeedMultiplier);
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.55f, 0.65f, 1f, 0.22f), 1f, 0.18f);
+
+            while (elapsed < invisibilityDuration)
+            {
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            playerHealth?.SetInvulnerable(false);
+            playerController?.SetTemporarySpeedMultiplier(1f);
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.55f, 0.65f, 1f, 0.34f), 1.1f, 0.18f);
+            DamageAround(transform.position, invisibilityExitDamage, Mathf.Max(0.75f, slot.Range * 0.35f));
+            activeInvisibility = null;
+        }
+
+        private IEnumerator StoneskinRoutine(MovementSlot slot)
+        {
+            float elapsed = 0f;
+            float nextPulseAt = 0f;
+            playerHealth?.SetInvulnerable(true);
+            playerController?.SetTemporarySpeedMultiplier(stoneskinSpeedMultiplier);
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.62f, 0.52f, 0.36f, 0.34f), 1.1f, 0.18f);
+
+            while (elapsed < stoneskinDuration)
+            {
+                elapsed += Time.deltaTime;
+                if (Time.time >= nextPulseAt)
+                {
+                    DamageAround(transform.position, slot.Damage, Mathf.Max(1f, slot.Range * 0.35f));
+                    TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.62f, 0.52f, 0.36f, 0.22f), Mathf.Max(1f, slot.Range * 0.35f), 0.12f);
+                    nextPulseAt = Time.time + stoneskinPulseInterval;
+                }
+
+                yield return null;
+            }
+
+            playerHealth?.SetInvulnerable(false);
+            playerController?.SetTemporarySpeedMultiplier(1f);
+            activeStoneskin = null;
+        }
+
+        private IEnumerator TunnelRoutine(Vector2 destination, int damage)
+        {
+            Vector2 start = transform.position;
+            float elapsed = 0f;
+            playerHealth?.SetInvulnerable(true);
+            playerController?.SetMovementLocked(true);
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.42f, 0.28f, 0.14f, 0.3f), 0.9f, 0.16f);
+
+            while (elapsed < tunnelDuration)
+            {
+                elapsed += Time.deltaTime;
+                float percent = Mathf.Clamp01(elapsed / tunnelDuration);
+                transform.position = Vector2.Lerp(start, destination, percent);
+                TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.36f, 0.22f, 0.12f, 0.18f), 0.55f, 0.08f);
+                yield return null;
+            }
+
+            transform.position = destination;
+            DamageAround(destination, damage, tunnelEruptionRadius);
+            TemporaryVisualEffect.CreateCircle(destination, new Color(0.5f, 0.32f, 0.14f, 0.34f), tunnelEruptionRadius, 0.18f);
+            playerHealth?.SetInvulnerable(false);
+            playerController?.SetMovementLocked(false);
+            activeTunnel = null;
+        }
+
+        private IEnumerator FlightRoutine(Vector2 destination, int damage)
+        {
+            Vector2 start = transform.position;
+            float elapsed = 0f;
+            playerHealth?.SetInvulnerable(true);
+            playerController?.SetMovementLocked(true);
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.88f, 0.96f, 1f, 0.28f), 0.95f, 0.14f);
+
+            while (elapsed < flightDuration)
+            {
+                elapsed += Time.deltaTime;
+                float percent = Mathf.Clamp01(elapsed / flightDuration);
+                float eased = Mathf.Sin(percent * Mathf.PI * 0.5f);
+                transform.position = Vector2.Lerp(start, destination, eased);
+                TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.82f, 0.94f, 1f, 0.18f), 0.5f, 0.07f);
+                yield return null;
+            }
+
+            transform.position = destination;
+            DamageAround(destination, damage, flightLandingRadius);
+            TemporaryVisualEffect.CreateCircle(destination, new Color(0.88f, 0.96f, 1f, 0.34f), flightLandingRadius, 0.16f);
+            playerHealth?.SetInvulnerable(false);
+            playerController?.SetMovementLocked(false);
+            activeFlight = null;
+        }
+
         private Vector2 FindValidDestination(Vector2 origin, Vector2 direction, float range)
         {
             Vector2 destination = origin + direction.normalized * range;
@@ -511,6 +755,117 @@ namespace Heroic.Player
                 {
                     slot.SetDamage(damage);
                 }
+            }
+        }
+
+        private static float DefaultCooldown(MovementSkillId skillId)
+        {
+            switch (skillId)
+            {
+                case MovementSkillId.Blink:
+                    return 5f;
+                case MovementSkillId.Lunge:
+                    return 7f;
+                case MovementSkillId.Teleport:
+                    return 12f;
+                case MovementSkillId.Whirlwind:
+                    return 9f;
+                case MovementSkillId.CloudWalk:
+                    return 8f;
+                case MovementSkillId.Invisibility:
+                    return 10f;
+                case MovementSkillId.Stoneskin:
+                    return 11f;
+                case MovementSkillId.Tunnel:
+                    return 10f;
+                case MovementSkillId.Flight:
+                    return 10f;
+                default:
+                    return 1f;
+            }
+        }
+
+        private static float DefaultRange(MovementSkillId skillId)
+        {
+            switch (skillId)
+            {
+                case MovementSkillId.Blink:
+                    return 3f;
+                case MovementSkillId.Lunge:
+                    return 4f;
+                case MovementSkillId.Teleport:
+                    return 8f;
+                case MovementSkillId.Whirlwind:
+                    return 3f;
+                case MovementSkillId.CloudWalk:
+                    return 5f;
+                case MovementSkillId.Invisibility:
+                    return 3f;
+                case MovementSkillId.Stoneskin:
+                    return 4f;
+                case MovementSkillId.Tunnel:
+                    return 5f;
+                case MovementSkillId.Flight:
+                    return 6f;
+                default:
+                    return 0f;
+            }
+        }
+
+        private static int DefaultDamage(MovementSkillId skillId)
+        {
+            switch (skillId)
+            {
+                case MovementSkillId.Blink:
+                    return 10;
+                case MovementSkillId.Lunge:
+                    return 20;
+                case MovementSkillId.Teleport:
+                    return 18;
+                case MovementSkillId.Whirlwind:
+                    return 12;
+                case MovementSkillId.Stoneskin:
+                    return 16;
+                case MovementSkillId.Tunnel:
+                    return 18;
+                case MovementSkillId.Flight:
+                    return 12;
+                default:
+                    return 0;
+            }
+        }
+
+        private static int Value(int tier, int basic, int advanced, int expert, int master, int grandmaster)
+        {
+            switch (Mathf.Clamp(tier, 1, 5))
+            {
+                case 1:
+                    return basic;
+                case 2:
+                    return advanced;
+                case 3:
+                    return expert;
+                case 4:
+                    return master;
+                default:
+                    return grandmaster;
+            }
+        }
+
+        private static float Value(int tier, float basic, float advanced, float expert, float master, float grandmaster)
+        {
+            switch (Mathf.Clamp(tier, 1, 5))
+            {
+                case 1:
+                    return basic;
+                case 2:
+                    return advanced;
+                case 3:
+                    return expert;
+                case 4:
+                    return master;
+                default:
+                    return grandmaster;
             }
         }
     }

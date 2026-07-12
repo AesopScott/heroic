@@ -235,6 +235,17 @@ namespace Heroic.Systems
                     return false;
                 }
 
+                if (IsSystemSynergyBoost(choice))
+                {
+                    string[] prerequisites = ResolveSystemSynergyPrerequisites(choice.Id);
+                    string synergyId = ResolveBoostedSkillId(choice.Id);
+                    return prerequisites.Length == 2
+                        && buildState != null
+                        && buildState.HasSkill(prerequisites[0])
+                        && buildState.HasSkill(prerequisites[1])
+                        && buildState.GetSkillPathTier(synergyId, choice.Id) < 5;
+                }
+
                 string boostedSkillId = ResolveBoostedSkillId(choice.Id);
                 if (string.IsNullOrEmpty(boostedSkillId) || buildState == null || !buildState.HasSkill(boostedSkillId))
                 {
@@ -260,6 +271,11 @@ namespace Heroic.Systems
         private static bool IsMovementBoost(DraftChoice choice)
         {
             return choice.Category == UpgradeCategory.Boost && ResolveBoostedSkillId(choice.Id).StartsWith("movement_");
+        }
+
+        private static bool IsSystemSynergyBoost(DraftChoice choice)
+        {
+            return choice.Category == UpgradeCategory.Boost && choice.Id.StartsWith("upgrade_system_synergy_");
         }
 
         private bool IsMovementEquipped(string choiceId)
@@ -300,6 +316,14 @@ namespace Heroic.Systems
                     return MovementCaster.MovementSkillId.Whirlwind;
                 case "movement_cloud_walk":
                     return MovementCaster.MovementSkillId.CloudWalk;
+                case "movement_invisibility":
+                    return MovementCaster.MovementSkillId.Invisibility;
+                case "movement_stoneskin":
+                    return MovementCaster.MovementSkillId.Stoneskin;
+                case "movement_tunnel":
+                    return MovementCaster.MovementSkillId.Tunnel;
+                case "movement_flight":
+                    return MovementCaster.MovementSkillId.Flight;
                 default:
                     return MovementCaster.MovementSkillId.None;
             }
@@ -345,6 +369,16 @@ namespace Heroic.Systems
             if (choiceId.StartsWith("upgrade_fire_burning_ground"))
             {
                 return "fire_burning_ground";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_flame_shield"))
+            {
+                return "fire_flame_shield";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_flame_wall"))
+            {
+                return "fire_flame_wall";
             }
 
             if (choiceId.StartsWith("upgrade_cold_frost_ring"))
@@ -502,9 +536,44 @@ namespace Heroic.Systems
                 return "system_territory_casting";
             }
 
-            if (choiceId.StartsWith("upgrade_movement_cloud_walk"))
+            if (choiceId.StartsWith("upgrade_system_synergy_"))
             {
-                return "movement_cloud_walk";
+                return choiceId.Replace("upgrade_", string.Empty);
+            }
+
+            if (choiceId.StartsWith("upgrade_system_component_boosts"))
+            {
+                return "system_component_boosts";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_sacrifice_casting"))
+            {
+                return "system_sacrifice_casting";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_rhythm_casting"))
+            {
+                return "system_rhythm_casting";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_spell_tension"))
+            {
+                return "system_spell_tension";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_blink"))
+            {
+                return "movement_blink";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_lunge"))
+            {
+                return "movement_lunge";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_teleport"))
+            {
+                return "movement_teleport";
             }
 
             if (choiceId.StartsWith("upgrade_movement_whirlwind"))
@@ -512,7 +581,61 @@ namespace Heroic.Systems
                 return "movement_whirlwind";
             }
 
+            if (choiceId.StartsWith("upgrade_movement_cloud_walk"))
+            {
+                return "movement_cloud_walk";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_invisibility"))
+            {
+                return "movement_invisibility";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_stoneskin"))
+            {
+                return "movement_stoneskin";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_tunnel"))
+            {
+                return "movement_tunnel";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_flight"))
+            {
+                return "movement_flight";
+            }
+
             return string.Empty;
+        }
+
+        private static string[] ResolveSystemSynergyPrerequisites(string choiceId)
+        {
+            switch (choiceId)
+            {
+                case "upgrade_system_synergy_territory_components":
+                    return new[] { "system_territory_casting", "system_component_boosts" };
+                case "upgrade_system_synergy_territory_sacrifice":
+                    return new[] { "system_territory_casting", "system_sacrifice_casting" };
+                case "upgrade_system_synergy_territory_rhythm":
+                    return new[] { "system_territory_casting", "system_rhythm_casting" };
+                case "upgrade_system_synergy_territory_tension":
+                    return new[] { "system_territory_casting", "system_spell_tension" };
+                case "upgrade_system_synergy_components_sacrifice":
+                    return new[] { "system_component_boosts", "system_sacrifice_casting" };
+                case "upgrade_system_synergy_components_rhythm":
+                    return new[] { "system_component_boosts", "system_rhythm_casting" };
+                case "upgrade_system_synergy_components_tension":
+                    return new[] { "system_component_boosts", "system_spell_tension" };
+                case "upgrade_system_synergy_sacrifice_rhythm":
+                    return new[] { "system_sacrifice_casting", "system_rhythm_casting" };
+                case "upgrade_system_synergy_sacrifice_tension":
+                    return new[] { "system_sacrifice_casting", "system_spell_tension" };
+                case "upgrade_system_synergy_rhythm_tension":
+                    return new[] { "system_rhythm_casting", "system_spell_tension" };
+                default:
+                    return new string[0];
+            }
         }
     }
 }

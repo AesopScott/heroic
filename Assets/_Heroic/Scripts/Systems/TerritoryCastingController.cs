@@ -102,6 +102,24 @@ namespace Heroic.Systems
             }
         }
 
+        public void SetZoneRadius(float radius)
+        {
+            zoneRadius = Mathf.Max(0.5f, radius);
+            for (int i = 0; i < zones.Count; i++)
+            {
+                zones[i].Radius = zoneRadius;
+            }
+        }
+
+        public void SetBoostMultipliers(float damage, float range, float recovery, float confluence)
+        {
+            damageBoost = Mathf.Max(1f, damage);
+            rangeBoost = Mathf.Max(1f, range);
+            recoveryBoost = Mathf.Max(1f, recovery);
+            confluenceBoost = Mathf.Max(1f, confluence);
+            ApplyCurrentTerritory();
+        }
+
         private void RemoveExpiredZones()
         {
             for (int i = 0; i < zones.Count; i++)

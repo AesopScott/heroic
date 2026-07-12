@@ -12,6 +12,8 @@ namespace Heroic.Spells
         [SerializeField] private FireBoltCaster fireBoltCaster;
         [SerializeField] private FlameWaveCaster flameWaveCaster;
         [SerializeField] private BurningGroundCaster burningGroundCaster;
+        [SerializeField] private FlameShieldCaster flameShieldCaster;
+        [SerializeField] private FlameWallCaster flameWallCaster;
         [SerializeField] private FrostRingCaster frostRingCaster;
         [SerializeField] private IceShardCaster iceShardCaster;
         [SerializeField] private GlacialFieldCaster glacialFieldCaster;
@@ -53,6 +55,8 @@ namespace Heroic.Spells
             SetOptionalCasterEnabled(fireBoltCaster, false);
             SetOptionalCasterEnabled(flameWaveCaster, false);
             SetOptionalCasterEnabled(burningGroundCaster, false);
+            SetOptionalCasterEnabled(flameShieldCaster, false);
+            SetOptionalCasterEnabled(flameWallCaster, false);
             SetOptionalCasterEnabled(frostRingCaster, false);
             SetOptionalCasterEnabled(iceShardCaster, false);
             SetOptionalCasterEnabled(glacialFieldCaster, false);
@@ -127,6 +131,12 @@ namespace Heroic.Spells
                     break;
                 case "fire_burning_ground":
                     SetOptionalCasterEnabled(burningGroundCaster, true);
+                    break;
+                case "fire_flame_shield":
+                    SetOptionalCasterEnabled(flameShieldCaster, true);
+                    break;
+                case "fire_flame_wall":
+                    SetOptionalCasterEnabled(flameWallCaster, true);
                     break;
                 case "cold_frost_ring":
                     SetOptionalCasterEnabled(frostRingCaster, true);

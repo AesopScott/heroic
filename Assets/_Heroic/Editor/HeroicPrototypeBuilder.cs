@@ -433,6 +433,7 @@ namespace Heroic.Editor
             MovementCaster movementCaster = player.GetComponent<MovementCaster>();
             PlayerTemporaryBuffs temporaryBuffs = player.GetComponent<PlayerTemporaryBuffs>();
             TerritoryCastingController territoryCasting = player.GetComponent<TerritoryCastingController>();
+            MagicSystemController magicSystemController = player.GetComponent<MagicSystemController>();
 
             SetObject(runEndWatcher, "runManager", runManager);
             SetObject(runEndWatcher, "playerHealth", playerHealth);
@@ -458,6 +459,7 @@ namespace Heroic.Editor
             SetObject(choiceApplier, "spellCaster", spellCaster);
             SetObject(choiceApplier, "movementCaster", movementCaster);
             SetObject(choiceApplier, "territoryCasting", territoryCasting);
+            SetObject(choiceApplier, "magicSystemController", magicSystemController);
             SetObject(choiceApplier, "arcaneUpgradeApplier", arcaneUpgradeApplier);
             SetObject(choiceApplier, "fireUpgradeApplier", fireUpgradeApplier);
             SetObject(choiceApplier, "coldUpgradeApplier", coldUpgradeApplier);
@@ -511,6 +513,7 @@ namespace Heroic.Editor
             player.AddComponent<PlayerTemporaryBuffs>();
             player.AddComponent<SpellStatModifier>();
             player.AddComponent<TerritoryCastingController>();
+            player.AddComponent<MagicSystemController>();
             player.AddComponent<PlayerHealth>();
             PlayerExperience playerExperience = player.AddComponent<PlayerExperience>();
             SetInt(playerExperience, "baseExperienceToLevel", 15);
@@ -523,6 +526,8 @@ namespace Heroic.Editor
             FireBoltCaster fireBolt = player.AddComponent<FireBoltCaster>();
             FlameWaveCaster flameWave = player.AddComponent<FlameWaveCaster>();
             BurningGroundCaster burningGround = player.AddComponent<BurningGroundCaster>();
+            FlameShieldCaster flameShield = player.AddComponent<FlameShieldCaster>();
+            FlameWallCaster flameWall = player.AddComponent<FlameWallCaster>();
             FrostRingCaster frostRing = player.AddComponent<FrostRingCaster>();
             IceShardCaster iceShard = player.AddComponent<IceShardCaster>();
             GlacialFieldCaster glacialField = player.AddComponent<GlacialFieldCaster>();
@@ -578,6 +583,8 @@ namespace Heroic.Editor
             SetObject(fireBolt, "spellEcho", spellEcho);
             SetObject(flameWave, "spellEcho", spellEcho);
             SetObject(burningGround, "spellEcho", spellEcho);
+            SetObject(flameShield, "spellEcho", spellEcho);
+            SetObject(flameWall, "spellEcho", spellEcho);
             SetObject(iceShard, "projectilePrefab", coldProjectile.GetComponent<Projectile>());
             SetObject(iceShard, "firePoint", firePoint.transform);
             SetObject(frostRing, "spellEcho", spellEcho);
@@ -638,6 +645,8 @@ namespace Heroic.Editor
             SetObject(spellCaster, "fireBoltCaster", fireBolt);
             SetObject(spellCaster, "flameWaveCaster", flameWave);
             SetObject(spellCaster, "burningGroundCaster", burningGround);
+            SetObject(spellCaster, "flameShieldCaster", flameShield);
+            SetObject(spellCaster, "flameWallCaster", flameWall);
             SetObject(spellCaster, "frostRingCaster", frostRing);
             SetObject(spellCaster, "iceShardCaster", iceShard);
             SetObject(spellCaster, "glacialFieldCaster", glacialField);
@@ -697,6 +706,8 @@ namespace Heroic.Editor
             SetObject(applier, "fireBolt", player.GetComponent<FireBoltCaster>());
             SetObject(applier, "flameWave", player.GetComponent<FlameWaveCaster>());
             SetObject(applier, "burningGround", player.GetComponent<BurningGroundCaster>());
+            SetObject(applier, "flameShield", player.GetComponent<FlameShieldCaster>());
+            SetObject(applier, "flameWall", player.GetComponent<FlameWallCaster>());
         }
 
         private static void WireColdUpgradeApplier(ColdUpgradeApplier applier, GameObject player)

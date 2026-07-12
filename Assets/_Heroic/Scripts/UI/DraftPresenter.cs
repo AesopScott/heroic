@@ -165,7 +165,7 @@ namespace Heroic.UI
                 return 0;
             }
 
-            if (choice.Category == UpgradeManager.UpgradeCategory.System)
+            if (choice.Category == UpgradeManager.UpgradeCategory.System || IsSystemBoost(choice))
             {
                 return 2;
             }
@@ -176,6 +176,11 @@ namespace Heroic.UI
         private static bool IsMovementBoost(UpgradeManager.DraftChoice choice)
         {
             return choice.Category == UpgradeManager.UpgradeCategory.Boost && ResolveSkillId(choice.Id).StartsWith("movement_");
+        }
+
+        private static bool IsSystemBoost(UpgradeManager.DraftChoice choice)
+        {
+            return choice.Category == UpgradeManager.UpgradeCategory.Boost && ResolveSkillId(choice.Id).StartsWith("system_");
         }
 
         private void ApplyChoiceVisuals(int index, UpgradeManager.DraftChoice choice)
@@ -219,7 +224,7 @@ namespace Heroic.UI
                 return Hex("88F7B0");
             }
 
-            if (choice.Category == UpgradeManager.UpgradeCategory.System || id.StartsWith("system_"))
+            if (choice.Category == UpgradeManager.UpgradeCategory.System || id.StartsWith("system_") || id.StartsWith("upgrade_system_"))
             {
                 return Hex("C8C3FF");
             }
@@ -364,9 +369,99 @@ namespace Heroic.UI
                 return "CW";
             }
 
+            if (id.Contains("invisibility"))
+            {
+                return "IV";
+            }
+
+            if (id.Contains("stoneskin"))
+            {
+                return "SK";
+            }
+
+            if (id.Contains("tunnel"))
+            {
+                return "TN";
+            }
+
+            if (id.Contains("flight"))
+            {
+                return "FL";
+            }
+
             if (id.Contains("territory_casting"))
             {
                 return "TC";
+            }
+
+            if (id.Contains("component_boosts"))
+            {
+                return "CB";
+            }
+
+            if (id.Contains("sacrifice_casting"))
+            {
+                return "SC";
+            }
+
+            if (id.Contains("rhythm_casting"))
+            {
+                return "RC";
+            }
+
+            if (id.Contains("spell_tension"))
+            {
+                return "ST";
+            }
+
+            if (id.Contains("synergy_territory_components"))
+            {
+                return "TC";
+            }
+
+            if (id.Contains("synergy_territory_sacrifice"))
+            {
+                return "TS";
+            }
+
+            if (id.Contains("synergy_territory_rhythm"))
+            {
+                return "TR";
+            }
+
+            if (id.Contains("synergy_territory_tension"))
+            {
+                return "TT";
+            }
+
+            if (id.Contains("synergy_components_sacrifice"))
+            {
+                return "CS";
+            }
+
+            if (id.Contains("synergy_components_rhythm"))
+            {
+                return "CR";
+            }
+
+            if (id.Contains("synergy_components_tension"))
+            {
+                return "CT";
+            }
+
+            if (id.Contains("synergy_sacrifice_rhythm"))
+            {
+                return "SR";
+            }
+
+            if (id.Contains("synergy_sacrifice_tension"))
+            {
+                return "ST";
+            }
+
+            if (id.Contains("synergy_rhythm_tension"))
+            {
+                return "RT";
             }
 
             if (id.Contains("fire_bolt"))
@@ -382,6 +477,16 @@ namespace Heroic.UI
             if (id.Contains("burning_ground"))
             {
                 return "BG";
+            }
+
+            if (id.Contains("flame_shield"))
+            {
+                return "FS";
+            }
+
+            if (id.Contains("flame_wall"))
+            {
+                return "FL";
             }
 
             if (id.Contains("frost_ring"))
@@ -579,6 +684,16 @@ namespace Heroic.UI
                 return "fire_burning_ground";
             }
 
+            if (choiceId.StartsWith("upgrade_fire_flame_shield"))
+            {
+                return "fire_flame_shield";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_flame_wall"))
+            {
+                return "fire_flame_wall";
+            }
+
             if (choiceId.StartsWith("upgrade_cold_frost_ring"))
             {
                 return "cold_frost_ring";
@@ -734,9 +849,74 @@ namespace Heroic.UI
                 return "system_territory_casting";
             }
 
+            if (choiceId.StartsWith("upgrade_system_synergy_"))
+            {
+                return choiceId.Replace("upgrade_", string.Empty);
+            }
+
+            if (choiceId.StartsWith("upgrade_system_component_boosts"))
+            {
+                return "system_component_boosts";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_sacrifice_casting"))
+            {
+                return "system_sacrifice_casting";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_rhythm_casting"))
+            {
+                return "system_rhythm_casting";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_spell_tension"))
+            {
+                return "system_spell_tension";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_blink"))
+            {
+                return "movement_blink";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_lunge"))
+            {
+                return "movement_lunge";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_teleport"))
+            {
+                return "movement_teleport";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_whirlwind"))
+            {
+                return "movement_whirlwind";
+            }
+
             if (choiceId.StartsWith("upgrade_movement_cloud_walk"))
             {
                 return "movement_cloud_walk";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_invisibility"))
+            {
+                return "movement_invisibility";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_stoneskin"))
+            {
+                return "movement_stoneskin";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_tunnel"))
+            {
+                return "movement_tunnel";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_flight"))
+            {
+                return "movement_flight";
             }
 
             return choiceId;

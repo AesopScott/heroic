@@ -11,6 +11,7 @@ namespace Heroic.Systems
         [SerializeField] private SpellCaster spellCaster;
         [SerializeField] private MovementCaster movementCaster;
         [SerializeField] private TerritoryCastingController territoryCasting;
+        [SerializeField] private MagicSystemController magicSystemController;
         [SerializeField] private ArcaneUpgradeApplier arcaneUpgradeApplier;
         [SerializeField] private FireUpgradeApplier fireUpgradeApplier;
         [SerializeField] private ColdUpgradeApplier coldUpgradeApplier;
@@ -65,6 +66,11 @@ namespace Heroic.Systems
             if (poisonUpgradeApplier == null)
             {
                 poisonUpgradeApplier = GetComponent<PoisonUpgradeApplier>();
+            }
+
+            if (magicSystemController == null)
+            {
+                magicSystemController = FindAnyObjectByType<MagicSystemController>();
             }
         }
 
@@ -139,21 +145,15 @@ namespace Heroic.Systems
                 return;
             }
 
-            if (choice.Id.StartsWith("upgrade_system_territory_casting"))
+            if (choice.Id.StartsWith("upgrade_system_"))
             {
-                ApplyTerritoryCastingUpgrade(choice.Id);
+                ApplySystemUpgrade(choice.Id);
                 return;
             }
 
-            if (choice.Id.StartsWith("upgrade_movement_cloud_walk"))
+            if (choice.Id.StartsWith("upgrade_movement_"))
             {
-                ApplyCloudWalkUpgrade(choice.Id);
-                return;
-            }
-
-            if (choice.Id.StartsWith("upgrade_movement_whirlwind"))
-            {
-                ApplyWhirlwindUpgrade(choice.Id);
+                ApplyMovementUpgrade(choice.Id);
                 return;
             }
 
@@ -168,6 +168,13 @@ namespace Heroic.Systems
             {
                 buildState?.LearnSkill(choice.Id);
                 territoryCasting?.EnableTerritoryCasting();
+                return;
+            }
+
+            if (choice.Id.StartsWith("system_"))
+            {
+                buildState?.LearnSkill(choice.Id);
+                magicSystemController?.EnableSystem(choice.Id);
                 return;
             }
 
@@ -190,6 +197,22 @@ namespace Heroic.Systems
             else if (choice.Id == "movement_cloud_walk")
             {
                 EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.CloudWalk);
+            }
+            else if (choice.Id == "movement_invisibility")
+            {
+                EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.Invisibility);
+            }
+            else if (choice.Id == "movement_stoneskin")
+            {
+                EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.Stoneskin);
+            }
+            else if (choice.Id == "movement_tunnel")
+            {
+                EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.Tunnel);
+            }
+            else if (choice.Id == "movement_flight")
+            {
+                EquipFirstOpenMovementSlot(MovementCaster.MovementSkillId.Flight);
             }
         }
 
@@ -350,6 +373,16 @@ namespace Heroic.Systems
             if (choiceId.StartsWith("upgrade_fire_burning_ground"))
             {
                 return "fire_burning_ground";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_flame_shield"))
+            {
+                return "fire_flame_shield";
+            }
+
+            if (choiceId.StartsWith("upgrade_fire_flame_wall"))
+            {
+                return "fire_flame_wall";
             }
 
             return "fire_unknown";
@@ -535,9 +568,23 @@ namespace Heroic.Systems
             return "poison_unknown";
         }
 
-        private void ApplyTerritoryCastingUpgrade(string choiceId)
+        private void ApplySystemUpgrade(string choiceId)
         {
-            const string skillId = "system_territory_casting";
+            string skillId = ResolveSystemSkillId(choiceId);
+            if (IsSystemSynergyUpgrade(choiceId))
+            {
+                string[] prerequisites = ResolveSystemSynergyPrerequisites(choiceId);
+                if (buildState == null || prerequisites.Length != 2 || !buildState.HasSkill(prerequisites[0]) || !buildState.HasSkill(prerequisites[1]))
+                {
+                    return;
+                }
+
+                buildState.UpgradeSkillPath(skillId, choiceId);
+                int synergyTier = buildState.GetSkillPathTier(skillId, choiceId);
+                magicSystemController?.ApplyUpgrade(choiceId, synergyTier);
+                return;
+            }
+
             if (buildState == null || !buildState.HasSkill(skillId))
             {
                 return;
@@ -545,9 +592,94 @@ namespace Heroic.Systems
 
             buildState.UpgradeSkillPath(skillId, choiceId);
             int tier = buildState.GetSkillPathTier(skillId, choiceId);
-            if (choiceId == "upgrade_system_territory_casting_more_territories")
+            if (skillId == "system_territory_casting")
             {
-                territoryCasting?.SetActiveZoneCount(Value(tier, 7, 8, 9, 10, 12));
+                if (choiceId == "upgrade_system_territory_casting_more_territories")
+                {
+                    territoryCasting?.SetActiveZoneCount(Value(tier, 7, 8, 9, 10, 12));
+                }
+                else if (choiceId == "upgrade_system_territory_casting_larger_territories")
+                {
+                    territoryCasting?.SetZoneRadius(Value(tier, 2.8f, 3.15f, 3.55f, 4f, 4.6f));
+                }
+                else if (choiceId == "upgrade_system_territory_casting_stronger_territories")
+                {
+                    float standard = Value(tier, 1.42f, 1.5f, 1.6f, 1.72f, 1.88f);
+                    float confluence = Value(tier, 1.25f, 1.32f, 1.4f, 1.5f, 1.62f);
+                    territoryCasting?.SetBoostMultipliers(standard, standard, standard, confluence);
+                }
+                return;
+            }
+
+            magicSystemController?.ApplyUpgrade(choiceId, tier);
+        }
+
+        private static string ResolveSystemSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_system_territory_casting"))
+            {
+                return "system_territory_casting";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_synergy_"))
+            {
+                return choiceId.Replace("upgrade_", string.Empty);
+            }
+
+            if (choiceId.StartsWith("upgrade_system_component_boosts"))
+            {
+                return "system_component_boosts";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_sacrifice_casting"))
+            {
+                return "system_sacrifice_casting";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_rhythm_casting"))
+            {
+                return "system_rhythm_casting";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_spell_tension"))
+            {
+                return "system_spell_tension";
+            }
+
+            return string.Empty;
+        }
+
+        private static bool IsSystemSynergyUpgrade(string choiceId)
+        {
+            return choiceId.StartsWith("upgrade_system_synergy_");
+        }
+
+        private static string[] ResolveSystemSynergyPrerequisites(string choiceId)
+        {
+            switch (choiceId)
+            {
+                case "upgrade_system_synergy_territory_components":
+                    return new[] { "system_territory_casting", "system_component_boosts" };
+                case "upgrade_system_synergy_territory_sacrifice":
+                    return new[] { "system_territory_casting", "system_sacrifice_casting" };
+                case "upgrade_system_synergy_territory_rhythm":
+                    return new[] { "system_territory_casting", "system_rhythm_casting" };
+                case "upgrade_system_synergy_territory_tension":
+                    return new[] { "system_territory_casting", "system_spell_tension" };
+                case "upgrade_system_synergy_components_sacrifice":
+                    return new[] { "system_component_boosts", "system_sacrifice_casting" };
+                case "upgrade_system_synergy_components_rhythm":
+                    return new[] { "system_component_boosts", "system_rhythm_casting" };
+                case "upgrade_system_synergy_components_tension":
+                    return new[] { "system_component_boosts", "system_spell_tension" };
+                case "upgrade_system_synergy_sacrifice_rhythm":
+                    return new[] { "system_sacrifice_casting", "system_rhythm_casting" };
+                case "upgrade_system_synergy_sacrifice_tension":
+                    return new[] { "system_sacrifice_casting", "system_spell_tension" };
+                case "upgrade_system_synergy_rhythm_tension":
+                    return new[] { "system_rhythm_casting", "system_spell_tension" };
+                default:
+                    return new string[0];
             }
         }
 
@@ -568,9 +700,26 @@ namespace Heroic.Systems
             }
         }
 
-        private void ApplyCloudWalkUpgrade(string choiceId)
+        private float Value(int tier, float basic, float advanced, float expert, float master, float grandmaster)
         {
-            const string skillId = "movement_cloud_walk";
+            switch (Mathf.Clamp(tier, 1, 5))
+            {
+                case 1:
+                    return basic;
+                case 2:
+                    return advanced;
+                case 3:
+                    return expert;
+                case 4:
+                    return master;
+                default:
+                    return grandmaster;
+            }
+        }
+
+        private void ApplyMovementUpgrade(string choiceId)
+        {
+            string skillId = ResolveMovementUpgradeSkillId(choiceId);
             if (buildState == null || !buildState.HasSkill(skillId))
             {
                 return;
@@ -591,22 +740,66 @@ namespace Heroic.Systems
             {
                 movementCaster?.SetCloudWalkKnockbackTier(tier);
             }
-        }
-
-        private void ApplyWhirlwindUpgrade(string choiceId)
-        {
-            const string skillId = "movement_whirlwind";
-            if (buildState == null || !buildState.HasSkill(skillId))
-            {
-                return;
-            }
-
-            buildState.UpgradeSkillPath(skillId, choiceId);
-            int tier = buildState.GetSkillPathTier(skillId, choiceId);
-
-            if (choiceId == "upgrade_movement_whirlwind_gale")
+            else if (choiceId == "upgrade_movement_whirlwind_gale")
             {
                 movementCaster?.SetWhirlwindGaleTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_invisibility_longer_fade")
+            {
+                movementCaster?.SetInvisibilityDurationTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_invisibility_swift_fade")
+            {
+                movementCaster?.SetInvisibilitySpeedTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_invisibility_exit_burst")
+            {
+                movementCaster?.SetInvisibilityExitDamageTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_stoneskin_longer_skin")
+            {
+                movementCaster?.SetStoneskinDurationTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_stoneskin_lighter_skin")
+            {
+                movementCaster?.SetStoneskinSpeedTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_stoneskin_thorn_skin")
+            {
+                movementCaster?.SetStoneskinPulseDamageTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_tunnel_deeper_tunnel")
+            {
+                movementCaster?.SetTunnelDurationTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_tunnel_eruption")
+            {
+                movementCaster?.SetTunnelEruptionRadiusTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_flight_swift_flight")
+            {
+                movementCaster?.SetFlightDurationTier(tier);
+            }
+            else if (choiceId == "upgrade_movement_flight_landing_gust")
+            {
+                movementCaster?.SetFlightLandingRadiusTier(tier);
+                movementCaster?.SetMovementDamageTier(MovementCaster.MovementSkillId.Flight, tier);
+            }
+            else if (choiceId.Contains("_longer_") || choiceId.EndsWith("_longer_blink") || choiceId.EndsWith("_longer_lunge") || choiceId.EndsWith("_longer_teleport") || choiceId.EndsWith("_longer_tunnel"))
+            {
+                movementCaster?.SetMovementRangeTier(ResolveMovementSkillEnum(skillId), tier);
+            }
+            else if (choiceId.Contains("_quick_"))
+            {
+                movementCaster?.SetMovementCooldownTier(ResolveMovementSkillEnum(skillId), tier);
+            }
+            else if (choiceId.EndsWith("_arc_flash") || choiceId.EndsWith("_heavy_impact") || choiceId.EndsWith("_arrival_burst"))
+            {
+                movementCaster?.SetMovementDamageTier(ResolveMovementSkillEnum(skillId), tier);
+            }
+            else if (choiceId == "upgrade_movement_whirlwind_wider_spin")
+            {
+                movementCaster?.SetWhirlwindRadiusTier(tier);
             }
         }
 
@@ -655,8 +848,93 @@ namespace Heroic.Systems
                     return "movement_whirlwind";
                 case MovementCaster.MovementSkillId.CloudWalk:
                     return "movement_cloud_walk";
+                case MovementCaster.MovementSkillId.Invisibility:
+                    return "movement_invisibility";
+                case MovementCaster.MovementSkillId.Stoneskin:
+                    return "movement_stoneskin";
+                case MovementCaster.MovementSkillId.Tunnel:
+                    return "movement_tunnel";
+                case MovementCaster.MovementSkillId.Flight:
+                    return "movement_flight";
                 default:
                     return string.Empty;
+            }
+        }
+
+        private string ResolveMovementUpgradeSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_movement_blink"))
+            {
+                return "movement_blink";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_lunge"))
+            {
+                return "movement_lunge";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_teleport"))
+            {
+                return "movement_teleport";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_whirlwind"))
+            {
+                return "movement_whirlwind";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_cloud_walk"))
+            {
+                return "movement_cloud_walk";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_invisibility"))
+            {
+                return "movement_invisibility";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_stoneskin"))
+            {
+                return "movement_stoneskin";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_tunnel"))
+            {
+                return "movement_tunnel";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_flight"))
+            {
+                return "movement_flight";
+            }
+
+            return string.Empty;
+        }
+
+        private MovementCaster.MovementSkillId ResolveMovementSkillEnum(string skillId)
+        {
+            switch (skillId)
+            {
+                case "movement_blink":
+                    return MovementCaster.MovementSkillId.Blink;
+                case "movement_lunge":
+                    return MovementCaster.MovementSkillId.Lunge;
+                case "movement_teleport":
+                    return MovementCaster.MovementSkillId.Teleport;
+                case "movement_whirlwind":
+                    return MovementCaster.MovementSkillId.Whirlwind;
+                case "movement_cloud_walk":
+                    return MovementCaster.MovementSkillId.CloudWalk;
+                case "movement_invisibility":
+                    return MovementCaster.MovementSkillId.Invisibility;
+                case "movement_stoneskin":
+                    return MovementCaster.MovementSkillId.Stoneskin;
+                case "movement_tunnel":
+                    return MovementCaster.MovementSkillId.Tunnel;
+                case "movement_flight":
+                    return MovementCaster.MovementSkillId.Flight;
+                default:
+                    return MovementCaster.MovementSkillId.None;
             }
         }
     }

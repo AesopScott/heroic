@@ -8,6 +8,8 @@ namespace Heroic.Systems
         [SerializeField] private FireBoltCaster fireBolt;
         [SerializeField] private FlameWaveCaster flameWave;
         [SerializeField] private BurningGroundCaster burningGround;
+        [SerializeField] private FlameShieldCaster flameShield;
+        [SerializeField] private FlameWallCaster flameWall;
 
         public bool Apply(string choiceId, int tier)
         {
@@ -43,6 +45,26 @@ namespace Heroic.Systems
                     return true;
                 case "upgrade_fire_burning_ground_persist":
                     burningGround?.SetDuration(Value(clampedTier, 3.8f, 4.6f, 5.5f, 6.8f, 8.5f));
+                    return true;
+
+                case "upgrade_fire_flame_shield_hotter_shield":
+                    flameShield?.SetDamagePerTick(Value(clampedTier, 15, 22, 32, 46, 68));
+                    return true;
+                case "upgrade_fire_flame_shield_wider_shield":
+                    flameShield?.SetRadius(Value(clampedTier, 2.2f, 2.7f, 3.3f, 4f, 4.8f));
+                    return true;
+                case "upgrade_fire_flame_shield_longer_shield":
+                    flameShield?.SetDuration(Value(clampedTier, 3.8f, 4.7f, 5.8f, 7.2f, 9f));
+                    return true;
+
+                case "upgrade_fire_flame_wall_longer_wall":
+                    flameWall?.SetLength(Value(clampedTier, 5.2f, 6.4f, 7.8f, 9.5f, 11.5f));
+                    return true;
+                case "upgrade_fire_flame_wall_hotter_wall":
+                    flameWall?.SetDamagePerTick(Value(clampedTier, 20, 30, 44, 64, 92));
+                    return true;
+                case "upgrade_fire_flame_wall_lingering_wall":
+                    flameWall?.SetDuration(Value(clampedTier, 4.4f, 5.4f, 6.6f, 8f, 10f));
                     return true;
                 default:
                     return false;
