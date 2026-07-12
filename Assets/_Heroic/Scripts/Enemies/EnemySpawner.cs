@@ -166,7 +166,7 @@ namespace Heroic.Enemies
             if (activeWave.WaveIndex == 1 && playerExperience != null)
             {
                 minSpawnCount = 1;
-                maxSpawnCount = playerExperience.Level >= 2 ? 3 : 2;
+                maxSpawnCount = playerExperience.Level >= 2 ? 2 : 1;
             }
 
             return Random.Range(minSpawnCount, maxSpawnCount + 1);
