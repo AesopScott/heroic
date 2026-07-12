@@ -3,6 +3,8 @@ using Heroic.Enemies;
 using Heroic.Systems;
 using Heroic.Visuals;
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Heroic.Spells
 {
@@ -11,6 +13,8 @@ namespace Heroic.Spells
         [SerializeField] private float castInterval = 2.6f;
         [SerializeField] private float range = 5f;
         [SerializeField] private float width = 2.2f;
+        [SerializeField] private float travelDuration = 0.45f;
+        [SerializeField] private float tickInterval = 0.06f;
         [SerializeField] private int damage = 28;
         [SerializeField] private LayerMask enemyLayers;
         [SerializeField] private SpellEchoCaster spellEcho;
@@ -74,15 +78,31 @@ namespace Heroic.Spells
                 direction = Vector2.right;
             }
 
+            StartCoroutine(FlameWaveRoutine(direction.normalized));
+        }
+
+        private IEnumerator FlameWaveRoutine(Vector2 direction)
+        {
             Vector2 origin = transform.position;
             float activeRange = ModifiedRange(range);
-            for (int i = 1; i <= 4; i++)
-            {
-                float percent = i / 4f;
-                Vector2 position = origin + direction.normalized * activeRange * percent;
-                TemporaryVisualEffect.CreateCircle(position, new Color(1f, 0.34f, 0.08f, 0.28f), width * percent, 0.18f);
-            }
+            float elapsed = 0f;
+            HashSet<Damageable> damaged = new HashSet<Damageable>();
 
+            while (elapsed < travelDuration)
+            {
+                elapsed += tickInterval;
+                float percent = Mathf.Clamp01(elapsed / travelDuration);
+                float waveDistance = activeRange * percent;
+                float waveWidth = Mathf.Lerp(width * 0.35f, width, percent);
+                Vector2 waveCenter = origin + direction * waveDistance;
+                TemporaryVisualEffect.CreateCircle(waveCenter, new Color(1f, 0.34f, 0.08f, 0.32f), waveWidth, 0.16f);
+                DamageWaveBand(origin, direction, waveDistance, waveWidth, activeRange, damaged);
+                yield return new WaitForSeconds(tickInterval);
+            }
+        }
+
+        private void DamageWaveBand(Vector2 origin, Vector2 direction, float waveDistance, float waveWidth, float activeRange, HashSet<Damageable> damaged)
+        {
             Collider2D[] hits = enemyLayers.value == 0
                 ? Physics2D.OverlapCircleAll(origin, activeRange)
                 : Physics2D.OverlapCircleAll(origin, activeRange, enemyLayers);
@@ -90,8 +110,13 @@ namespace Heroic.Spells
             foreach (Collider2D hit in hits)
             {
                 Vector2 offset = (Vector2)hit.transform.position - origin;
-                float forwardDistance = Vector2.Dot(offset, direction.normalized);
+                float forwardDistance = Vector2.Dot(offset, direction);
                 if (forwardDistance <= 0f || forwardDistance > activeRange)
+                {
+                    continue;
+                }
+
+                if (Mathf.Abs(forwardDistance - waveDistance) > Mathf.Max(0.35f, waveWidth * 0.45f))
                 {
                     continue;
                 }
@@ -104,8 +129,9 @@ namespace Heroic.Spells
                 }
 
                 Damageable damageable = hit.GetComponent<Damageable>();
-                if (damageable != null)
+                if (damageable != null && !damaged.Contains(damageable))
                 {
+                    damaged.Add(damageable);
                     damageable.ApplyDamage(ModifiedDamage(damage));
                 }
             }
