@@ -27,6 +27,7 @@ namespace Heroic.Audio
         private Damageable damageable;
         private PlayerHealth playerHealth;
         private ExperiencePickup pickup;
+        private LootPickup lootPickup;
         private MovementCaster movementCaster;
 
         private void Awake()
@@ -39,6 +40,7 @@ namespace Heroic.Audio
             damageable = GetComponent<Damageable>();
             playerHealth = GetComponent<PlayerHealth>();
             pickup = GetComponent<ExperiencePickup>();
+            lootPickup = GetComponent<LootPickup>();
             movementCaster = GetComponent<MovementCaster>();
         }
 
@@ -59,6 +61,11 @@ namespace Heroic.Audio
             if (pickup != null)
             {
                 pickup.Collected += HandlePickupCollected;
+            }
+
+            if (lootPickup != null)
+            {
+                lootPickup.Collected += HandleLootPickupCollected;
             }
 
             if (movementCaster != null)
@@ -84,6 +91,11 @@ namespace Heroic.Audio
             if (pickup != null)
             {
                 pickup.Collected -= HandlePickupCollected;
+            }
+
+            if (lootPickup != null)
+            {
+                lootPickup.Collected -= HandleLootPickupCollected;
             }
 
             if (movementCaster != null)
@@ -121,6 +133,49 @@ namespace Heroic.Audio
 
             AudioClip clip = ProceduralAudio.Tone("xp_pickup", 760f, 0.08f, volume, -120f);
             AudioSource.PlayClipAtPoint(clip, collectedPickup.transform.position, volume);
+        }
+
+        private void HandleLootPickupCollected(LootPickup collectedPickup)
+        {
+            string key = KeyForLoot(collectedPickup.Kind);
+            if (!CanPlay(key))
+            {
+                return;
+            }
+
+            float frequency = FrequencyForLoot(collectedPickup.Kind);
+            AudioClip clip = ProceduralAudio.Tone(key, frequency, 0.1f, volume, -80f);
+            AudioSource.PlayClipAtPoint(clip, collectedPickup.transform.position, volume);
+        }
+
+        private static string KeyForLoot(LootPickup.LootKind kind)
+        {
+            switch (kind)
+            {
+                case LootPickup.LootKind.HealthRestore:
+                    return "health_pickup";
+                case LootPickup.LootKind.ExperienceBoost:
+                    return "xp_boost_pickup";
+                case LootPickup.LootKind.SpeedBoost:
+                    return "speed_pickup";
+                default:
+                    return "invulnerability_pickup";
+            }
+        }
+
+        private static float FrequencyForLoot(LootPickup.LootKind kind)
+        {
+            switch (kind)
+            {
+                case LootPickup.LootKind.HealthRestore:
+                    return 520f;
+                case LootPickup.LootKind.ExperienceBoost:
+                    return 940f;
+                case LootPickup.LootKind.SpeedBoost:
+                    return 680f;
+                default:
+                    return 1080f;
+            }
         }
 
         private void HandleMovementActivated(MovementCaster.MovementSkillId skill)

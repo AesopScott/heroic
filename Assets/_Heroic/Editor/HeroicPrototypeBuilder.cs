@@ -40,13 +40,18 @@ namespace Heroic.Editor
             runtimeFont = CreateOrLoadRuntimeFont();
 
             GameObject xpPickup = CreateXpPickupPrefab();
+            GameObject healthPickup = CreateHealthPickupPrefab();
+            GameObject experienceBoostPickup = CreateExperienceBoostPickupPrefab();
+            GameObject speedBoostPickup = CreateSpeedBoostPickupPrefab();
+            GameObject invulnerabilityPickup = CreateInvulnerabilityPickupPrefab();
             GameObject projectile = CreateMagicMissilePrefab();
             GameObject fireProjectile = CreateFireProjectilePrefab();
+            GameObject coldProjectile = CreateColdProjectilePrefab();
             GameObject enemyMissile = CreateEnemyMissilePrefab();
             GameObject orb = CreateArcaneOrbPrefab();
-            GameObject enemy = CreateEnemyPrefab(xpPickup);
-            GameObject shooter = CreateShooterEnemyPrefab(xpPickup, enemyMissile);
-            GameObject boss = CreateBossPrefab(xpPickup);
+            GameObject enemy = CreateEnemyPrefab(xpPickup, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup);
+            GameObject shooter = CreateShooterEnemyPrefab(xpPickup, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup, enemyMissile);
+            GameObject boss = CreateBossPrefab(xpPickup, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup);
 
             EnemyDefinition crashOneDefinition = CreateEnemyDefinition("Enemy_Crash_01", "Crash I", enemy, 10, 2f, 10, 1, VisualPresetApplier.Preset.CrashLevel1, false);
             EnemyDefinition crashTwoDefinition = CreateEnemyDefinition("Enemy_Crash_02", "Crash II", enemy, 12, 2.15f, 10, 1, VisualPresetApplier.Preset.CrashLevel2, false);
@@ -62,7 +67,7 @@ namespace Heroic.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
 
-            CreateGameScene(projectile, fireProjectile, orb, enemy, boss, xpPickup, bossDefinition, new[] { waveOne, waveTwo, waveThree });
+            CreateGameScene(projectile, fireProjectile, coldProjectile, orb, enemy, boss, xpPickup, bossDefinition, new[] { waveOne, waveTwo, waveThree });
             CreateMenuScene("MainMenu");
             CreateMenuScene("Results");
             UpdateBuildSettings();
@@ -209,6 +214,18 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Projectiles/Projectile_FireBolt.prefab");
         }
 
+        private static GameObject CreateColdProjectilePrefab()
+        {
+            GameObject go = new GameObject("Projectile_IceShard");
+            CircleCollider2D collider = go.AddComponent<CircleCollider2D>();
+            collider.isTrigger = true;
+            go.AddComponent<Projectile>();
+            go.AddComponent<ColdProjectileHit>();
+            VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
+            SetEnum(visual, "preset", VisualPresetApplier.Preset.ColdProjectile);
+            return SavePrefab(go, Prefabs + "/Projectiles/Projectile_IceShard.prefab");
+        }
+
         private static GameObject CreateEnemyMissilePrefab()
         {
             GameObject go = new GameObject("Projectile_EnemyMissile");
@@ -245,7 +262,48 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Pickups/XP_Pickup.prefab");
         }
 
-        private static GameObject CreateEnemyPrefab(GameObject xpPickup)
+        private static GameObject CreateHealthPickupPrefab()
+        {
+            GameObject go = CreateLootPickupBase("Health_Pickup", LootPickup.LootKind.HealthRestore, VisualPresetApplier.Preset.HealthPickup);
+            return SavePrefab(go, Prefabs + "/Pickups/Health_Pickup.prefab");
+        }
+
+        private static GameObject CreateExperienceBoostPickupPrefab()
+        {
+            GameObject go = CreateLootPickupBase("XP_Boost_Pickup", LootPickup.LootKind.ExperienceBoost, VisualPresetApplier.Preset.ExperienceBoostPickup);
+            return SavePrefab(go, Prefabs + "/Pickups/XP_Boost_Pickup.prefab");
+        }
+
+        private static GameObject CreateSpeedBoostPickupPrefab()
+        {
+            GameObject go = CreateLootPickupBase("Speed_Boost_Pickup", LootPickup.LootKind.SpeedBoost, VisualPresetApplier.Preset.SpeedBoostPickup);
+            return SavePrefab(go, Prefabs + "/Pickups/Speed_Boost_Pickup.prefab");
+        }
+
+        private static GameObject CreateInvulnerabilityPickupPrefab()
+        {
+            GameObject go = CreateLootPickupBase("Invulnerability_Pickup", LootPickup.LootKind.Invulnerability, VisualPresetApplier.Preset.InvulnerabilityPickup);
+            return SavePrefab(go, Prefabs + "/Pickups/Invulnerability_Pickup.prefab");
+        }
+
+        private static GameObject CreateLootPickupBase(string name, LootPickup.LootKind kind, VisualPresetApplier.Preset preset)
+        {
+            GameObject go = new GameObject(name);
+            CircleCollider2D collider = go.AddComponent<CircleCollider2D>();
+            collider.isTrigger = true;
+            LootPickup pickup = go.AddComponent<LootPickup>();
+            SetEnum(pickup, "kind", kind);
+            SetInt(pickup, "value", kind == LootPickup.LootKind.HealthRestore ? 8 : 5);
+            SetInt(pickup, "tier", 1);
+            SetFloat(pickup, "duration", kind == LootPickup.LootKind.Invulnerability ? 1.25f : kind == LootPickup.LootKind.SpeedBoost ? 3f : kind == LootPickup.LootKind.ExperienceBoost ? 10f : 0f);
+            SetFloat(pickup, "multiplier", kind == LootPickup.LootKind.SpeedBoost ? 1.2f : kind == LootPickup.LootKind.ExperienceBoost ? 1.5f : 1f);
+            VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
+            SetEnum(visual, "preset", preset);
+            AddAudioFeedback(go, ProceduralAudioFeedback.Preset.Pickup, 0.3f);
+            return go;
+        }
+
+        private static GameObject CreateEnemyPrefab(GameObject xpPickup, GameObject healthPickup, GameObject experienceBoostPickup, GameObject speedBoostPickup, GameObject invulnerabilityPickup)
         {
             GameObject go = new GameObject("Enemy_Crash");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
@@ -256,6 +314,7 @@ namespace Heroic.Editor
             go.AddComponent<EnemyController>();
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            WireExtraLootPrefabs(dropper, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.CrashLevel1);
             go.AddComponent<HitFlashVisual>();
@@ -266,7 +325,7 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Crash.prefab");
         }
 
-        private static GameObject CreateShooterEnemyPrefab(GameObject xpPickup, GameObject enemyMissile)
+        private static GameObject CreateShooterEnemyPrefab(GameObject xpPickup, GameObject healthPickup, GameObject experienceBoostPickup, GameObject speedBoostPickup, GameObject invulnerabilityPickup, GameObject enemyMissile)
         {
             GameObject go = new GameObject("Enemy_Shooter");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
@@ -285,6 +344,7 @@ namespace Heroic.Editor
             SetBool(controller, "suppressExperienceOnContactDamage", false);
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            WireExtraLootPrefabs(dropper, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.ShooterLevel1);
             go.AddComponent<HitFlashVisual>();
@@ -295,7 +355,7 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Shooter.prefab");
         }
 
-        private static GameObject CreateBossPrefab(GameObject xpPickup)
+        private static GameObject CreateBossPrefab(GameObject xpPickup, GameObject healthPickup, GameObject experienceBoostPickup, GameObject speedBoostPickup, GameObject invulnerabilityPickup)
         {
             GameObject go = new GameObject("Enemy_Boss_ArcaneWarden");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
@@ -309,6 +369,7 @@ namespace Heroic.Editor
             go.AddComponent<BossController>();
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            WireExtraLootPrefabs(dropper, healthPickup, experienceBoostPickup, speedBoostPickup, invulnerabilityPickup);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.Boss);
             go.AddComponent<HitFlashVisual>();
@@ -320,7 +381,15 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Boss_ArcaneWarden.prefab");
         }
 
-        private static void CreateGameScene(GameObject projectile, GameObject fireProjectile, GameObject orb, GameObject enemy, GameObject boss, GameObject xpPickup, EnemyDefinition bossDefinition, WaveDefinition[] waves)
+        private static void WireExtraLootPrefabs(ExperienceDropper dropper, GameObject healthPickup, GameObject experienceBoostPickup, GameObject speedBoostPickup, GameObject invulnerabilityPickup)
+        {
+            SetObject(dropper, "healthRestorePrefab", healthPickup.GetComponent<LootPickup>());
+            SetObject(dropper, "experienceBoostPrefab", experienceBoostPickup.GetComponent<LootPickup>());
+            SetObject(dropper, "speedBoostPrefab", speedBoostPickup.GetComponent<LootPickup>());
+            SetObject(dropper, "invulnerabilityPrefab", invulnerabilityPickup.GetComponent<LootPickup>());
+        }
+
+        private static void CreateGameScene(GameObject projectile, GameObject fireProjectile, GameObject coldProjectile, GameObject orb, GameObject enemy, GameObject boss, GameObject xpPickup, EnemyDefinition bossDefinition, WaveDefinition[] waves)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = "Game";
@@ -345,17 +414,20 @@ namespace Heroic.Editor
             UpgradeChoiceApplier choiceApplier = managers.AddComponent<UpgradeChoiceApplier>();
             ArcaneUpgradeApplier arcaneUpgradeApplier = managers.AddComponent<ArcaneUpgradeApplier>();
             FireUpgradeApplier fireUpgradeApplier = managers.AddComponent<FireUpgradeApplier>();
+            ColdUpgradeApplier coldUpgradeApplier = managers.AddComponent<ColdUpgradeApplier>();
+            LightningUpgradeApplier lightningUpgradeApplier = managers.AddComponent<LightningUpgradeApplier>();
             UIManager uiManager = managers.AddComponent<UIManager>();
             BackgroundMusicPlayer music = managers.AddComponent<BackgroundMusicPlayer>();
             SetString(music, "resourcesClipPath", "Audio/Music/HeroicDemoLoop");
             SetFloat(music, "volume", 0.24f);
             managers.AddComponent<DemoAudioControls>();
 
-            GameObject player = CreateScenePlayer(projectile, fireProjectile, orb, upgradeManager);
+            GameObject player = CreateScenePlayer(projectile, fireProjectile, coldProjectile, orb, upgradeManager);
             PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
             PlayerExperience playerExperience = player.GetComponent<PlayerExperience>();
             SpellCaster spellCaster = player.GetComponent<SpellCaster>();
             MovementCaster movementCaster = player.GetComponent<MovementCaster>();
+            PlayerTemporaryBuffs temporaryBuffs = player.GetComponent<PlayerTemporaryBuffs>();
             TerritoryCastingController territoryCasting = player.GetComponent<TerritoryCastingController>();
 
             SetObject(runEndWatcher, "runManager", runManager);
@@ -384,9 +456,13 @@ namespace Heroic.Editor
             SetObject(choiceApplier, "territoryCasting", territoryCasting);
             SetObject(choiceApplier, "arcaneUpgradeApplier", arcaneUpgradeApplier);
             SetObject(choiceApplier, "fireUpgradeApplier", fireUpgradeApplier);
+            SetObject(choiceApplier, "coldUpgradeApplier", coldUpgradeApplier);
+            SetObject(choiceApplier, "lightningUpgradeApplier", lightningUpgradeApplier);
 
             WireArcaneUpgradeApplier(arcaneUpgradeApplier, player);
             WireFireUpgradeApplier(fireUpgradeApplier, player);
+            WireColdUpgradeApplier(coldUpgradeApplier, player);
+            WireLightningUpgradeApplier(lightningUpgradeApplier, player);
 
             GameObject cameraObject = new GameObject("Main Camera");
             Camera camera = cameraObject.AddComponent<Camera>();
@@ -400,7 +476,7 @@ namespace Heroic.Editor
             SetObject(cameraShake, "movementCaster", movementCaster);
             SetObject(cameraShake, "bossSpawner", bossSpawner);
 
-            TMP_Text showcaseLabel = CreateGameUi(uiManager, runManager, upgradeManager, buildState, playerHealth, playerExperience, movementCaster, bossSpawner);
+            TMP_Text showcaseLabel = CreateGameUi(uiManager, runManager, upgradeManager, buildState, playerHealth, playerExperience, movementCaster, temporaryBuffs, player.GetComponent<SpellStatModifier>(), territoryCasting, bossSpawner);
             SetObject(showcaseMode, "spellCaster", spellCaster);
             SetObject(showcaseMode, "movementCaster", movementCaster);
             SetObject(showcaseMode, "playerExperience", playerExperience);
@@ -410,7 +486,7 @@ namespace Heroic.Editor
             EditorSceneManager.SaveScene(scene, Scenes + "/Game.unity");
         }
 
-        private static GameObject CreateScenePlayer(GameObject projectile, GameObject fireProjectile, GameObject orb, UpgradeManager upgradeManager)
+        private static GameObject CreateScenePlayer(GameObject projectile, GameObject fireProjectile, GameObject coldProjectile, GameObject orb, UpgradeManager upgradeManager)
         {
             GameObject player = new GameObject("Player");
             Rigidbody2D body = player.AddComponent<Rigidbody2D>();
@@ -420,6 +496,7 @@ namespace Heroic.Editor
             player.AddComponent<PlayerController>();
             player.AddComponent<PlayerPickupMagnet>();
             player.AddComponent<CloudWalkController>();
+            player.AddComponent<PlayerTemporaryBuffs>();
             player.AddComponent<SpellStatModifier>();
             player.AddComponent<TerritoryCastingController>();
             player.AddComponent<PlayerHealth>();
@@ -434,6 +511,16 @@ namespace Heroic.Editor
             FireBoltCaster fireBolt = player.AddComponent<FireBoltCaster>();
             FlameWaveCaster flameWave = player.AddComponent<FlameWaveCaster>();
             BurningGroundCaster burningGround = player.AddComponent<BurningGroundCaster>();
+            FrostRingCaster frostRing = player.AddComponent<FrostRingCaster>();
+            IceShardCaster iceShard = player.AddComponent<IceShardCaster>();
+            GlacialFieldCaster glacialField = player.AddComponent<GlacialFieldCaster>();
+            CrystalPrisonCaster crystalPrison = player.AddComponent<CrystalPrisonCaster>();
+            ShatterLineCaster shatterLine = player.AddComponent<ShatterLineCaster>();
+            ChainBoltCaster chainBolt = player.AddComponent<ChainBoltCaster>();
+            StaticFieldCaster staticField = player.AddComponent<StaticFieldCaster>();
+            ThunderLanceCaster thunderLance = player.AddComponent<ThunderLanceCaster>();
+            SparkSurgeCaster sparkSurge = player.AddComponent<SparkSurgeCaster>();
+            StormCallCaster stormCall = player.AddComponent<StormCallCaster>();
             SpellCaster spellCaster = player.AddComponent<SpellCaster>();
             player.AddComponent<MovementCaster>();
             VisualPresetApplier visual = player.AddComponent<VisualPresetApplier>();
@@ -459,6 +546,18 @@ namespace Heroic.Editor
             SetObject(fireBolt, "spellEcho", spellEcho);
             SetObject(flameWave, "spellEcho", spellEcho);
             SetObject(burningGround, "spellEcho", spellEcho);
+            SetObject(iceShard, "projectilePrefab", coldProjectile.GetComponent<Projectile>());
+            SetObject(iceShard, "firePoint", firePoint.transform);
+            SetObject(frostRing, "spellEcho", spellEcho);
+            SetObject(iceShard, "spellEcho", spellEcho);
+            SetObject(glacialField, "spellEcho", spellEcho);
+            SetObject(crystalPrison, "spellEcho", spellEcho);
+            SetObject(shatterLine, "spellEcho", spellEcho);
+            SetObject(chainBolt, "spellEcho", spellEcho);
+            SetObject(staticField, "spellEcho", spellEcho);
+            SetObject(thunderLance, "spellEcho", spellEcho);
+            SetObject(sparkSurge, "spellEcho", spellEcho);
+            SetObject(stormCall, "spellEcho", spellEcho);
             SetObject(spellCaster, "magicMissileCaster", magicMissile);
             SetObject(spellCaster, "arcaneBlastCaster", arcaneBlast);
             SetObject(spellCaster, "warpPulseCaster", warpPulse);
@@ -467,6 +566,16 @@ namespace Heroic.Editor
             SetObject(spellCaster, "fireBoltCaster", fireBolt);
             SetObject(spellCaster, "flameWaveCaster", flameWave);
             SetObject(spellCaster, "burningGroundCaster", burningGround);
+            SetObject(spellCaster, "frostRingCaster", frostRing);
+            SetObject(spellCaster, "iceShardCaster", iceShard);
+            SetObject(spellCaster, "glacialFieldCaster", glacialField);
+            SetObject(spellCaster, "crystalPrisonCaster", crystalPrison);
+            SetObject(spellCaster, "shatterLineCaster", shatterLine);
+            SetObject(spellCaster, "chainBoltCaster", chainBolt);
+            SetObject(spellCaster, "staticFieldCaster", staticField);
+            SetObject(spellCaster, "thunderLanceCaster", thunderLance);
+            SetObject(spellCaster, "sparkSurgeCaster", sparkSurge);
+            SetObject(spellCaster, "stormCallCaster", stormCall);
             return player;
         }
 
@@ -498,7 +607,25 @@ namespace Heroic.Editor
             SetObject(applier, "burningGround", player.GetComponent<BurningGroundCaster>());
         }
 
-        private static TMP_Text CreateGameUi(UIManager uiManager, RunManager runManager, UpgradeManager upgradeManager, RunBuildState buildState, PlayerHealth health, PlayerExperience experience, MovementCaster movement, BossSpawner bossSpawner)
+        private static void WireColdUpgradeApplier(ColdUpgradeApplier applier, GameObject player)
+        {
+            SetObject(applier, "frostRing", player.GetComponent<FrostRingCaster>());
+            SetObject(applier, "iceShard", player.GetComponent<IceShardCaster>());
+            SetObject(applier, "glacialField", player.GetComponent<GlacialFieldCaster>());
+            SetObject(applier, "crystalPrison", player.GetComponent<CrystalPrisonCaster>());
+            SetObject(applier, "shatterLine", player.GetComponent<ShatterLineCaster>());
+        }
+
+        private static void WireLightningUpgradeApplier(LightningUpgradeApplier applier, GameObject player)
+        {
+            SetObject(applier, "chainBolt", player.GetComponent<ChainBoltCaster>());
+            SetObject(applier, "staticField", player.GetComponent<StaticFieldCaster>());
+            SetObject(applier, "thunderLance", player.GetComponent<ThunderLanceCaster>());
+            SetObject(applier, "sparkSurge", player.GetComponent<SparkSurgeCaster>());
+            SetObject(applier, "stormCall", player.GetComponent<StormCallCaster>());
+        }
+
+        private static TMP_Text CreateGameUi(UIManager uiManager, RunManager runManager, UpgradeManager upgradeManager, RunBuildState buildState, PlayerHealth health, PlayerExperience experience, MovementCaster movement, PlayerTemporaryBuffs temporaryBuffs, SpellStatModifier spellStats, TerritoryCastingController territoryCasting, BossSpawner bossSpawner)
         {
             Canvas canvas = CreateCanvas("GameUI");
             GameObject gameRoot = CreateUiRoot("HUD", canvas.transform);
@@ -542,6 +669,7 @@ namespace Heroic.Editor
             SetObject(hud, "healthFillRect", GetSliderFillRect(healthSlider));
             SetObject(hud, "experienceFillRect", GetSliderFillRect(experienceSlider));
 
+            CreateCharacterStatsPanel(gameRoot.transform, health, experience, buildState, movement, temporaryBuffs, spellStats, territoryCasting);
             CreateObjectivePanel(gameRoot.transform, runManager, experience, bossSpawner);
 
             for (int i = 0; i < 3; i++)
@@ -709,11 +837,11 @@ namespace Heroic.Editor
             GameObject panel = new GameObject("ObjectivePanel");
             panel.transform.SetParent(parent, false);
             RectTransform panelRect = panel.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0f, 1f);
-            panelRect.anchorMax = new Vector2(0f, 1f);
-            panelRect.pivot = new Vector2(0f, 1f);
+            panelRect.anchorMin = new Vector2(1f, 1f);
+            panelRect.anchorMax = new Vector2(1f, 1f);
+            panelRect.pivot = new Vector2(1f, 1f);
             panelRect.sizeDelta = new Vector2(340f, 132f);
-            panelRect.anchoredPosition = new Vector2(18f, -18f);
+            panelRect.anchoredPosition = new Vector2(-18f, -18f);
             Image panelImage = panel.AddComponent<Image>();
             panelImage.color = new Color(0.005f, 0.014f, 0.02f, 0.64f);
 
@@ -742,6 +870,71 @@ namespace Heroic.Editor
             SetObject(objective, "goalText", goalText);
             SetObject(objective, "bossText", bossText);
             SetObject(objective, "upgradeText", upgradeText);
+        }
+
+        private static void CreateCharacterStatsPanel(Transform parent, PlayerHealth health, PlayerExperience experience, RunBuildState buildState, MovementCaster movement, PlayerTemporaryBuffs temporaryBuffs, SpellStatModifier spellStats, TerritoryCastingController territoryCasting)
+        {
+            GameObject panel = new GameObject("CharacterStatsPanel");
+            panel.transform.SetParent(parent, false);
+            RectTransform panelRect = panel.AddComponent<RectTransform>();
+            panelRect.anchorMin = new Vector2(0f, 1f);
+            panelRect.anchorMax = new Vector2(0f, 1f);
+            panelRect.pivot = new Vector2(0f, 1f);
+            panelRect.sizeDelta = new Vector2(340f, 520f);
+            panelRect.anchoredPosition = new Vector2(18f, -18f);
+            Image panelImage = panel.AddComponent<Image>();
+            panelImage.color = new Color(0.005f, 0.014f, 0.02f, 0.84f);
+
+            TMP_Text title = CreateText("CharacterStatsTitle", panel.transform, "SPELLBOOK STATUS", new Vector2(312f, 30f), Vector2.zero);
+            AnchorTopLeft(title.rectTransform, new Vector2(14f, -12f));
+            title.alignment = TextAlignmentOptions.TopLeft;
+            title.fontSize = 18f;
+            title.fontStyle = FontStyles.Bold;
+            title.color = new Color(0.82f, 0.96f, 1f);
+
+            TMP_Text healthText = CreateStatsLine("HealthLine", panel.transform, "Health: 100/100", -48f, new Color(1f, 0.62f, 0.58f));
+            TMP_Text experienceText = CreateStatsLine("ExperienceLine", panel.transform, "Experience: 0/15", -74f, new Color(0.62f, 0.82f, 1f));
+            TMP_Text levelText = CreateStatsLine("LevelLine", panel.transform, "Level: 1", -100f, new Color(0.88f, 1f, 0.72f));
+
+            TMP_Text skillListText = CreateText("SkillList", panel.transform, "Skills", new Vector2(312f, 260f), Vector2.zero);
+            AnchorTopLeft(skillListText.rectTransform, new Vector2(14f, -132f));
+            skillListText.alignment = TextAlignmentOptions.TopLeft;
+            skillListText.fontSize = 13.5f;
+            skillListText.color = new Color(0.88f, 0.96f, 0.98f);
+            skillListText.textWrappingMode = TextWrappingModes.Normal;
+            skillListText.overflowMode = TextOverflowModes.Ellipsis;
+
+            TMP_Text bonusListText = CreateText("BonusList", panel.transform, "Current Bonuses\n- None", new Vector2(312f, 98f), Vector2.zero);
+            AnchorTopLeft(bonusListText.rectTransform, new Vector2(14f, -408f));
+            bonusListText.alignment = TextAlignmentOptions.TopLeft;
+            bonusListText.fontSize = 13.5f;
+            bonusListText.color = new Color(1f, 0.88f, 0.54f);
+            bonusListText.textWrappingMode = TextWrappingModes.Normal;
+            bonusListText.overflowMode = TextOverflowModes.Ellipsis;
+
+            CharacterStatsPanel presenter = panel.AddComponent<CharacterStatsPanel>();
+            SetObject(presenter, "playerHealth", health);
+            SetObject(presenter, "playerExperience", experience);
+            SetObject(presenter, "buildState", buildState);
+            SetObject(presenter, "movementCaster", movement);
+            SetObject(presenter, "temporaryBuffs", temporaryBuffs);
+            SetObject(presenter, "spellStats", spellStats);
+            SetObject(presenter, "territoryCasting", territoryCasting);
+            SetObject(presenter, "healthText", healthText);
+            SetObject(presenter, "experienceText", experienceText);
+            SetObject(presenter, "levelText", levelText);
+            SetObject(presenter, "skillListText", skillListText);
+            SetObject(presenter, "bonusListText", bonusListText);
+        }
+
+        private static TMP_Text CreateStatsLine(string name, Transform parent, string text, float y, Color color)
+        {
+            TMP_Text line = CreateText(name, parent, text, new Vector2(312f, 24f), Vector2.zero);
+            AnchorTopLeft(line.rectTransform, new Vector2(14f, y));
+            line.alignment = TextAlignmentOptions.TopLeft;
+            line.fontSize = 15f;
+            line.color = color;
+            return line;
         }
 
         private static Canvas CreateCanvas(string name)

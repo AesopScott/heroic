@@ -13,6 +13,8 @@ namespace Heroic.Systems
         [SerializeField] private TerritoryCastingController territoryCasting;
         [SerializeField] private ArcaneUpgradeApplier arcaneUpgradeApplier;
         [SerializeField] private FireUpgradeApplier fireUpgradeApplier;
+        [SerializeField] private ColdUpgradeApplier coldUpgradeApplier;
+        [SerializeField] private LightningUpgradeApplier lightningUpgradeApplier;
 
         private void Awake()
         {
@@ -29,6 +31,16 @@ namespace Heroic.Systems
             if (fireUpgradeApplier == null)
             {
                 fireUpgradeApplier = GetComponent<FireUpgradeApplier>();
+            }
+
+            if (coldUpgradeApplier == null)
+            {
+                coldUpgradeApplier = GetComponent<ColdUpgradeApplier>();
+            }
+
+            if (lightningUpgradeApplier == null)
+            {
+                lightningUpgradeApplier = GetComponent<LightningUpgradeApplier>();
             }
         }
 
@@ -67,13 +79,37 @@ namespace Heroic.Systems
                 return;
             }
 
+            if (choice.Id.StartsWith("upgrade_cold_"))
+            {
+                ApplyColdUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("upgrade_lightning_"))
+            {
+                ApplyLightningUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("upgrade_system_territory_casting"))
+            {
+                ApplyTerritoryCastingUpgrade(choice.Id);
+                return;
+            }
+
             if (choice.Id.StartsWith("upgrade_movement_cloud_walk"))
             {
                 ApplyCloudWalkUpgrade(choice.Id);
                 return;
             }
 
-            if (choice.Id.StartsWith("arcane_") || choice.Id.StartsWith("fire_"))
+            if (choice.Id.StartsWith("upgrade_movement_whirlwind"))
+            {
+                ApplyWhirlwindUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("arcane_") || choice.Id.StartsWith("fire_") || choice.Id.StartsWith("cold_") || choice.Id.StartsWith("lightning_"))
             {
                 buildState?.LearnSkill(choice.Id);
                 spellCaster?.EnableSkill(choice.Id);
@@ -137,6 +173,34 @@ namespace Heroic.Systems
             fireUpgradeApplier?.Apply(choiceId, tier);
         }
 
+        private void ApplyColdUpgrade(string choiceId)
+        {
+            string skillId = ResolveColdSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            coldUpgradeApplier?.Apply(choiceId, tier);
+        }
+
+        private void ApplyLightningUpgrade(string choiceId)
+        {
+            string skillId = ResolveLightningSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            lightningUpgradeApplier?.Apply(choiceId, tier);
+        }
+
         private string ResolveArcaneSkillId(string choiceId)
         {
             if (choiceId.StartsWith("upgrade_arcane_magic_missile"))
@@ -187,6 +251,99 @@ namespace Heroic.Systems
             return "fire_unknown";
         }
 
+        private string ResolveColdSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_cold_frost_ring"))
+            {
+                return "cold_frost_ring";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_ice_shard"))
+            {
+                return "cold_ice_shard";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_glacial_field"))
+            {
+                return "cold_glacial_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_crystal_prison"))
+            {
+                return "cold_crystal_prison";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_shatter_line"))
+            {
+                return "cold_shatter_line";
+            }
+
+            return "cold_unknown";
+        }
+
+        private string ResolveLightningSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_lightning_chain_bolt"))
+            {
+                return "lightning_chain_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_static_field"))
+            {
+                return "lightning_static_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_thunder_lance"))
+            {
+                return "lightning_thunder_lance";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_spark_surge"))
+            {
+                return "lightning_spark_surge";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_storm_call"))
+            {
+                return "lightning_storm_call";
+            }
+
+            return "lightning_unknown";
+        }
+
+        private void ApplyTerritoryCastingUpgrade(string choiceId)
+        {
+            const string skillId = "system_territory_casting";
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            if (choiceId == "upgrade_system_territory_casting_more_territories")
+            {
+                territoryCasting?.SetActiveZoneCount(Value(tier, 7, 8, 9, 10, 12));
+            }
+        }
+
+        private int Value(int tier, int basic, int advanced, int expert, int master, int grandmaster)
+        {
+            switch (Mathf.Clamp(tier, 1, 5))
+            {
+                case 1:
+                    return basic;
+                case 2:
+                    return advanced;
+                case 3:
+                    return expert;
+                case 4:
+                    return master;
+                default:
+                    return grandmaster;
+            }
+        }
+
         private void ApplyCloudWalkUpgrade(string choiceId)
         {
             const string skillId = "movement_cloud_walk";
@@ -209,6 +366,23 @@ namespace Heroic.Systems
             else if (choiceId == "upgrade_movement_cloud_walk_knockback")
             {
                 movementCaster?.SetCloudWalkKnockbackTier(tier);
+            }
+        }
+
+        private void ApplyWhirlwindUpgrade(string choiceId)
+        {
+            const string skillId = "movement_whirlwind";
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+
+            if (choiceId == "upgrade_movement_whirlwind_gale")
+            {
+                movementCaster?.SetWhirlwindGaleTier(tier);
             }
         }
 

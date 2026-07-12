@@ -384,6 +384,56 @@ namespace Heroic.UI
                 return "BG";
             }
 
+            if (id.Contains("frost_ring"))
+            {
+                return "FR";
+            }
+
+            if (id.Contains("ice_shard"))
+            {
+                return "IS";
+            }
+
+            if (id.Contains("glacial_field"))
+            {
+                return "GF";
+            }
+
+            if (id.Contains("crystal_prison"))
+            {
+                return "CP";
+            }
+
+            if (id.Contains("shatter_line"))
+            {
+                return "SL";
+            }
+
+            if (id.Contains("chain_bolt"))
+            {
+                return "CB";
+            }
+
+            if (id.Contains("static_field"))
+            {
+                return "SF";
+            }
+
+            if (id.Contains("thunder_lance"))
+            {
+                return "TL";
+            }
+
+            if (id.Contains("spark_surge"))
+            {
+                return "SS";
+            }
+
+            if (id.Contains("storm_call"))
+            {
+                return "SC";
+            }
+
             return "??";
         }
 
@@ -427,6 +477,61 @@ namespace Heroic.UI
             if (choiceId.StartsWith("upgrade_fire_burning_ground"))
             {
                 return "fire_burning_ground";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_frost_ring"))
+            {
+                return "cold_frost_ring";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_ice_shard"))
+            {
+                return "cold_ice_shard";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_glacial_field"))
+            {
+                return "cold_glacial_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_crystal_prison"))
+            {
+                return "cold_crystal_prison";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_shatter_line"))
+            {
+                return "cold_shatter_line";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_chain_bolt"))
+            {
+                return "lightning_chain_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_static_field"))
+            {
+                return "lightning_static_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_thunder_lance"))
+            {
+                return "lightning_thunder_lance";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_spark_surge"))
+            {
+                return "lightning_spark_surge";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_storm_call"))
+            {
+                return "lightning_storm_call";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_territory_casting"))
+            {
+                return "system_territory_casting";
             }
 
             if (choiceId.StartsWith("upgrade_movement_cloud_walk"))

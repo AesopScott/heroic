@@ -47,6 +47,11 @@ namespace Heroic.Player
                 nextReadyTime = Time.time + cooldown;
             }
 
+            public void SetDamage(int newDamage)
+            {
+                damage = Mathf.Max(0, newDamage);
+            }
+
             private void ApplyDefaultsForSkill()
             {
                 switch (skill)
@@ -68,8 +73,8 @@ namespace Heroic.Player
                         break;
                     case MovementSkillId.Whirlwind:
                         cooldown = 9f;
-                        range = 5f;
-                        damage = 18;
+                        range = 3f;
+                        damage = 12;
                         break;
                     case MovementSkillId.CloudWalk:
                         cooldown = 8f;
@@ -97,11 +102,16 @@ namespace Heroic.Player
         [SerializeField] private float collisionCheckRadius = 0.35f;
         [SerializeField] private float lungeDuration = 0.16f;
         [SerializeField] private float lungeHitRadius = 0.6f;
+        [SerializeField] private float whirlwindHitRadius = 1.15f;
+        [SerializeField] private float whirlwindTickInterval = 0.3f;
+        [SerializeField] private float whirlwindSpeedMultiplier = 0.75f;
+        [SerializeField] private float whirlwindVisualSpinSpeed = 720f;
         [SerializeField] private bool equipPrototypeMovementSetOnStart = true;
 
         private PlayerController playerController;
         private CloudWalkController cloudWalkController;
         private Coroutine activeLunge;
+        private Coroutine activeWhirlwind;
 
         public event Action<MovementSkillId> MovementActivated;
 
@@ -162,6 +172,7 @@ namespace Heroic.Player
             if (playerController != null)
             {
                 playerController.SetMovementLocked(false);
+                playerController.SetTemporarySpeedMultiplier(1f);
             }
         }
 
@@ -270,14 +281,12 @@ namespace Heroic.Player
 
         private bool Whirlwind(MovementSlot slot)
         {
-            if (activeLunge != null)
+            if (activeWhirlwind != null)
             {
                 return false;
             }
 
-            Vector2 direction = GetFacingDirection();
-            Vector2 destination = FindValidDestination(transform.position, direction, slot.Range);
-            activeLunge = StartCoroutine(WhirlwindRoutine(destination, slot.Damage));
+            activeWhirlwind = StartCoroutine(WhirlwindRoutine(slot.Range, slot.Damage));
             return true;
         }
 
@@ -308,6 +317,16 @@ namespace Heroic.Player
             cloudWalkController?.SetKnockbackTier(tier);
         }
 
+        public void SetWhirlwindGaleTier(int tier)
+        {
+            int clampedTier = Mathf.Clamp(tier, 0, 5);
+            float[] speedMultipliers = { 0.75f, 0.9f, 1.05f, 1.2f, 1.35f, 1.5f };
+            int[] damages = { 12, 16, 21, 27, 34, 42 };
+
+            whirlwindSpeedMultiplier = speedMultipliers[clampedTier];
+            SetEquippedMovementDamage(MovementSkillId.Whirlwind, damages[clampedTier]);
+        }
+
         private IEnumerator LungeRoutine(Vector2 destination, int damage)
         {
             Vector2 start = transform.position;
@@ -336,34 +355,37 @@ namespace Heroic.Player
             activeLunge = null;
         }
 
-        private IEnumerator WhirlwindRoutine(Vector2 destination, int damage)
+        private IEnumerator WhirlwindRoutine(float duration, int damage)
         {
-            Vector2 start = transform.position;
             float elapsed = 0f;
-            float duration = lungeDuration * 1.45f;
+            float nextTickTime = 0f;
+            SpinningWhirlwindVisual.Attach(transform, whirlwindHitRadius, duration, whirlwindVisualSpinSpeed);
+
             if (playerController != null)
             {
-                playerController.SetMovementLocked(true);
+                playerController.SetTemporarySpeedMultiplier(whirlwindSpeedMultiplier);
             }
 
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
-                float percent = Mathf.Clamp01(elapsed / duration);
-                transform.position = Vector2.Lerp(start, destination, percent);
-                TemporaryVisualEffect.CreateCircle(transform.position, new Color(1f, 0.58f, 0.14f, 0.26f), 0.75f, 0.08f);
-                DamageAround(transform.position, damage, lungeHitRadius * 1.25f);
+                if (Time.time >= nextTickTime)
+                {
+                    DamageAround(transform.position, damage, whirlwindHitRadius);
+                    TemporaryVisualEffect.CreateCircle(transform.position, new Color(1f, 0.58f, 0.14f, 0.18f), whirlwindHitRadius, 0.08f);
+                    nextTickTime = Time.time + whirlwindTickInterval;
+                }
+
                 yield return null;
             }
 
-            transform.position = destination;
-            TemporaryVisualEffect.CreateCircle(destination, new Color(1f, 0.42f, 0.08f, 0.38f), 1.1f, 0.16f);
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(1f, 0.42f, 0.08f, 0.32f), whirlwindHitRadius * 1.2f, 0.16f);
             if (playerController != null)
             {
-                playerController.SetMovementLocked(false);
+                playerController.SetTemporarySpeedMultiplier(1f);
             }
 
-            activeLunge = null;
+            activeWhirlwind = null;
         }
 
         private Vector2 FindValidDestination(Vector2 origin, Vector2 direction, float range)
@@ -411,6 +433,17 @@ namespace Heroic.Player
         private bool IsValidSlot(int slotIndex)
         {
             return slotIndex >= 0 && slotIndex < movementSlots.Length && movementSlots[slotIndex] != null;
+        }
+
+        private void SetEquippedMovementDamage(MovementSkillId skillId, int damage)
+        {
+            foreach (MovementSlot slot in movementSlots)
+            {
+                if (slot != null && slot.Skill == skillId)
+                {
+                    slot.SetDamage(damage);
+                }
+            }
         }
     }
 }

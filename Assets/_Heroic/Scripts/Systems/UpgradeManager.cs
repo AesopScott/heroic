@@ -347,9 +347,69 @@ namespace Heroic.Systems
                 return "fire_burning_ground";
             }
 
+            if (choiceId.StartsWith("upgrade_cold_frost_ring"))
+            {
+                return "cold_frost_ring";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_ice_shard"))
+            {
+                return "cold_ice_shard";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_glacial_field"))
+            {
+                return "cold_glacial_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_crystal_prison"))
+            {
+                return "cold_crystal_prison";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_shatter_line"))
+            {
+                return "cold_shatter_line";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_chain_bolt"))
+            {
+                return "lightning_chain_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_static_field"))
+            {
+                return "lightning_static_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_thunder_lance"))
+            {
+                return "lightning_thunder_lance";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_spark_surge"))
+            {
+                return "lightning_spark_surge";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_storm_call"))
+            {
+                return "lightning_storm_call";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_territory_casting"))
+            {
+                return "system_territory_casting";
+            }
+
             if (choiceId.StartsWith("upgrade_movement_cloud_walk"))
             {
                 return "movement_cloud_walk";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_whirlwind"))
+            {
+                return "movement_whirlwind";
             }
 
             return string.Empty;

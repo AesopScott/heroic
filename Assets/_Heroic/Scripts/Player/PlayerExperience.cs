@@ -12,12 +12,19 @@ namespace Heroic.Player
         [SerializeField] private float thresholdGrowth = 1.35f;
         [SerializeField] private UpgradeManager upgradeManager;
 
+        private PlayerTemporaryBuffs temporaryBuffs;
+
         public event Action<int> LevelChanged;
         public event Action<int, int> ExperienceChanged;
 
         public int Level => level;
         public int CurrentExperience => currentExperience;
         public int ExperienceToNextLevel => CalculateExperienceThreshold(level);
+
+        private void Awake()
+        {
+            temporaryBuffs = GetComponent<PlayerTemporaryBuffs>();
+        }
 
         public void ConfigureLeveling(int newBaseExperienceToLevel, float newThresholdGrowth)
         {
@@ -33,7 +40,7 @@ namespace Heroic.Player
                 return;
             }
 
-            currentExperience += amount;
+            currentExperience += ModifiedExperience(amount);
 
             while (currentExperience >= ExperienceToNextLevel)
             {
@@ -59,6 +66,12 @@ namespace Heroic.Player
         private int CalculateExperienceThreshold(int targetLevel)
         {
             return Mathf.Max(1, baseExperienceToLevel * targetLevel);
+        }
+
+        private int ModifiedExperience(int amount)
+        {
+            float multiplier = temporaryBuffs != null ? temporaryBuffs.ActiveExperienceMultiplier : 1f;
+            return Mathf.Max(1, Mathf.RoundToInt(amount * multiplier));
         }
     }
 }

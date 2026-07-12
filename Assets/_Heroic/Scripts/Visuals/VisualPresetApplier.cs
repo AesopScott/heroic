@@ -19,8 +19,13 @@ namespace Heroic.Visuals
             Boss,
             MagicMissile,
             FireProjectile,
+            ColdProjectile,
             ArcaneOrb,
             ExperiencePickup,
+            HealthPickup,
+            ExperienceBoostPickup,
+            SpeedBoostPickup,
+            InvulnerabilityPickup,
             ArcaneArea
         }
 
@@ -130,6 +135,12 @@ namespace Heroic.Visuals
                     EnsureLayer("FireBoltCore", AutoSpriteVisual.Shape.Circle, new Color(1f, 0.95f, 0.42f, 0.9f), new Vector2(0.15f, 0.15f), 31, true, false, Vector2.zero, 0f, 0.1f, 10f);
                     EnsureTrail(new Color(1f, 0.38f, 0.08f, 0.78f));
                     break;
+                case Preset.ColdProjectile:
+                    ApplyVisual(visual, AutoSpriteVisual.Shape.Diamond, new Color(0.66f, 0.94f, 1f), new Vector2(0.38f, 0.24f), 30, true, false, 0.1f, 8f);
+                    EnsureLayer("IceShardHalo", AutoSpriteVisual.Shape.Ring, new Color(0.42f, 0.86f, 1f, 0.62f), new Vector2(0.54f, 0.54f), 29, true, true, Vector2.zero, 0f, 0.06f, 7f, 160f);
+                    EnsureLayer("IceShardCore", AutoSpriteVisual.Shape.Diamond, new Color(0.95f, 1f, 1f, 0.9f), new Vector2(0.18f, 0.12f), 31, true, false, Vector2.zero, 0f, 0.08f, 9f);
+                    EnsureTrail(new Color(0.48f, 0.9f, 1f, 0.72f));
+                    break;
                 case Preset.ArcaneOrb:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Ring, new Color(0.45f, 0.75f, 1f, 0.86f), new Vector2(0.35f, 0.35f), 25, true, true, 0.05f, 4f, 120f);
                     EnsureLayer("OrbCore", AutoSpriteVisual.Shape.Circle, new Color(0.88f, 1f, 1f), new Vector2(0.18f, 0.18f), 26, true, false, Vector2.zero, 0f, 0.1f, 6.4f);
@@ -138,6 +149,27 @@ namespace Heroic.Visuals
                 case Preset.ExperiencePickup:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Diamond, new Color(0.35f, 1f, 0.55f), new Vector2(0.35f, 0.35f), 15, true, true, 0.1f, 4.6f, 95f);
                     EnsureLayer("PickupSparkle", AutoSpriteVisual.Shape.Ring, new Color(0.8f, 1f, 0.72f, 0.55f), new Vector2(0.52f, 0.52f), 14, true, true, Vector2.zero, 0f, 0.08f, 5.2f, -110f);
+                    break;
+                case Preset.HealthPickup:
+                    ApplyVisual(visual, AutoSpriteVisual.Shape.Circle, new Color(0.12f, 1f, 0.42f), new Vector2(0.48f, 0.48f), 16, true, false, 0.1f, 4.2f);
+                    EnsureLayer("HealthCrossA", AutoSpriteVisual.Shape.Diamond, new Color(0.92f, 1f, 0.94f, 0.95f), new Vector2(0.12f, 0.42f), 17, false, false);
+                    EnsureLayer("HealthCrossB", AutoSpriteVisual.Shape.Diamond, new Color(0.92f, 1f, 0.94f, 0.95f), new Vector2(0.42f, 0.12f), 17, false, false);
+                    EnsureLayer("HealthRing", AutoSpriteVisual.Shape.Ring, new Color(0.62f, 1f, 0.72f, 0.55f), new Vector2(0.68f, 0.68f), 15, true, true, Vector2.zero, 0f, 0.08f, 4.6f, 90f);
+                    break;
+                case Preset.ExperienceBoostPickup:
+                    ApplyVisual(visual, AutoSpriteVisual.Shape.Diamond, new Color(0.2f, 0.72f, 1f), new Vector2(0.52f, 0.52f), 16, true, true, 0.12f, 5.2f, 160f);
+                    EnsureLayer("BoostCore", AutoSpriteVisual.Shape.Circle, new Color(0.92f, 1f, 1f, 0.88f), new Vector2(0.18f, 0.18f), 18, true, false, Vector2.zero, 0f, 0.08f, 7f);
+                    EnsureLayer("BoostRing", AutoSpriteVisual.Shape.Ring, new Color(0.5f, 0.9f, 1f, 0.58f), new Vector2(0.76f, 0.76f), 15, true, true, Vector2.zero, 0f, 0.08f, 5.4f, -150f);
+                    break;
+                case Preset.SpeedBoostPickup:
+                    ApplyVisual(visual, AutoSpriteVisual.Shape.Triangle, new Color(1f, 0.86f, 0.16f), new Vector2(0.42f, 0.62f), 16, true, true, 0.12f, 6.2f, 220f);
+                    EnsureLayer("SpeedTrailA", AutoSpriteVisual.Shape.Triangle, new Color(1f, 0.5f, 0.08f, 0.5f), new Vector2(0.58f, 0.82f), 15, true, false, new Vector2(0f, -0.08f), 180f, 0.08f, 6.4f);
+                    EnsureLayer("SpeedSpark", AutoSpriteVisual.Shape.Circle, new Color(1f, 0.98f, 0.62f, 0.86f), new Vector2(0.16f, 0.16f), 18, true, false, new Vector2(0f, 0.08f), 0f, 0.1f, 8f);
+                    break;
+                case Preset.InvulnerabilityPickup:
+                    ApplyVisual(visual, AutoSpriteVisual.Shape.Ring, new Color(1f, 0.92f, 0.28f, 0.86f), new Vector2(0.62f, 0.62f), 16, true, true, 0.08f, 4.2f, 120f);
+                    EnsureLayer("InvulnShield", AutoSpriteVisual.Shape.Diamond, new Color(1f, 0.96f, 0.62f, 0.58f), new Vector2(0.42f, 0.42f), 17, true, false, Vector2.zero, 0f, 0.07f, 5.4f);
+                    EnsureLayer("InvulnCore", AutoSpriteVisual.Shape.Circle, new Color(1f, 1f, 0.92f, 0.9f), new Vector2(0.16f, 0.16f), 18, true, false, Vector2.zero, 0f, 0.08f, 7f);
                     break;
                 case Preset.ArcaneArea:
                     ApplyVisual(visual, AutoSpriteVisual.Shape.Ring, new Color(0.35f, 0.8f, 1f, 0.45f), new Vector2(1.55f, 1.55f), 5, true, true, 0.04f, 2.6f, 35f);

@@ -32,6 +32,13 @@ namespace Heroic.Enemies
         private float nextShotTime;
         private float slowMultiplier = 1f;
         private float slowEndsAt;
+        private float freezeEndsAt;
+        private float stunEndsAt;
+
+        public bool IsSlowed => Time.time < slowEndsAt && slowMultiplier < 0.99f;
+        public bool IsFrozen => Time.time < freezeEndsAt;
+        public bool IsStunned => Time.time < stunEndsAt;
+        public bool IsColdControlled => IsSlowed || IsFrozen;
 
         public void SetTarget(Transform newTarget)
         {
@@ -66,6 +73,11 @@ namespace Heroic.Enemies
                 slowMultiplier = 1f;
             }
 
+            if (IsStunned)
+            {
+                return;
+            }
+
             if (behavior == EnemyBehavior.Shooter)
             {
                 UpdateShooter();
@@ -79,7 +91,7 @@ namespace Heroic.Enemies
         private void MoveTowardTarget()
         {
             Vector3 direction = (target.position - transform.position).normalized;
-            transform.position += direction * (moveSpeed * slowMultiplier * Time.deltaTime);
+            transform.position += direction * (moveSpeed * CurrentMovementMultiplier() * Time.deltaTime);
         }
 
         private void TryApplyContactDamage()
@@ -161,6 +173,21 @@ namespace Heroic.Enemies
         {
             slowMultiplier = Mathf.Clamp(multiplier, 0.1f, 1f);
             slowEndsAt = Time.time + Mathf.Max(0f, duration);
+        }
+
+        public void ApplyFreeze(float duration)
+        {
+            freezeEndsAt = Mathf.Max(freezeEndsAt, Time.time + Mathf.Max(0f, duration));
+        }
+
+        public void ApplyStun(float duration)
+        {
+            stunEndsAt = Mathf.Max(stunEndsAt, Time.time + Mathf.Max(0f, duration));
+        }
+
+        private float CurrentMovementMultiplier()
+        {
+            return IsFrozen || IsStunned ? 0f : slowMultiplier;
         }
     }
 }

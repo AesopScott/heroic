@@ -125,6 +125,7 @@ namespace Heroic.Editor
             RequireSceneObject<PlayerController>("PlayerController", ref errors);
             RequireSceneObject<PlayerHealth>("PlayerHealth", ref errors);
             RequireSceneObject<PlayerExperience>("PlayerExperience", ref errors);
+            RequireSceneObject<PlayerTemporaryBuffs>("PlayerTemporaryBuffs", ref errors);
             RequireSceneObject<SpellCaster>("SpellCaster", ref errors);
             RequireSceneObject<MagicMissileCaster>("MagicMissileCaster", ref errors);
             RequireSceneObject<ArcaneBlastCaster>("ArcaneBlastCaster", ref warnings, true);
@@ -133,6 +134,7 @@ namespace Heroic.Editor
             RequireSceneObject<WorldHealthBar>("WorldHealthBar", ref errors);
             RequireSceneObject<DamageNumberEmitter>("DamageNumberEmitter", ref errors);
             RequireSceneObject<HudPresenter>("HudPresenter", ref errors);
+            RequireSceneObject<CharacterStatsPanel>("CharacterStatsPanel", ref errors);
             RequireSceneObject<ObjectivePresenter>("ObjectivePresenter", ref errors);
             RequireSceneObject<DraftPresenter>("DraftPresenter", ref errors);
             RequireSceneObject<ResultsPresenter>("ResultsPresenter", ref errors);
@@ -159,6 +161,17 @@ namespace Heroic.Editor
             RequireSerializedObjectReference(hud, "experienceText", "HUD experience text", ref errors);
             RequireTopAnchoredRect("HealthBar", "HUD health bar", ref errors);
             RequireTopAnchoredRect("ExperienceBar", "HUD experience bar", ref errors);
+
+            CharacterStatsPanel characterStats = FindSceneComponent<CharacterStatsPanel>();
+            RequireSerializedObjectReference(characterStats, "playerHealth", "character stats player health", ref errors);
+            RequireSerializedObjectReference(characterStats, "playerExperience", "character stats player experience", ref errors);
+            RequireSerializedObjectReference(characterStats, "buildState", "character stats build state", ref errors);
+            RequireSerializedObjectReference(characterStats, "movementCaster", "character stats movement caster", ref errors);
+            RequireSerializedObjectReference(characterStats, "temporaryBuffs", "character stats temporary buffs", ref errors);
+            RequireSerializedObjectReference(characterStats, "spellStats", "character stats spell stats", ref errors);
+            RequireSerializedObjectReference(characterStats, "territoryCasting", "character stats territory casting", ref errors);
+            RequireSerializedObjectReference(characterStats, "skillListText", "character stats skill list", ref errors);
+            RequireSerializedObjectReference(characterStats, "bonusListText", "character stats bonus list", ref errors);
 
             UIManager uiManager = FindSceneComponent<UIManager>();
             RequireSerializedObjectReference(uiManager, "gameUiRoot", "UI manager game root", ref errors);

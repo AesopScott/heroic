@@ -12,10 +12,11 @@ namespace Heroic.Player
         private Vector2 lastMoveDirection = Vector2.right;
         private bool movementLocked;
         private float temporarySpeedMultiplier = 1f;
+        private float lootSpeedMultiplier = 1f;
 
         public Vector2 LastMoveDirection => lastMoveDirection;
         public float BaseMoveSpeed => baseMoveSpeed;
-        public float CurrentMoveSpeed => baseMoveSpeed * temporarySpeedMultiplier;
+        public float CurrentMoveSpeed => baseMoveSpeed * temporarySpeedMultiplier * lootSpeedMultiplier;
 
         private void Awake()
         {
@@ -55,6 +56,11 @@ namespace Heroic.Player
         public void SetTemporarySpeedMultiplier(float multiplier)
         {
             temporarySpeedMultiplier = Mathf.Max(0f, multiplier);
+        }
+
+        public void SetLootSpeedMultiplier(float multiplier)
+        {
+            lootSpeedMultiplier = Mathf.Max(0f, multiplier);
         }
 
         public void SetMovementLocked(bool isLocked)

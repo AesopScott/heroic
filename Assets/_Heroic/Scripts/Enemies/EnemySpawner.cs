@@ -16,7 +16,7 @@ namespace Heroic.Enemies
         [SerializeField] private WaveDefinition[] waves = new WaveDefinition[0];
         [SerializeField] private float spawnRadius = 8f;
         [SerializeField] private float spawnInterval = 2f;
-        [SerializeField] private float spawnRateMultiplier = 0.7f;
+        [SerializeField] private float spawnRateMultiplier = 0.35f;
         [SerializeField] private float packSpacing = 0.9f;
 
         private float nextSpawnTime;
