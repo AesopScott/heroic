@@ -17,7 +17,6 @@ namespace Heroic.UI
         private CanvasGroup canvasGroup;
         private RectTransform rectTransform;
         private Outline activeOutline;
-        private static readonly string MovementIconRoot = "MovementIcons/";
         private const float SlotSize = 144f;
 
         private void Awake()
@@ -172,23 +171,16 @@ namespace Heroic.UI
                 MovementCaster.MovementSkillId.Teleport => "movement_teleport",
                 MovementCaster.MovementSkillId.Whirlwind => "movement_whirlwind",
                 MovementCaster.MovementSkillId.CloudWalk => "movement_cloud_walk",
+                MovementCaster.MovementSkillId.Invisibility => "movement_invisibility",
+                MovementCaster.MovementSkillId.Stoneskin => "movement_stoneskin",
+                MovementCaster.MovementSkillId.Tunnel => "movement_tunnel",
+                MovementCaster.MovementSkillId.Flight => "movement_flight",
                 _ => string.Empty
             };
 
             if (!string.IsNullOrEmpty(resourceName))
             {
-                Sprite sprite = Resources.Load<Sprite>(MovementIconRoot + resourceName);
-                if (sprite != null)
-                {
-                    return sprite;
-                }
-
-                Texture2D texture = Resources.Load<Texture2D>(MovementIconRoot + resourceName);
-                if (texture != null)
-                {
-                    Rect rect = new Rect(0f, 0f, texture.width, texture.height);
-                    return Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), 384f);
-                }
+                return SkillIconRegistry.GetIcon(resourceName);
             }
 
             return Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd");

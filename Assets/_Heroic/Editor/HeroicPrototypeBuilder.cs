@@ -661,7 +661,8 @@ namespace Heroic.Editor
             SetObject(hud, "healthFillRect", GetSliderFillRect(healthSlider));
             SetObject(hud, "experienceFillRect", GetSliderFillRect(experienceSlider));
 
-            CreateObjectivePanel(gameRoot.transform, runManager, experience, bossSpawner);
+            SkillSideHudPresenter sideHud = gameRoot.AddComponent<SkillSideHudPresenter>();
+            SetObject(sideHud, "buildState", buildState);
 
             for (int i = 0; i < 3; i++)
             {
@@ -835,46 +836,6 @@ namespace Heroic.Editor
             controls.fontSize = 17f;
             controls.color = new Color(0.72f, 0.88f, 0.92f);
             controls.textWrappingMode = TextWrappingModes.Normal;
-        }
-
-        private static void CreateObjectivePanel(Transform parent, RunManager runManager, PlayerExperience experience, BossSpawner bossSpawner)
-        {
-            GameObject panel = new GameObject("ObjectivePanel");
-            panel.transform.SetParent(parent, false);
-            RectTransform panelRect = panel.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(0f, 1f);
-            panelRect.anchorMax = new Vector2(0f, 1f);
-            panelRect.pivot = new Vector2(0f, 1f);
-            panelRect.sizeDelta = new Vector2(340f, 132f);
-            panelRect.anchoredPosition = new Vector2(18f, -18f);
-            Image panelImage = panel.AddComponent<Image>();
-            panelImage.color = new Color(0.005f, 0.014f, 0.02f, 0.64f);
-
-            TMP_Text goalText = CreateText("GoalText", panel.transform, "DEMO GOAL\nSurvive. Build the spellbook.\nKill the Arcane Warden.", new Vector2(312f, 60f), new Vector2(14f, -12f));
-            AnchorTopLeft(goalText.rectTransform, new Vector2(14f, -12f));
-            goalText.alignment = TextAlignmentOptions.TopLeft;
-            goalText.fontSize = 14f;
-            goalText.color = new Color(0.82f, 0.96f, 1f);
-
-            TMP_Text bossText = CreateText("BossText", panel.transform, "Boss in 02:00", new Vector2(312f, 24f), new Vector2(14f, -72f));
-            AnchorTopLeft(bossText.rectTransform, new Vector2(14f, -74f));
-            bossText.alignment = TextAlignmentOptions.Left;
-            bossText.fontSize = 15f;
-            bossText.color = new Color(1f, 0.72f, 0.9f);
-
-            TMP_Text upgradeText = CreateText("UpgradeText", panel.transform, "Next draft: 0/5 XP", new Vector2(312f, 24f), new Vector2(14f, -100f));
-            AnchorTopLeft(upgradeText.rectTransform, new Vector2(14f, -102f));
-            upgradeText.alignment = TextAlignmentOptions.Left;
-            upgradeText.fontSize = 15f;
-            upgradeText.color = new Color(0.72f, 1f, 0.78f);
-
-            ObjectivePresenter objective = panel.AddComponent<ObjectivePresenter>();
-            SetObject(objective, "runManager", runManager);
-            SetObject(objective, "playerExperience", experience);
-            SetObject(objective, "bossSpawner", bossSpawner);
-            SetObject(objective, "goalText", goalText);
-            SetObject(objective, "bossText", bossText);
-            SetObject(objective, "upgradeText", upgradeText);
         }
 
         private static Canvas CreateCanvas(string name)

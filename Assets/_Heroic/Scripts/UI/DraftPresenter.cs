@@ -188,6 +188,7 @@ namespace Heroic.UI
         {
             Color barColor = ResolveBarColor(choice);
             Color tierColor = ResolveTierColor(choice);
+            string skillId = SkillIconRegistry.ResolveSkillId(choice);
 
             if (index < choiceBars.Length && choiceBars[index] != null)
             {
@@ -206,18 +207,21 @@ namespace Heroic.UI
 
             if (index < skillIconBackdrops.Length && skillIconBackdrops[index] != null)
             {
+                skillIconBackdrops[index].sprite = SkillIconRegistry.GetIcon(skillId);
+                skillIconBackdrops[index].preserveAspect = true;
+                skillIconBackdrops[index].type = Image.Type.Simple;
                 skillIconBackdrops[index].color = tierColor;
             }
 
             if (index < skillIconLabels.Length && skillIconLabels[index] != null)
             {
-                skillIconLabels[index].text = ResolveSkillIcon(choice.Id);
-                skillIconLabels[index].color = IsBright(tierColor) ? new Color(0.03f, 0.04f, 0.05f) : Color.white;
+                skillIconLabels[index].text = string.Empty;
+                skillIconLabels[index].color = Color.clear;
             }
 
             if (index < elementNameLabels.Length && elementNameLabels[index] != null)
             {
-                elementNameLabels[index].text = ResolveElementName(choice);
+                elementNameLabels[index].text = SkillIconRegistry.GetElementName(skillId);
                 elementNameLabels[index].color = barColor;
             }
         }
@@ -225,7 +229,7 @@ namespace Heroic.UI
         private Color ResolveBarColor(UpgradeManager.DraftChoice choice)
         {
             string id = choice.Id.ToLowerInvariant();
-            string skillId = ResolveSkillId(choice.Id).ToLowerInvariant();
+            string skillId = SkillIconRegistry.ResolveSkillId(choice.Id).ToLowerInvariant();
 
             if (choice.Category == UpgradeManager.UpgradeCategory.Movement || id.StartsWith("movement_") || skillId.StartsWith("movement_"))
             {
@@ -293,62 +297,6 @@ namespace Heroic.UI
             }
         }
 
-        private static string ResolveElementName(UpgradeManager.DraftChoice choice)
-        {
-            string id = ResolveSkillId(choice.Id).ToLowerInvariant();
-            if (choice.Category == UpgradeManager.UpgradeCategory.Movement || id.StartsWith("movement_"))
-            {
-                return "Movement";
-            }
-
-            if (choice.Category == UpgradeManager.UpgradeCategory.System || id.StartsWith("system_"))
-            {
-                return "System";
-            }
-
-            if (id.StartsWith("arcane_"))
-            {
-                return "Arcane";
-            }
-
-            if (id.StartsWith("fire_"))
-            {
-                return "Fire";
-            }
-
-            if (id.StartsWith("cold_"))
-            {
-                return "Cold";
-            }
-
-            if (id.StartsWith("lightning_"))
-            {
-                return "Lightning";
-            }
-
-            if (id.StartsWith("earth_"))
-            {
-                return "Earth";
-            }
-
-            if (id.StartsWith("mind_"))
-            {
-                return "Mind";
-            }
-
-            if (id.StartsWith("blood_"))
-            {
-                return "Blood";
-            }
-
-            if (id.StartsWith("poison_"))
-            {
-                return "Poison";
-            }
-
-            return choice.Category.ToString();
-        }
-
         private int ResolveDisplayedTier(UpgradeManager.DraftChoice choice)
         {
             if (choice.Category != UpgradeManager.UpgradeCategory.Boost || buildState == null)
@@ -356,7 +304,7 @@ namespace Heroic.UI
                 return 1;
             }
 
-            string skillId = ResolveSkillId(choice.Id);
+            string skillId = SkillIconRegistry.ResolveSkillId(choice.Id);
             int currentTier = buildState.GetSkillPathTier(skillId, choice.Id);
             return Mathf.Clamp(currentTier + 1, 1, 5);
         }
