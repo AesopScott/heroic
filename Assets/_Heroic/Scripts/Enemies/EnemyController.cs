@@ -32,6 +32,20 @@ namespace Heroic.Enemies
         private float nextShotTime;
         private float slowMultiplier = 1f;
         private float slowEndsAt;
+        private float freezeEndsAt;
+        private float stunEndsAt;
+        private float fearEndsAt;
+        private float confuseEndsAt;
+        private float nextConfuseDirectionTime;
+        private Vector2 fearSource;
+        private Vector2 confusedDirection = Vector2.right;
+
+        public bool IsSlowed => Time.time < slowEndsAt && slowMultiplier < 0.99f;
+        public bool IsFrozen => Time.time < freezeEndsAt;
+        public bool IsStunned => Time.time < stunEndsAt;
+        public bool IsColdControlled => IsSlowed || IsFrozen;
+        public bool IsFeared => Time.time < fearEndsAt;
+        public bool IsConfused => Time.time < confuseEndsAt;
 
         public void SetTarget(Transform newTarget)
         {
@@ -66,6 +80,11 @@ namespace Heroic.Enemies
                 slowMultiplier = 1f;
             }
 
+            if (IsStunned)
+            {
+                return;
+            }
+
             if (behavior == EnemyBehavior.Thrower)
             {
                 UpdateThrower();
@@ -78,8 +97,34 @@ namespace Heroic.Enemies
 
         private void MoveTowardTarget()
         {
-            Vector3 direction = (target.position - transform.position).normalized;
-            transform.position += direction * (moveSpeed * slowMultiplier * Time.deltaTime);
+            Vector3 direction = ResolveMovementDirection();
+            transform.position += direction * (moveSpeed * CurrentMovementMultiplier() * Time.deltaTime);
+        }
+
+        private Vector2 ResolveMovementDirection()
+        {
+            if (IsFeared)
+            {
+                return ((Vector2)transform.position - fearSource).normalized;
+            }
+
+            if (IsConfused)
+            {
+                if (Time.time >= nextConfuseDirectionTime)
+                {
+                    confusedDirection = UnityEngine.Random.insideUnitCircle.normalized;
+                    if (confusedDirection.sqrMagnitude <= 0.001f)
+                    {
+                        confusedDirection = Vector2.right;
+                    }
+
+                    nextConfuseDirectionTime = Time.time + 0.45f;
+                }
+
+                return confusedDirection;
+            }
+
+            return ((Vector2)target.position - (Vector2)transform.position).normalized;
         }
 
         private void TryApplyContactDamage()
@@ -128,6 +173,12 @@ namespace Heroic.Enemies
 
             if (Time.time >= nextShotTime && distance <= ThrowerRange)
             {
+                if (IsFeared || IsConfused)
+                {
+                    nextShotTime = Time.time + ThrowerFireInterval;
+                    return;
+                }
+
                 FireAtCurrentPlayerPosition();
                 nextShotTime = Time.time + ThrowerFireInterval;
             }
@@ -162,6 +213,32 @@ namespace Heroic.Enemies
             slowMultiplier = Mathf.Clamp(multiplier, 0.1f, 1f);
             slowEndsAt = Time.time + Mathf.Max(0f, duration);
         }
+
+        public void ApplyFreeze(float duration)
+        {
+            freezeEndsAt = Mathf.Max(freezeEndsAt, Time.time + Mathf.Max(0f, duration));
+        }
+
+        public void ApplyStun(float duration)
+        {
+            stunEndsAt = Mathf.Max(stunEndsAt, Time.time + Mathf.Max(0f, duration));
+        }
+
+        public void ApplyFear(Vector2 source, float duration)
+        {
+            fearSource = source;
+            fearEndsAt = Mathf.Max(fearEndsAt, Time.time + Mathf.Max(0f, duration));
+        }
+
+        public void ApplyConfuse(float duration)
+        {
+            confuseEndsAt = Mathf.Max(confuseEndsAt, Time.time + Mathf.Max(0f, duration));
+            nextConfuseDirectionTime = 0f;
+        }
+
+        private float CurrentMovementMultiplier()
+        {
+            return IsFrozen || IsStunned ? 0f : slowMultiplier;
+        }
     }
 }
-

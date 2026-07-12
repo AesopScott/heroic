@@ -47,6 +47,11 @@ namespace Heroic.Player
                 nextReadyTime = Time.time + cooldown;
             }
 
+            public void SetDamage(int newDamage)
+            {
+                damage = Mathf.Max(0, newDamage);
+            }
+
             private void ApplyDefaultsForSkill()
             {
                 switch (skill)
@@ -102,8 +107,10 @@ namespace Heroic.Player
         private PlayerController playerController;
         private CloudWalkController cloudWalkController;
         private Coroutine activeLunge;
+        private int activeSlotIndex;
 
         public event Action<MovementSkillId> MovementActivated;
+        public event Action<int> ActiveSlotChanged;
 
         private void Awake()
         {
@@ -137,23 +144,35 @@ namespace Heroic.Player
             {
                 movementSlots[2].Equip(MovementSkillId.Teleport);
             }
+
+            SelectFirstAvailableSlot();
         }
 
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                TryActivateSlot(0);
+                SelectSlot(0);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha2))
             {
-                TryActivateSlot(1);
+                SelectSlot(1);
             }
 
             if (Input.GetKeyDown(KeyCode.Alpha3))
             {
-                TryActivateSlot(2);
+                SelectSlot(2);
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                TryActivateSlot(activeSlotIndex);
+            }
+
+            if (!IsActiveSlotUsable())
+            {
+                SelectFirstAvailableSlot();
             }
         }
 
@@ -177,6 +196,11 @@ namespace Heroic.Player
             {
                 cloudWalkController?.EnableCloudWalk();
             }
+
+            if (!IsActiveSlotEquipped())
+            {
+                SelectSlot(slotIndex);
+            }
         }
 
         public MovementSkillId GetEquippedSkill(int slotIndex)
@@ -192,6 +216,32 @@ namespace Heroic.Player
         public float GetCooldown(int slotIndex)
         {
             return IsValidSlot(slotIndex) ? movementSlots[slotIndex].Cooldown : 0f;
+        }
+
+        public int GetActiveSlotIndex()
+        {
+            return activeSlotIndex;
+        }
+
+        public bool IsSlotActive(int slotIndex)
+        {
+            return slotIndex == activeSlotIndex;
+        }
+
+        private void SelectSlot(int slotIndex)
+        {
+            if (!IsValidSlot(slotIndex) || movementSlots[slotIndex].Skill == MovementSkillId.None)
+            {
+                return;
+            }
+
+            if (activeSlotIndex == slotIndex)
+            {
+                return;
+            }
+
+            activeSlotIndex = slotIndex;
+            ActiveSlotChanged?.Invoke(activeSlotIndex);
         }
 
         private void TryActivateSlot(int slotIndex)
@@ -212,7 +262,30 @@ namespace Heroic.Player
             {
                 slot.StartCooldown();
                 MovementActivated?.Invoke(slot.Skill);
+                SelectFirstAvailableSlot();
             }
+        }
+
+        private void SelectFirstAvailableSlot()
+        {
+            for (int i = 0; i < movementSlots.Length; i++)
+            {
+                if (IsValidSlot(i) && movementSlots[i].Skill != MovementSkillId.None && movementSlots[i].IsReady)
+                {
+                    SelectSlot(i);
+                    return;
+                }
+            }
+        }
+
+        private bool IsActiveSlotEquipped()
+        {
+            return IsValidSlot(activeSlotIndex) && movementSlots[activeSlotIndex].Skill != MovementSkillId.None;
+        }
+
+        private bool IsActiveSlotUsable()
+        {
+            return IsValidSlot(activeSlotIndex) && movementSlots[activeSlotIndex].Skill != MovementSkillId.None && movementSlots[activeSlotIndex].IsReady;
         }
 
         private bool Activate(MovementSlot slot)
@@ -306,6 +379,13 @@ namespace Heroic.Player
         public void SetCloudWalkKnockbackTier(int tier)
         {
             cloudWalkController?.SetKnockbackTier(tier);
+        }
+
+        public void SetWhirlwindGaleTier(int tier)
+        {
+            int clampedTier = Mathf.Clamp(tier, 0, 5);
+            int[] damages = { 18, 22, 27, 33, 40, 48 };
+            SetEquippedMovementDamage(MovementSkillId.Whirlwind, damages[clampedTier]);
         }
 
         private IEnumerator LungeRoutine(Vector2 destination, int damage)
@@ -411,6 +491,17 @@ namespace Heroic.Player
         private bool IsValidSlot(int slotIndex)
         {
             return slotIndex >= 0 && slotIndex < movementSlots.Length && movementSlots[slotIndex] != null;
+        }
+
+        private void SetEquippedMovementDamage(MovementSkillId skillId, int damage)
+        {
+            foreach (MovementSlot slot in movementSlots)
+            {
+                if (slot != null && slot.Skill == skillId)
+                {
+                    slot.SetDamage(damage);
+                }
+            }
         }
     }
 }

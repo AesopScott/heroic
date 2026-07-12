@@ -347,9 +347,169 @@ namespace Heroic.Systems
                 return "fire_burning_ground";
             }
 
+            if (choiceId.StartsWith("upgrade_cold_frost_ring"))
+            {
+                return "cold_frost_ring";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_ice_shard"))
+            {
+                return "cold_ice_shard";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_glacial_field"))
+            {
+                return "cold_glacial_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_crystal_prison"))
+            {
+                return "cold_crystal_prison";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_shatter_line"))
+            {
+                return "cold_shatter_line";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_chain_bolt"))
+            {
+                return "lightning_chain_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_static_field"))
+            {
+                return "lightning_static_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_thunder_lance"))
+            {
+                return "lightning_thunder_lance";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_spark_surge"))
+            {
+                return "lightning_spark_surge";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_storm_call"))
+            {
+                return "lightning_storm_call";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_stone_spike"))
+            {
+                return "earth_stone_spike";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_boulder_toss"))
+            {
+                return "earth_boulder_toss";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_earth_wall"))
+            {
+                return "earth_earth_wall";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_quake"))
+            {
+                return "earth_quake";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_mud_trap"))
+            {
+                return "earth_mud_trap";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_psychic_lance"))
+            {
+                return "mind_psychic_lance";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_fear_wave"))
+            {
+                return "mind_fear_wave";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_illusion_clone"))
+            {
+                return "mind_illusion_clone";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_confuse"))
+            {
+                return "mind_confuse";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_mind_crush"))
+            {
+                return "mind_mind_crush";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_blood_bolt"))
+            {
+                return "blood_blood_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_sanguine_pact"))
+            {
+                return "blood_sanguine_pact";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_blood_nova"))
+            {
+                return "blood_blood_nova";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_leech_bind"))
+            {
+                return "blood_leech_bind";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_crimson_frenzy"))
+            {
+                return "blood_crimson_frenzy";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_poison_dart"))
+            {
+                return "poison_poison_dart";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_toxic_cloud"))
+            {
+                return "poison_toxic_cloud";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_venom_trail"))
+            {
+                return "poison_venom_trail";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_infection"))
+            {
+                return "poison_infection";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_rot_bloom"))
+            {
+                return "poison_rot_bloom";
+            }
+
+            if (choiceId.StartsWith("upgrade_system_territory_casting"))
+            {
+                return "system_territory_casting";
+            }
+
             if (choiceId.StartsWith("upgrade_movement_cloud_walk"))
             {
                 return "movement_cloud_walk";
+            }
+
+            if (choiceId.StartsWith("upgrade_movement_whirlwind"))
+            {
+                return "movement_whirlwind";
             }
 
             return string.Empty;

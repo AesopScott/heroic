@@ -13,6 +13,12 @@ namespace Heroic.Systems
         [SerializeField] private TerritoryCastingController territoryCasting;
         [SerializeField] private ArcaneUpgradeApplier arcaneUpgradeApplier;
         [SerializeField] private FireUpgradeApplier fireUpgradeApplier;
+        [SerializeField] private ColdUpgradeApplier coldUpgradeApplier;
+        [SerializeField] private LightningUpgradeApplier lightningUpgradeApplier;
+        [SerializeField] private EarthUpgradeApplier earthUpgradeApplier;
+        [SerializeField] private MindUpgradeApplier mindUpgradeApplier;
+        [SerializeField] private BloodUpgradeApplier bloodUpgradeApplier;
+        [SerializeField] private PoisonUpgradeApplier poisonUpgradeApplier;
 
         private void Awake()
         {
@@ -29,6 +35,36 @@ namespace Heroic.Systems
             if (fireUpgradeApplier == null)
             {
                 fireUpgradeApplier = GetComponent<FireUpgradeApplier>();
+            }
+
+            if (coldUpgradeApplier == null)
+            {
+                coldUpgradeApplier = GetComponent<ColdUpgradeApplier>();
+            }
+
+            if (lightningUpgradeApplier == null)
+            {
+                lightningUpgradeApplier = GetComponent<LightningUpgradeApplier>();
+            }
+
+            if (earthUpgradeApplier == null)
+            {
+                earthUpgradeApplier = GetComponent<EarthUpgradeApplier>();
+            }
+
+            if (mindUpgradeApplier == null)
+            {
+                mindUpgradeApplier = GetComponent<MindUpgradeApplier>();
+            }
+
+            if (bloodUpgradeApplier == null)
+            {
+                bloodUpgradeApplier = GetComponent<BloodUpgradeApplier>();
+            }
+
+            if (poisonUpgradeApplier == null)
+            {
+                poisonUpgradeApplier = GetComponent<PoisonUpgradeApplier>();
             }
         }
 
@@ -67,13 +103,61 @@ namespace Heroic.Systems
                 return;
             }
 
+            if (choice.Id.StartsWith("upgrade_cold_"))
+            {
+                ApplyColdUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("upgrade_lightning_"))
+            {
+                ApplyLightningUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("upgrade_earth_"))
+            {
+                ApplyEarthUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("upgrade_mind_"))
+            {
+                ApplyMindUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("upgrade_blood_"))
+            {
+                ApplyBloodUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("upgrade_poison_"))
+            {
+                ApplyPoisonUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("upgrade_system_territory_casting"))
+            {
+                ApplyTerritoryCastingUpgrade(choice.Id);
+                return;
+            }
+
             if (choice.Id.StartsWith("upgrade_movement_cloud_walk"))
             {
                 ApplyCloudWalkUpgrade(choice.Id);
                 return;
             }
 
-            if (choice.Id.StartsWith("arcane_") || choice.Id.StartsWith("fire_"))
+            if (choice.Id.StartsWith("upgrade_movement_whirlwind"))
+            {
+                ApplyWhirlwindUpgrade(choice.Id);
+                return;
+            }
+
+            if (choice.Id.StartsWith("arcane_") || choice.Id.StartsWith("fire_") || choice.Id.StartsWith("cold_") || choice.Id.StartsWith("lightning_") || choice.Id.StartsWith("earth_") || choice.Id.StartsWith("mind_") || choice.Id.StartsWith("blood_") || choice.Id.StartsWith("poison_"))
             {
                 buildState?.LearnSkill(choice.Id);
                 spellCaster?.EnableSkill(choice.Id);
@@ -137,6 +221,90 @@ namespace Heroic.Systems
             fireUpgradeApplier?.Apply(choiceId, tier);
         }
 
+        private void ApplyColdUpgrade(string choiceId)
+        {
+            string skillId = ResolveColdSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            coldUpgradeApplier?.Apply(choiceId, tier);
+        }
+
+        private void ApplyLightningUpgrade(string choiceId)
+        {
+            string skillId = ResolveLightningSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            lightningUpgradeApplier?.Apply(choiceId, tier);
+        }
+
+        private void ApplyEarthUpgrade(string choiceId)
+        {
+            string skillId = ResolveEarthSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            earthUpgradeApplier?.Apply(choiceId, tier);
+        }
+
+        private void ApplyMindUpgrade(string choiceId)
+        {
+            string skillId = ResolveMindSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            mindUpgradeApplier?.Apply(choiceId, tier);
+        }
+
+        private void ApplyBloodUpgrade(string choiceId)
+        {
+            string skillId = ResolveBloodSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            bloodUpgradeApplier?.Apply(choiceId, tier);
+        }
+
+        private void ApplyPoisonUpgrade(string choiceId)
+        {
+            string skillId = ResolvePoisonSkillId(choiceId);
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            spellCaster?.EnableSkill(skillId);
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            poisonUpgradeApplier?.Apply(choiceId, tier);
+        }
+
         private string ResolveArcaneSkillId(string choiceId)
         {
             if (choiceId.StartsWith("upgrade_arcane_magic_missile"))
@@ -187,6 +355,219 @@ namespace Heroic.Systems
             return "fire_unknown";
         }
 
+        private string ResolveColdSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_cold_frost_ring"))
+            {
+                return "cold_frost_ring";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_ice_shard"))
+            {
+                return "cold_ice_shard";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_glacial_field"))
+            {
+                return "cold_glacial_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_crystal_prison"))
+            {
+                return "cold_crystal_prison";
+            }
+
+            if (choiceId.StartsWith("upgrade_cold_shatter_line"))
+            {
+                return "cold_shatter_line";
+            }
+
+            return "cold_unknown";
+        }
+
+        private string ResolveLightningSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_lightning_chain_bolt"))
+            {
+                return "lightning_chain_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_static_field"))
+            {
+                return "lightning_static_field";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_thunder_lance"))
+            {
+                return "lightning_thunder_lance";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_spark_surge"))
+            {
+                return "lightning_spark_surge";
+            }
+
+            if (choiceId.StartsWith("upgrade_lightning_storm_call"))
+            {
+                return "lightning_storm_call";
+            }
+
+            return "lightning_unknown";
+        }
+
+        private string ResolveEarthSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_earth_stone_spike"))
+            {
+                return "earth_stone_spike";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_boulder_toss"))
+            {
+                return "earth_boulder_toss";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_earth_wall"))
+            {
+                return "earth_earth_wall";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_quake"))
+            {
+                return "earth_quake";
+            }
+
+            if (choiceId.StartsWith("upgrade_earth_mud_trap"))
+            {
+                return "earth_mud_trap";
+            }
+
+            return "earth_unknown";
+        }
+
+        private string ResolveMindSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_mind_psychic_lance"))
+            {
+                return "mind_psychic_lance";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_fear_wave"))
+            {
+                return "mind_fear_wave";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_illusion_clone"))
+            {
+                return "mind_illusion_clone";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_confuse"))
+            {
+                return "mind_confuse";
+            }
+
+            if (choiceId.StartsWith("upgrade_mind_mind_crush"))
+            {
+                return "mind_mind_crush";
+            }
+
+            return "mind_unknown";
+        }
+
+        private string ResolveBloodSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_blood_blood_bolt"))
+            {
+                return "blood_blood_bolt";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_sanguine_pact"))
+            {
+                return "blood_sanguine_pact";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_blood_nova"))
+            {
+                return "blood_blood_nova";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_leech_bind"))
+            {
+                return "blood_leech_bind";
+            }
+
+            if (choiceId.StartsWith("upgrade_blood_crimson_frenzy"))
+            {
+                return "blood_crimson_frenzy";
+            }
+
+            return "blood_unknown";
+        }
+
+        private string ResolvePoisonSkillId(string choiceId)
+        {
+            if (choiceId.StartsWith("upgrade_poison_poison_dart"))
+            {
+                return "poison_poison_dart";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_toxic_cloud"))
+            {
+                return "poison_toxic_cloud";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_venom_trail"))
+            {
+                return "poison_venom_trail";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_infection"))
+            {
+                return "poison_infection";
+            }
+
+            if (choiceId.StartsWith("upgrade_poison_rot_bloom"))
+            {
+                return "poison_rot_bloom";
+            }
+
+            return "poison_unknown";
+        }
+
+        private void ApplyTerritoryCastingUpgrade(string choiceId)
+        {
+            const string skillId = "system_territory_casting";
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+            if (choiceId == "upgrade_system_territory_casting_more_territories")
+            {
+                territoryCasting?.SetActiveZoneCount(Value(tier, 7, 8, 9, 10, 12));
+            }
+        }
+
+        private int Value(int tier, int basic, int advanced, int expert, int master, int grandmaster)
+        {
+            switch (Mathf.Clamp(tier, 1, 5))
+            {
+                case 1:
+                    return basic;
+                case 2:
+                    return advanced;
+                case 3:
+                    return expert;
+                case 4:
+                    return master;
+                default:
+                    return grandmaster;
+            }
+        }
+
         private void ApplyCloudWalkUpgrade(string choiceId)
         {
             const string skillId = "movement_cloud_walk";
@@ -209,6 +590,23 @@ namespace Heroic.Systems
             else if (choiceId == "upgrade_movement_cloud_walk_knockback")
             {
                 movementCaster?.SetCloudWalkKnockbackTier(tier);
+            }
+        }
+
+        private void ApplyWhirlwindUpgrade(string choiceId)
+        {
+            const string skillId = "movement_whirlwind";
+            if (buildState == null || !buildState.HasSkill(skillId))
+            {
+                return;
+            }
+
+            buildState.UpgradeSkillPath(skillId, choiceId);
+            int tier = buildState.GetSkillPathTier(skillId, choiceId);
+
+            if (choiceId == "upgrade_movement_whirlwind_gale")
+            {
+                movementCaster?.SetWhirlwindGaleTier(tier);
             }
         }
 
