@@ -101,7 +101,15 @@ namespace Heroic.Systems
             }
 
             ChoiceApplied?.Invoke(selected);
-            CloseDraft();
+            RemoveChoicesInLane(selected);
+
+            if (currentChoices.Count == 0)
+            {
+                CloseDraft();
+                return;
+            }
+
+            DraftOpened?.Invoke(currentChoices, CurrentDraftIncludesMovement);
         }
 
         public void CloseDraft()
@@ -183,6 +191,34 @@ namespace Heroic.Systems
             int index = UnityEngine.Random.Range(0, choices.Count);
             currentChoices.Add(choices[index]);
             choices.RemoveAt(index);
+        }
+
+        private void RemoveChoicesInLane(DraftChoice selected)
+        {
+            ChoiceLane selectedLane = ResolveLane(selected);
+            currentChoices.RemoveAll(choice => ResolveLane(choice) == selectedLane);
+        }
+
+        private enum ChoiceLane
+        {
+            Ability,
+            Movement,
+            System
+        }
+
+        private static ChoiceLane ResolveLane(DraftChoice choice)
+        {
+            if (choice.Category == UpgradeCategory.Movement)
+            {
+                return ChoiceLane.Movement;
+            }
+
+            if (choice.Category == UpgradeCategory.System || choice.Category == UpgradeCategory.Boost)
+            {
+                return ChoiceLane.System;
+            }
+
+            return ChoiceLane.Ability;
         }
 
         private bool IsChoiceEligible(DraftChoice choice, bool includeMovementChoice, bool includeSystemChoice)
