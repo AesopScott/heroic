@@ -479,6 +479,7 @@ namespace Heroic.Editor
             PlayerVisualController visual = player.AddComponent<PlayerVisualController>();
             SetObject(visual, "levelOneTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Player I.png"));
             SetObject(visual, "levelTwoTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Player II.png"));
+            SetObject(visual, "levelSixTexture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Player VI.png"));
             player.AddComponent<HitFlashVisual>();
             player.AddComponent<WorldHealthBar>();
             player.AddComponent<DamageNumberEmitter>();

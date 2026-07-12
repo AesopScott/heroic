@@ -61,3 +61,7 @@
 - 2026-07-12T13:18:00-06:00: Unity/WebGL rebuild completed successfully after the player visual update; local browser host remains `http://127.0.0.1:5239/`.
 - 2026-07-12T13:28:00-06:00: Player robe tint now accumulates and blends every gathered school or boost color instead of replacing the previous color, so the robe evolves with the full build.
 - 2026-07-12T13:28:00-06:00: Unity/WebGL rebuild completed successfully after the robe blend update; local browser host remains `http://127.0.0.1:5239/`.
+- 2026-07-12T13:38:00-06:00: Player level 6 now uses `Assets/mobs/Player VI.png` while preserving the accumulated robe tint, so the art can add the beard without changing the color mixing behavior.
+- 2026-07-12T13:38:00-06:00: Unity/WebGL rebuild completed successfully after the level 6 player art update; local browser host remains `http://127.0.0.1:5239/`.
+- 2026-07-12T13:48:00-06:00: Player visuals now cycle the 4-frame player sheets instead of stacking all art at once, Crash sprites face the player horizontally, and the mob/player PNGs were converted to transparent cutouts from their white backgrounds.
+- 2026-07-12T13:48:00-06:00: Unity/WebGL rebuild completed successfully after the sprite-cycle and cutout update; local browser host remains `http://127.0.0.1:5239/`.

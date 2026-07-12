@@ -1,4 +1,5 @@
 using UnityEngine;
+using Heroic.Player;
 
 namespace Heroic.Visuals
 {
@@ -13,15 +14,18 @@ namespace Heroic.Visuals
         [SerializeField] private float pixelsPerUnit = 384f;
         [SerializeField] private Vector2 pivotNormalized = new Vector2(0.5f, 0.18f);
         [SerializeField] private Vector2 worldScale = new Vector2(1.12f, 1.12f);
+        [SerializeField] private bool facePlayer = true;
 
         private SpriteRenderer spriteRenderer;
         private Sprite[] frames;
         private int frameIndex;
         private float nextFrameTime;
+        private Transform playerTransform;
 
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
+            playerTransform = FindAnyObjectByType<PlayerController>()?.transform;
             BuildFrames();
 
             spriteRenderer.sortingOrder = sortingOrder;
@@ -38,12 +42,14 @@ namespace Heroic.Visuals
         {
             if (frames == null || frames.Length < 2 || Time.time < nextFrameTime)
             {
+                UpdateFacing();
                 return;
             }
 
             frameIndex = (frameIndex + 1) % frames.Length;
             spriteRenderer.sprite = frames[frameIndex];
             nextFrameTime = Time.time + secondsPerFrame;
+            UpdateFacing();
         }
 
         private void BuildFrames()
@@ -67,6 +73,29 @@ namespace Heroic.Visuals
             Rect rect = new Rect(x, y, frameWidth, frameHeight);
             Vector2 pivot = new Vector2(Mathf.Clamp01(pivotNormalized.x), Mathf.Clamp01(pivotNormalized.y));
             return Sprite.Create(sourceTexture, rect, pivot, pixelsPerUnit);
+        }
+
+        private void UpdateFacing()
+        {
+            if (!facePlayer)
+            {
+                return;
+            }
+
+            if (playerTransform == null)
+            {
+                playerTransform = FindAnyObjectByType<PlayerController>()?.transform;
+                if (playerTransform == null)
+                {
+                    return;
+                }
+            }
+
+            Vector3 scale = transform.localScale;
+            float direction = playerTransform.position.x < transform.position.x ? -1f : 1f;
+            scale.x = Mathf.Abs(worldScale.x) * direction;
+            scale.y = worldScale.y;
+            transform.localScale = scale;
         }
     }
 }

@@ -261,6 +261,7 @@ MonoBehaviour:
   pixelsPerUnit: 384
   pivotNormalized: {x: 0.5, y: 0.18}
   worldScale: {x: 1.12, y: 1.12}
+  facePlayer: 1
 --- !u!114 &5731093364363048823
 MonoBehaviour:
   m_ObjectHideFlags: 0
