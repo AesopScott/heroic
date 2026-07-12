@@ -38,9 +38,9 @@ namespace Heroic.Systems
         [SerializeField] private List<SkillUpgradeState> skillUpgrades = new List<SkillUpgradeState>();
         [SerializeField] private MovementCaster.MovementSkillId[] equippedMovementSkills =
         {
-            MovementCaster.MovementSkillId.Blink,
-            MovementCaster.MovementSkillId.Lunge,
-            MovementCaster.MovementSkillId.Teleport
+            MovementCaster.MovementSkillId.None,
+            MovementCaster.MovementSkillId.None,
+            MovementCaster.MovementSkillId.None
         };
 
         public IReadOnlyList<string> LearnedSkillIds => learnedSkillIds;

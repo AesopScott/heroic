@@ -259,6 +259,44 @@ namespace Heroic.Player
             return IsValidSlot(slotIndex) ? movementSlots[slotIndex].Skill : MovementSkillId.None;
         }
 
+        public int GetEquippedMovementSkillCount()
+        {
+            int count = 0;
+            for (int i = 0; i < movementSlots.Length; i++)
+            {
+                if (IsValidSlot(i) && movementSlots[i].Skill != MovementSkillId.None)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        public MovementSkillId GetDisplayedMovementSkill(int displayIndex)
+        {
+            int actualSlot = ResolveDisplayedSlotIndex(displayIndex);
+            return actualSlot >= 0 ? movementSlots[actualSlot].Skill : MovementSkillId.None;
+        }
+
+        public float GetDisplayedRemainingCooldown(int displayIndex)
+        {
+            int actualSlot = ResolveDisplayedSlotIndex(displayIndex);
+            return actualSlot >= 0 ? movementSlots[actualSlot].RemainingCooldown : 0f;
+        }
+
+        public float GetDisplayedCooldown(int displayIndex)
+        {
+            int actualSlot = ResolveDisplayedSlotIndex(displayIndex);
+            return actualSlot >= 0 ? movementSlots[actualSlot].Cooldown : 0f;
+        }
+
+        public bool IsDisplayedSkillActive(int displayIndex)
+        {
+            int actualSlot = ResolveDisplayedSlotIndex(displayIndex);
+            return actualSlot >= 0 && actualSlot == activeSlotIndex;
+        }
+
         public float GetRemainingCooldown(int slotIndex)
         {
             return IsValidSlot(slotIndex) ? movementSlots[slotIndex].RemainingCooldown : 0f;
@@ -745,6 +783,32 @@ namespace Heroic.Player
         private bool IsValidSlot(int slotIndex)
         {
             return slotIndex >= 0 && slotIndex < movementSlots.Length && movementSlots[slotIndex] != null;
+        }
+
+        private int ResolveDisplayedSlotIndex(int displayIndex)
+        {
+            if (displayIndex < 0)
+            {
+                return -1;
+            }
+
+            int seen = 0;
+            for (int i = 0; i < movementSlots.Length; i++)
+            {
+                if (!IsValidSlot(i) || movementSlots[i].Skill == MovementSkillId.None)
+                {
+                    continue;
+                }
+
+                if (seen == displayIndex)
+                {
+                    return i;
+                }
+
+                seen++;
+            }
+
+            return -1;
         }
 
         private void SetEquippedMovementDamage(MovementSkillId skillId, int damage)

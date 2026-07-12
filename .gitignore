@@ -29,6 +29,10 @@ sysinfo.txt
 __pycache__/
 *.py[cod]
 
+# Local sibling worktrees; do not publish them from the main Heroic repo.
+heroic-build/
+heroic-skills/
+
 # OS noise
 .DS_Store
 Thumbs.db

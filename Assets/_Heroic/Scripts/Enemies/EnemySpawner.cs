@@ -15,9 +15,9 @@ namespace Heroic.Enemies
         [SerializeField] private PlayerExperience playerExperience;
         [SerializeField] private WaveDefinition[] waves = new WaveDefinition[0];
         [SerializeField] private float spawnRadius = 8f;
-        [SerializeField] private float spawnInterval = 2f;
-        [SerializeField] private float spawnRateMultiplier = 0.35f;
-        [SerializeField] private float packSpacing = 0.9f;
+        [SerializeField] private float spawnRateMultiplier = 0.7f;
+        [SerializeField] private int spawnRollCount = 5;
+        [SerializeField] private float rollInterval = 3f;
 
         private float nextSpawnTime;
 
@@ -47,19 +47,13 @@ namespace Heroic.Enemies
             }
 
             WaveDefinition activeWave = GetActiveWave();
-            int spawnCount = GetCurrentSpawnCount(activeWave);
-            Vector2 packCenter = GetSpawnOffset();
-            Vector2 packSide = new Vector2(-packCenter.y, packCenter.x).normalized;
-            for (int i = 0; i < spawnCount; i++)
+            for (int i = 0; i < Mathf.Max(1, spawnRollCount); i++)
             {
-                float centeredIndex = i - ((spawnCount - 1) * 0.5f);
-                Vector2 packOffset = packCenter + (packSide * centeredIndex * packSpacing);
-                SpawnEnemy(ChooseCrashDefinition(activeWave), packOffset);
+                Vector2 location = GetSpawnOffset();
+                SpawnRoll(activeWave, location);
             }
 
-            SpawnSupplementalThrowers(activeWave, packCenter, packSide, spawnCount);
-
-            nextSpawnTime = Time.time + GetCurrentSpawnInterval(activeWave);
+            nextSpawnTime = Time.time + GetCurrentSpawnInterval();
         }
 
         public void StartWave(int waveIndex)
@@ -76,7 +70,7 @@ namespace Heroic.Enemies
 
         public void SetBaseSpawnInterval(float interval)
         {
-            spawnInterval = Mathf.Max(0.1f, interval);
+            rollInterval = Mathf.Max(0.1f, interval);
         }
 
         private void SpawnEnemy(EnemyDefinition enemyDefinition, Vector2 spawnOffset)
@@ -93,27 +87,61 @@ namespace Heroic.Enemies
             ApplyDefinition(enemy, enemyDefinition);
         }
 
-        private void SpawnSupplementalThrowers(WaveDefinition activeWave, Vector2 packCenter, Vector2 packSide, int crashSpawnCount)
+        private void SpawnRoll(WaveDefinition activeWave, Vector2 location)
         {
-            if (playerExperience == null || playerExperience.Level < 4)
+            int level = playerExperience != null ? playerExperience.Level : 1;
+            SpawnByLevelTable(activeWave, level, location);
+        }
+
+        private void SpawnByLevelTable(WaveDefinition activeWave, int level, Vector2 location)
+        {
+            if (level <= 0)
             {
                 return;
             }
 
-            EnemyDefinition ThrowerDefinition = FindEnemyDefinition(activeWave, "Enemy_Thrower_01");
-            if (ThrowerDefinition == null)
+            if (level >= 4)
             {
+                TrySpawnLevelTable(activeWave, "enemy_crash_04", location, new[] { 50, 40, 8, 2 });
+                TrySpawnLevelTable(activeWave, "enemy_thrower_01", location, new[] { 80, 18, 2, 0 });
                 return;
             }
 
-            int ThrowerCount = Random.Range(0, 2);
-            for (int i = 0; i < ThrowerCount; i++)
+            string crashId = "enemy_crash_" + Mathf.Clamp(level, 1, 5).ToString("00");
+            TrySpawnLevelTable(activeWave, crashId, location, new[] { 50, 40, 8, 2 });
+        }
+
+        private void TrySpawnLevelTable(WaveDefinition activeWave, string enemyId, Vector2 location, int[] chanceTable)
+        {
+            EnemyDefinition definition = FindEnemyDefinition(activeWave, enemyId);
+            if (definition == null)
             {
-                float side = Random.value < 0.5f ? -1f : 1f;
-                float spacingIndex = (crashSpawnCount * 0.5f) + 1f + i;
-                Vector2 ThrowerOffset = packCenter + packSide * side * spacingIndex * packSpacing;
-                SpawnEnemy(ThrowerDefinition, ThrowerOffset);
+                Debug.LogWarning($"EnemySpawner could not find enemy definition `{enemyId}` for player level table.");
+                return;
             }
+
+            int roll = Random.Range(0, 100);
+            int spawnCount = RollSpawnCount(chanceTable, roll);
+            for (int i = 0; i < spawnCount; i++)
+            {
+                Vector2 offset = location + Random.insideUnitCircle * 0.75f;
+                SpawnEnemy(definition, offset);
+            }
+        }
+
+        private static int RollSpawnCount(int[] chanceTable, int roll)
+        {
+            int cumulative = 0;
+            for (int i = 0; i < chanceTable.Length; i++)
+            {
+                cumulative += chanceTable[i];
+                if (roll < cumulative)
+                {
+                    return i;
+                }
+            }
+
+            return 0;
         }
 
         private Vector2 GetSpawnOffset()
@@ -145,60 +173,38 @@ namespace Heroic.Enemies
             return null;
         }
 
-        private float GetCurrentSpawnInterval(WaveDefinition activeWave)
+        private float GetCurrentSpawnInterval()
         {
             float rateMultiplier = Mathf.Max(0.05f, spawnRateMultiplier);
-            if (activeWave == null)
-            {
-                return Mathf.Max(0.1f, spawnInterval / rateMultiplier);
-            }
-
-            return Mathf.Max(0.1f, activeWave.SpawnInterval / rateMultiplier);
-        }
-
-        private int GetCurrentSpawnCount(WaveDefinition activeWave)
-        {
-            if (activeWave == null)
-            {
-                return 1;
-            }
-
-            int minSpawnCount = activeWave.MinSpawnCount;
-            int maxSpawnCount = activeWave.MaxSpawnCount;
-            if (activeWave.WaveIndex == 1 && playerExperience != null)
-            {
-                minSpawnCount = 1;
-                maxSpawnCount = playerExperience.Level >= 2 ? 2 : 1;
-            }
-
-            return Random.Range(minSpawnCount, maxSpawnCount + 1);
-        }
-
-        private EnemyDefinition ChooseCrashDefinition(WaveDefinition activeWave)
-        {
-            int level = playerExperience != null ? playerExperience.Level : 1;
-            int crashLevel = Mathf.Clamp(level, 1, 4);
-            EnemyDefinition crashDefinition = FindEnemyDefinition(activeWave, "enemy_crash_" + crashLevel.ToString("00"));
-            if (crashDefinition != null)
-            {
-                return crashDefinition;
-            }
-
-            return ChooseEnemy(activeWave);
+            return Mathf.Max(0.1f, rollInterval / rateMultiplier);
         }
 
         private EnemyDefinition FindEnemyDefinition(WaveDefinition activeWave, string enemyId)
         {
-            if (activeWave == null || activeWave.SpawnEntries == null)
+            if (activeWave != null && activeWave.SpawnEntries != null)
             {
-                return null;
+                foreach (WaveDefinition.SpawnEntry entry in activeWave.SpawnEntries)
+                {
+                    if (entry != null && entry.Enemy != null && string.Equals(entry.Enemy.Id, enemyId, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        return entry.Enemy;
+                    }
+                }
             }
 
-            foreach (WaveDefinition.SpawnEntry entry in activeWave.SpawnEntries)
+            foreach (WaveDefinition wave in waves)
             {
-                if (entry != null && entry.Enemy != null && entry.Enemy.Id == enemyId)
+                if (wave == null || wave.SpawnEntries == null)
                 {
-                    return entry.Enemy;
+                    continue;
+                }
+
+                foreach (WaveDefinition.SpawnEntry entry in wave.SpawnEntries)
+                {
+                    if (entry != null && entry.Enemy != null && string.Equals(entry.Enemy.Id, enemyId, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        return entry.Enemy;
+                    }
                 }
             }
 
@@ -262,7 +268,9 @@ namespace Heroic.Enemies
             }
 
             enemy.Configure(definition.MoveSpeed, definition.ContactDamage);
-            if (definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel4)
+            if (definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel4 ||
+                definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel5 ||
+                definition.VisualPreset == VisualPresetApplier.Preset.WallLevel1)
             {
                 enemy.ConfigureContactBehavior(false, false);
             }
@@ -321,4 +329,3 @@ namespace Heroic.Enemies
         }
     }
 }
-

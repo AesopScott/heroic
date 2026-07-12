@@ -154,7 +154,7 @@ namespace Heroic.Spells
                 if (target != null)
                 {
                     StartCoroutine(DrainTarget(target));
-                    targetPosition = target.transform.position + Random.insideUnitCircle * radius;
+                    targetPosition = (Vector2)target.transform.position + Random.insideUnitCircle * radius;
                 }
             }
 

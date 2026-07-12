@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 3462537468152855084}
   - component: {fileID: 5837664123824774708}
   - component: {fileID: 4175852406067866859}
+  - component: {fileID: 8943175632048801122}
   - component: {fileID: 5731093364363048823}
   - component: {fileID: 8718548839095353337}
   - component: {fileID: 7481707820923879581}
@@ -159,135 +160,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Enemies.ExperienceDropper
   pickupPrefab: {fileID: 5784620583280495773, guid: 73f2a172788c4434ea46f29cafd61a37, type: 3}
-  healthRestorePrefab: {fileID: 1858660174591875655, guid: ed322bed3878d184c8a41f7fdda76d76, type: 3}
-  experienceBoostPrefab: {fileID: 7181841527662417881, guid: d81895703d30b3e4c804689182bc49dd, type: 3}
-  speedBoostPrefab: {fileID: 1131941664685358444, guid: 28aa0ca728247bb4bb12a8d266f2268c, type: 3}
-  invulnerabilityPrefab: {fileID: 1197769651498486620, guid: 416a5141b3378a941ab8204b63c51ca5, type: 3}
   experienceValue: 1
-  healthRestoreTiers:
-  - tier: 1
-    minimumPlayerLevel: 1
-    dropChance: 0.1
-    value: 8
-    duration: 0
-    multiplier: 1
-  - tier: 2
-    minimumPlayerLevel: 3
-    dropChance: 0.08
-    value: 14
-    duration: 0
-    multiplier: 1
-  - tier: 3
-    minimumPlayerLevel: 5
-    dropChance: 0.06
-    value: 22
-    duration: 0
-    multiplier: 1
-  - tier: 4
-    minimumPlayerLevel: 8
-    dropChance: 0.04
-    value: 35
-    duration: 0
-    multiplier: 1
-  - tier: 5
-    minimumPlayerLevel: 12
-    dropChance: 0.025
-    value: 55
-    duration: 0
-    multiplier: 1
-  experienceBoostTiers:
-  - tier: 1
-    minimumPlayerLevel: 1
-    dropChance: 0.04
-    value: 0
-    duration: 10
-    multiplier: 1.5
-  - tier: 2
-    minimumPlayerLevel: 3
-    dropChance: 0.035
-    value: 0
-    duration: 10
-    multiplier: 2
-  - tier: 3
-    minimumPlayerLevel: 5
-    dropChance: 0.025
-    value: 0
-    duration: 10
-    multiplier: 2.5
-  - tier: 4
-    minimumPlayerLevel: 8
-    dropChance: 0.015
-    value: 0
-    duration: 10
-    multiplier: 3
-  - tier: 5
-    minimumPlayerLevel: 12
-    dropChance: 0.01
-    value: 0
-    duration: 10
-    multiplier: 3.5
-  speedBoostTiers:
-  - tier: 1
-    minimumPlayerLevel: 1
-    dropChance: 0.035
-    value: 0
-    duration: 3
-    multiplier: 1.2
-  - tier: 2
-    minimumPlayerLevel: 3
-    dropChance: 0.03
-    value: 0
-    duration: 3.5
-    multiplier: 1.3
-  - tier: 3
-    minimumPlayerLevel: 5
-    dropChance: 0.022
-    value: 0
-    duration: 4
-    multiplier: 1.45
-  - tier: 4
-    minimumPlayerLevel: 8
-    dropChance: 0.014
-    value: 0
-    duration: 4.5
-    multiplier: 1.6
-  - tier: 5
-    minimumPlayerLevel: 12
-    dropChance: 0.008
-    value: 0
-    duration: 5
-    multiplier: 1.8
-  invulnerabilityTiers:
-  - tier: 1
-    minimumPlayerLevel: 2
-    dropChance: 0.015
-    value: 0
-    duration: 1.25
-    multiplier: 1
-  - tier: 2
-    minimumPlayerLevel: 4
-    dropChance: 0.012
-    value: 0
-    duration: 1.75
-    multiplier: 1
-  - tier: 3
-    minimumPlayerLevel: 6
-    dropChance: 0.009
-    value: 0
-    duration: 2.25
-    multiplier: 1
-  - tier: 4
-    minimumPlayerLevel: 9
-    dropChance: 0.006
-    value: 0
-    duration: 3
-    multiplier: 1
-  - tier: 5
-    minimumPlayerLevel: 13
-    dropChance: 0.003
-    value: 0
-    duration: 4
-    multiplier: 1
 --- !u!114 &5837664123824774708
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -302,6 +175,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Visuals.VisualPresetApplier
   preset: 2
   applyOnAwake: 1
+  crashLevel1Texture: {fileID: 0}
+  crashLevel2Texture: {fileID: 0}
+  crashLevel3Texture: {fileID: 0}
+  crashLevel4Texture: {fileID: 0}
+  crashLevel5Texture: {fileID: 0}
+  wallLevel1Texture: {fileID: 0}
+  throwerLevel1Texture: {fileID: 0}
+  crashLevel1Frames: []
+  crashLevel2Frames:
+  - {fileID: 2800000, guid: 762ba318a8fe41a3b3255dd1a42a8d2e, type: 3}
+  - {fileID: 2800000, guid: f8afb4d88fcd4a0f9d5129a948c50376, type: 3}
+  crashLevel3Frames:
+  - {fileID: 2800000, guid: ec2709ec370e4f2f9676ba345fcabeb1, type: 3}
+  - {fileID: 2800000, guid: ae9dd777c88944599dd39cafe89f5551, type: 3}
+  crashLevel4Frames:
+  - {fileID: 2800000, guid: cf1c515a72134c50a504a529413b3b01, type: 3}
+  - {fileID: 2800000, guid: 377330932cfd4f329c3607d3b1477083, type: 3}
+  crashLevel5Frames:
+  - {fileID: 2800000, guid: 71298781844c46adaa94b69c21b34abf, type: 3}
+  - {fileID: 2800000, guid: 89c8a53110d140f28ef633242cfcc10c, type: 3}
+  wallLevel1Frames:
+  - {fileID: 2800000, guid: 1f71ba8dcc334ec8a9d0f755e3c805ec, type: 3}
+  - {fileID: 2800000, guid: 966f697667114b8f95f8b6714b9edde5, type: 3}
+  throwerLevel1Frames:
+  - {fileID: 2800000, guid: 8b2109838bc247639aa10f7b273945de, type: 3}
+  - {fileID: 2800000, guid: c71188a33d1d4ac986a5a23519012b1b, type: 3}
 --- !u!212 &4175852406067866859
 SpriteRenderer:
   serializedVersion: 3
@@ -362,6 +261,30 @@ SpriteRenderer:
   m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!114 &8943175632048801122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5540489990661272454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 34ca3ab1d6dc4062a4dd1e55678bf6a9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Heroic.Visuals.CrashSpriteAnimator
+  sourceTexture: {fileID: 0}
+  sourceFrames:
+  - {fileID: 2800000, guid: 1fc227f14aa843ca86d1480f2cd9cf34, type: 3}
+  - {fileID: 2800000, guid: 61f4937314a44d0fa0b305982c9ff657, type: 3}
+  frameWidth: 384
+  frameHeight: 512
+  secondsPerFrame: 0.35
+  sortingOrder: 20
+  pixelsPerUnit: 384
+  pivotNormalized: {x: 0.5, y: 0.18}
+  worldScale: {x: 1.12, y: 1.12}
+  facePlayer: 1
 --- !u!114 &5731093364363048823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -536,4 +459,3 @@ MonoBehaviour:
   preset: 1
   volume: 0.32
   minimumGlobalInterval: 0.035
-

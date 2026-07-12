@@ -7,8 +7,7 @@ namespace Heroic.Player
     {
         [SerializeField] private int maxHealth = 100;
         [SerializeField] private int currentHealth = 100;
-
-        private bool invulnerable;
+        [SerializeField] private bool invulnerable;
 
         public event Action<int> Damaged;
         public event Action Died;
@@ -48,5 +47,6 @@ namespace Heroic.Player
         {
             invulnerable = value;
         }
+
     }
 }

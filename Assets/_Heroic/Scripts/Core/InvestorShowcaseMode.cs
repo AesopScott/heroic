@@ -8,7 +8,7 @@ namespace Heroic.Core
 {
     public class InvestorShowcaseMode : MonoBehaviour
     {
-        [SerializeField] private bool enabledForPrototype = true;
+        [SerializeField] private bool enabledForPrototype = false;
         [SerializeField] private SpellCaster spellCaster;
         [SerializeField] private MovementCaster movementCaster;
         [SerializeField] private PlayerExperience playerExperience;
@@ -31,12 +31,7 @@ namespace Heroic.Core
         {
             spellCaster?.EnableSkill("arcane_magic_missile");
 
-            if (movementCaster != null)
-            {
-                movementCaster.EquipMovementSkill(0, MovementCaster.MovementSkillId.Blink);
-                movementCaster.EquipMovementSkill(1, MovementCaster.MovementSkillId.Lunge);
-                movementCaster.EquipMovementSkill(2, MovementCaster.MovementSkillId.Teleport);
-            }
+            // Movement skills are earned through level-up choices, not granted at run start.
         }
 
         private void ApplyShowcasePacing()
