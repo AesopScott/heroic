@@ -54,7 +54,7 @@ namespace Heroic.Systems
                 Movement("movement_lunge", "Lunge", "Equip aggressive forward movement."),
                 Movement("movement_teleport", "Teleport", "Equip long-range reposition."),
                 Movement("movement_whirlwind", "Whirlwind", "Equip a damaging rush through enemies."),
-                Movement("movement_cloud_walk", "Cloud Walk", "Slow standard movement, then burst across clouds.")
+                Movement("movement_cloud_walk", "Cloud Walk", "Gain 25% standard movement speed and burst across clouds.")
             };
         }
 

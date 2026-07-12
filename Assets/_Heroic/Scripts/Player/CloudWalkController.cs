@@ -7,7 +7,8 @@ namespace Heroic.Player
 {
     public class CloudWalkController : MonoBehaviour
     {
-        [SerializeField] private float crashOneMoveSpeed = 2f;
+        [SerializeField] private float initialStandardSpeedMultiplier = 1.25f;
+        [SerializeField] private float standardSpeedMultiplierPerTier = 0.2f;
         [SerializeField] private float cloudSpeedMultiplier = 1.5f;
         [SerializeField] private float standardPickupRange = 20f;
         [SerializeField] private float knockbackRange = 50f;
@@ -22,11 +23,13 @@ namespace Heroic.Player
         private Coroutine activeCloudWalk;
         private int knockbackTier;
         private float nextProcScanTime;
+        private float startingBaseMoveSpeed;
 
         private void Awake()
         {
             playerController = GetComponent<PlayerController>();
             pickupMagnet = GetComponent<PlayerPickupMagnet>();
+            startingBaseMoveSpeed = playerController != null ? playerController.BaseMoveSpeed : 6f;
         }
 
         private void Update()
@@ -63,8 +66,8 @@ namespace Heroic.Player
 
         public void SetStandardMovementTier(int tier)
         {
-            float multiplier = 1f + Mathf.Clamp(tier, 0, 5) * 0.2f;
-            playerController?.SetBaseMoveSpeed(crashOneMoveSpeed * multiplier);
+            float multiplier = initialStandardSpeedMultiplier + Mathf.Clamp(tier, 0, 5) * standardSpeedMultiplierPerTier;
+            playerController?.SetBaseMoveSpeed(startingBaseMoveSpeed * multiplier);
         }
 
         public void SetPickupRangeTier(int tier)

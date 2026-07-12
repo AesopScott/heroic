@@ -14,6 +14,7 @@ namespace Heroic.Player
         private float temporarySpeedMultiplier = 1f;
 
         public Vector2 LastMoveDirection => lastMoveDirection;
+        public float BaseMoveSpeed => baseMoveSpeed;
         public float CurrentMoveSpeed => baseMoveSpeed * temporarySpeedMultiplier;
 
         private void Awake()
