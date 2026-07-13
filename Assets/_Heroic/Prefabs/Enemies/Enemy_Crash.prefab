@@ -147,6 +147,10 @@ MonoBehaviour:
   ThrowerProjectileSpeed: 4
   ThrowerProjectileDamage: 15
   firePoint: {fileID: 0}
+  blockingLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  terrainCollisionRadius: 0.42
 --- !u!114 &3462537468152855084
 MonoBehaviour:
   m_ObjectHideFlags: 0

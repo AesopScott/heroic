@@ -37,13 +37,43 @@ namespace Heroic.Audio
             }
         }
 
-        private static void SetMasterVolume(float value)
+        public void ToggleMusicMute()
+        {
+            ToggleMusicMuteStatic();
+        }
+
+        public void LowerMasterVolume()
+        {
+            LowerMasterVolumeStatic();
+        }
+
+        public void RaiseMasterVolume()
+        {
+            RaiseMasterVolumeStatic();
+        }
+
+        public static void ToggleMusicMuteStatic()
+        {
+            BackgroundMusicPlayer.SetMusicMuted(!BackgroundMusicPlayer.MusicMuted);
+        }
+
+        public static void LowerMasterVolumeStatic()
+        {
+            SetMasterVolume(masterVolume - 0.1f);
+        }
+
+        public static void RaiseMasterVolumeStatic()
+        {
+            SetMasterVolume(masterVolume + 0.1f);
+        }
+
+        public static void SetMasterVolume(float value)
         {
             masterVolume = Mathf.Clamp01(value);
             ApplyMasterVolume();
         }
 
-        private static void ApplyMasterVolume()
+        public static void ApplyMasterVolume()
         {
             AudioListener.volume = masterVolume;
         }

@@ -8,6 +8,7 @@ using Heroic.Spells;
 using Heroic.Systems;
 using Heroic.UI;
 using Heroic.Visuals;
+using Heroic.World;
 using System;
 using System.IO;
 using TMPro;
@@ -30,6 +31,18 @@ namespace Heroic.Editor
         private const string Scenes = Root + "/Scenes";
         private const string ScriptableObjects = Root + "/ScriptableObjects";
         private const string RuntimeFontPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
+        private const string PairedSystemIconSheetPath = "Assets/mobs/paired_systems.png";
+        private const int TerrainLayer = 8;
+        private const int TerrainLayerMask = 1 << TerrainLayer;
+        private static readonly string[] TerrainSheetPaths =
+        {
+            "Assets/mobs/terrain I.png",
+            "Assets/mobs/terrain II.png",
+            "Assets/mobs/terrain III.png",
+            "Assets/mobs/terrain IV.png",
+            "Assets/mobs/terrain V.png"
+        };
+
         private static readonly string[] CrashFramePaths =
         {
             "Assets/mobs/Crash I_frame1.png",
@@ -321,7 +334,8 @@ namespace Heroic.Editor
             body.freezeRotation = true;
             go.AddComponent<CircleCollider2D>();
             go.AddComponent<Damageable>();
-            go.AddComponent<EnemyController>();
+            EnemyController controller = go.AddComponent<EnemyController>();
+            SetLayerMask(controller, "blockingLayers", TerrainLayerMask);
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
@@ -354,6 +368,7 @@ namespace Heroic.Editor
             go.AddComponent<CircleCollider2D>();
             go.AddComponent<Damageable>();
             EnemyController controller = go.AddComponent<EnemyController>();
+            SetLayerMask(controller, "blockingLayers", TerrainLayerMask);
             SetBool(controller, "destroyAfterContactDamage", false);
             SetBool(controller, "suppressExperienceOnContactDamage", false);
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
@@ -379,6 +394,7 @@ namespace Heroic.Editor
             go.AddComponent<CircleCollider2D>();
             go.AddComponent<Damageable>();
             EnemyController controller = go.AddComponent<EnemyController>();
+            SetLayerMask(controller, "blockingLayers", TerrainLayerMask);
             SetEnum(controller, "behavior", EnemyController.EnemyBehavior.Thrower);
             SetObject(controller, "projectilePrefab", enemyMissile.GetComponent<EnemyProjectile>());
             SetFloat(controller, "ThrowerRange", 50f);
@@ -408,6 +424,7 @@ namespace Heroic.Editor
             go.AddComponent<CircleCollider2D>();
             go.AddComponent<Damageable>();
             EnemyController controller = go.AddComponent<EnemyController>();
+            SetLayerMask(controller, "blockingLayers", TerrainLayerMask);
             SetBool(controller, "destroyAfterContactDamage", false);
             SetBool(controller, "suppressExperienceOnContactDamage", false);
             go.AddComponent<BossController>();
@@ -463,6 +480,12 @@ namespace Heroic.Editor
             MovementCaster movementCaster = player.GetComponent<MovementCaster>();
             TerritoryCastingController territoryCasting = player.GetComponent<TerritoryCastingController>();
             MagicSystemController magicSystemController = player.GetComponent<MagicSystemController>();
+            GameObject terrainObject = new GameObject("DynamicTerrainGrid");
+            DynamicTerrainGrid terrainGrid = terrainObject.AddComponent<DynamicTerrainGrid>();
+            SetObjectArray(terrainGrid, "terrainSheets", LoadTextures(TerrainSheetPaths));
+            SetObject(terrainGrid, "playerReference", player.transform);
+            SetObject(terrainGrid, "playerExperience", playerExperience);
+            SetInt(terrainGrid, "terrainLayer", TerrainLayer);
 
             SetObject(runEndWatcher, "runManager", runManager);
             SetObject(runEndWatcher, "playerHealth", playerHealth);
@@ -473,6 +496,7 @@ namespace Heroic.Editor
             SetObject(enemySpawner, "runManager", runManager);
             SetObject(enemySpawner, "playerExperience", playerExperience);
             SetObjectArray(enemySpawner, "waves", LoadWaveAssets(waves));
+            SetObject(enemySpawner, "terrainGrid", terrainGrid);
 
             SetObject(bossSpawner, "runManager", runManager);
             SetObject(bossSpawner, "runEndWatcher", runEndWatcher);
@@ -497,6 +521,7 @@ namespace Heroic.Editor
 
             GameObject cameraObject = new GameObject("Main Camera");
             Camera camera = cameraObject.AddComponent<Camera>();
+            cameraObject.AddComponent<AudioListener>();
             camera.orthographic = true;
             camera.orthographicSize = 9.1f;
             cameraObject.transform.position = new Vector3(0f, 0f, -10f);
@@ -550,6 +575,7 @@ namespace Heroic.Editor
             SpellCaster spellCaster = player.AddComponent<SpellCaster>();
             MovementCaster movementCaster = player.AddComponent<MovementCaster>();
             SetBool(movementCaster, "equipPrototypeMovementSetOnStart", false);
+            SetLayerMask(movementCaster, "blockingLayers", TerrainLayerMask);
             PlayerVisualController visual = player.AddComponent<PlayerVisualController>();
             SetObjectArray(visual, "levelOneFrames", LoadTextures(PlayerLevel1FramePaths));
             SetObjectArray(visual, "levelTwoFrames", LoadTextures(PlayerLevel2FramePaths));
@@ -693,6 +719,8 @@ namespace Heroic.Editor
 
             SkillSideHudPresenter sideHud = gameRoot.AddComponent<SkillSideHudPresenter>();
             SetObject(sideHud, "buildState", buildState);
+            SetObject(sideHud, "pairedSystemIconSheet", AssetDatabase.LoadAssetAtPath<Texture2D>(PairedSystemIconSheetPath));
+            CreateAudioControlsPanel(gameRoot.transform, new Vector2(-176f, -42f));
 
             for (int i = 0; i < 3; i++)
             {
@@ -802,6 +830,7 @@ namespace Heroic.Editor
             SetObjectArray(draft, "elementNameLabels", elementNameLabels);
 
             CreatePausePanel(pauseRoot.transform);
+            CreateAudioControlsPanel(pauseRoot.transform, new Vector2(-176f, -42f));
 
             ResultsPresenter results = resultsRoot.AddComponent<ResultsPresenter>();
             SetObject(results, "runManager", runManager);
@@ -809,6 +838,7 @@ namespace Heroic.Editor
             SetString(results, "mainMenuSceneName", "MainMenu");
 
             GameObject resultsPanel = CreateCenteredPanel("ResultsPanel", resultsRoot.transform, new Vector2(560f, 320f), Vector2.zero, new Color(0.015f, 0.04f, 0.052f, 0.9f));
+            CreateAudioControlsPanel(resultsRoot.transform, new Vector2(-176f, -42f));
             TMP_Text resultText = CreateText("ResultText", resultsPanel.transform, "ARCANE WARDEN DEFEATED", new Vector2(500f, 58f), new Vector2(0f, 92f));
             resultText.fontSize = 28f;
             resultText.color = new Color(0.82f, 0.96f, 1f);
@@ -1027,6 +1057,7 @@ namespace Heroic.Editor
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             scene.name = sceneName;
             Camera camera = new GameObject("Main Camera").AddComponent<Camera>();
+            camera.gameObject.AddComponent<AudioListener>();
             camera.orthographic = true;
             camera.orthographicSize = 9.1f;
             camera.backgroundColor = new Color(0.015f, 0.025f, 0.04f);
@@ -1049,6 +1080,7 @@ namespace Heroic.Editor
             else
             {
                 CreateText(sceneName + "Title", canvas.transform, sceneName, new Vector2(500f, 80f), Vector2.zero);
+                CreateAudioControlsPanel(canvas.transform, new Vector2(-176f, -42f));
             }
 
             CreateEventSystem();
@@ -1086,10 +1118,24 @@ namespace Heroic.Editor
             TMP_Text controls = CreateText("Controls", parent, "Move: WASD / Arrows    Skills: 1, 2, 3    Pause: Esc    Music: M    Volume: - / +", new Vector2(820f, 36f), new Vector2(0f, -100f));
             controls.fontSize = 18f;
             controls.color = new Color(0.7f, 0.84f, 0.9f);
+            CreateAudioControlsPanel(parent, new Vector2(0f, -192f));
 
             TMP_Text demoNote = CreateText("DemoNote", parent, "1.0 Showcase Mode preloads Arcane tools so the first run shows the core fantasy immediately.", new Vector2(760f, 48f), new Vector2(0f, -145f));
             demoNote.fontSize = 16f;
             demoNote.color = new Color(0.58f, 0.72f, 0.78f);
+        }
+
+        private static AudioControlsPresenter CreateAudioControlsPanel(Transform parent, Vector2 anchoredPosition)
+        {
+            GameObject panel = new GameObject("AudioControls");
+            panel.transform.SetParent(parent, false);
+            RectTransform rect = panel.AddComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(1f, 1f);
+            rect.sizeDelta = new Vector2(260f, 74f);
+            rect.anchoredPosition = anchoredPosition;
+            return panel.AddComponent<AudioControlsPresenter>();
         }
 
         private static void CreateEventSystem()
@@ -1271,6 +1317,20 @@ namespace Heroic.Editor
             }
 
             serializedProperty.boolValue = value;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void SetLayerMask(Object target, string property, int value)
+        {
+            SerializedObject serialized = new SerializedObject(target);
+            SerializedProperty serializedProperty = serialized.FindProperty(property);
+            if (serializedProperty == null)
+            {
+                Debug.LogError($"Missing serialized property `{property}` on {target.name}.");
+                return;
+            }
+
+            serializedProperty.intValue = value;
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 

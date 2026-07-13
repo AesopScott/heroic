@@ -26,6 +26,8 @@ namespace Heroic.Enemies
         [SerializeField] private float ThrowerProjectileSpeed = 4f;
         [SerializeField] private int ThrowerProjectileDamage = 15;
         [SerializeField] private Transform firePoint;
+        [SerializeField] private LayerMask blockingLayers;
+        [SerializeField] private float terrainCollisionRadius = 0.42f;
 
         private Transform target;
         private float nextContactDamageTime;
@@ -98,7 +100,36 @@ namespace Heroic.Enemies
         private void MoveTowardTarget()
         {
             Vector3 direction = ResolveMovementDirection();
-            transform.position += direction * (moveSpeed * CurrentMovementMultiplier() * Time.deltaTime);
+            float distance = moveSpeed * CurrentMovementMultiplier() * Time.deltaTime;
+            transform.position += (Vector3)ResolveTerrainAwareMove(direction, distance);
+        }
+
+        private Vector2 ResolveTerrainAwareMove(Vector2 direction, float distance)
+        {
+            if (distance <= 0f || direction.sqrMagnitude <= 0.001f || blockingLayers.value == 0)
+            {
+                return direction * distance;
+            }
+
+            Vector2 normalized = direction.normalized;
+            if (!Physics2D.CircleCast(transform.position, terrainCollisionRadius, normalized, distance, blockingLayers))
+            {
+                return normalized * distance;
+            }
+
+            Vector2 horizontal = new Vector2(normalized.x, 0f).normalized;
+            if (horizontal.sqrMagnitude > 0.001f && !Physics2D.CircleCast(transform.position, terrainCollisionRadius, horizontal, distance, blockingLayers))
+            {
+                return horizontal * distance;
+            }
+
+            Vector2 vertical = new Vector2(0f, normalized.y).normalized;
+            if (vertical.sqrMagnitude > 0.001f && !Physics2D.CircleCast(transform.position, terrainCollisionRadius, vertical, distance, blockingLayers))
+            {
+                return vertical * distance;
+            }
+
+            return Vector2.zero;
         }
 
         private Vector2 ResolveMovementDirection()
@@ -242,4 +273,3 @@ namespace Heroic.Enemies
         }
     }
 }
-

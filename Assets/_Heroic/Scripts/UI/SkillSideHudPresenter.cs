@@ -11,18 +11,21 @@ namespace Heroic.UI
         [SerializeField] private RunBuildState buildState;
         [SerializeField] private RectTransform abilityRoot;
         [SerializeField] private RectTransform systemRoot;
-        [SerializeField] private int maxVisibleSlots = 12;
+        [SerializeField] private int maxVisibleSlots = 16;
         [SerializeField] private float slotSize = 144f;
         [SerializeField] private float slotSpacing = 158f;
         [SerializeField] private float upgradeBadgeWidth = 180f;
         [SerializeField] private float upgradeBadgeHeight = 30f;
         [SerializeField] private float upgradeBadgeSpacing = 34f;
+        [SerializeField] private Texture2D pairedSystemIconSheet;
 
         private readonly List<IconSlot> abilitySlots = new List<IconSlot>();
         private readonly List<IconSlot> systemSlots = new List<IconSlot>();
         private readonly Dictionary<string, float> nextReadyAt = new Dictionary<string, float>();
+        private readonly Dictionary<string, Sprite> pairedSystemSprites = new Dictionary<string, Sprite>();
         private readonly List<string> abilityIds = new List<string>();
         private readonly List<string> systemIds = new List<string>();
+        private readonly List<string> learnedSystemIds = new List<string>();
         private float nextRefreshAt;
         private string lastAbilitySignature = string.Empty;
         private string lastSystemSignature = string.Empty;
@@ -189,6 +192,7 @@ namespace Heroic.UI
         {
             abilityIds.Clear();
             systemIds.Clear();
+            learnedSystemIds.Clear();
 
             foreach (string skillId in buildState.LearnedSkillIds)
             {
@@ -199,9 +203,10 @@ namespace Heroic.UI
 
                 if (skillId.StartsWith("system_"))
                 {
-                    if (!skillId.StartsWith("system_synergy_"))
+                    if (!skillId.StartsWith("system_synergy_") && !skillId.StartsWith("system_pair_"))
                     {
                         systemIds.Add(skillId);
+                        learnedSystemIds.Add(skillId);
                     }
                     continue;
                 }
@@ -209,8 +214,26 @@ namespace Heroic.UI
                 abilityIds.Add(skillId);
             }
 
+            AddPairedSystemIds();
+
             ApplyList(abilityIds, abilitySlots, ref lastAbilitySignature, 0f, true);
             ApplyList(systemIds, systemSlots, ref lastSystemSignature, slotSpacing + 12f, false);
+        }
+
+        private void AddPairedSystemIds()
+        {
+            if (learnedSystemIds.Count < 2)
+            {
+                return;
+            }
+
+            for (int i = 0; i < learnedSystemIds.Count; i++)
+            {
+                for (int j = i + 1; j < learnedSystemIds.Count; j++)
+                {
+                    systemIds.Add(CreateSystemPairId(learnedSystemIds[i], learnedSystemIds[j]));
+                }
+            }
         }
 
         private void ApplyList(List<string> ids, List<IconSlot> slots, ref string signature, float yOffset, bool badgesToRight)
@@ -232,7 +255,7 @@ namespace Heroic.UI
                     RectTransform rect = slot.Root.GetComponent<RectTransform>();
                     rect.anchoredPosition = new Vector2(0f, -i * slotSpacing - yOffset);
                     string skillId = SkillIconRegistry.ResolveSkillId(ids[i]);
-                    slot.Icon.sprite = SkillIconRegistry.GetIcon(skillId);
+                    slot.Icon.sprite = ResolveSystemPairIcon(skillId) ?? SkillIconRegistry.GetIcon(skillId);
                     slot.Icon.color = Color.white;
                     ApplyUpgradeBadges(slot, skillId, badgesToRight);
                     if (!nextReadyAt.ContainsKey(skillId))
@@ -259,7 +282,7 @@ namespace Heroic.UI
                 }
 
                 string skillId = SkillIconRegistry.ResolveSkillId(upgrade.SkillId);
-                if (!ids.Contains(skillId) && !ids.Contains(upgrade.SkillId))
+                if (!ids.Contains(skillId) && !ids.Contains(upgrade.SkillId) && !ContainsPairForSynergy(ids, skillId))
                 {
                     continue;
                 }
@@ -317,7 +340,7 @@ namespace Heroic.UI
                 }
 
                 string resolvedSkillId = SkillIconRegistry.ResolveSkillId(upgrade.SkillId);
-                if (resolvedSkillId == skillId || upgrade.SkillId == skillId)
+                if (resolvedSkillId == skillId || upgrade.SkillId == skillId || IsPairUpgradeMatch(skillId, resolvedSkillId))
                 {
                     matches.Add(upgrade);
                 }
@@ -423,6 +446,174 @@ namespace Heroic.UI
             }
 
             return string.Join(" ", words);
+        }
+
+        private Sprite ResolveSystemPairIcon(string skillId)
+        {
+            if (pairedSystemIconSheet == null || string.IsNullOrEmpty(skillId) || !skillId.StartsWith("system_pair_"))
+            {
+                return null;
+            }
+
+            if (pairedSystemSprites.TryGetValue(skillId, out Sprite cached))
+            {
+                return cached;
+            }
+
+            int index = ResolvePairIconIndex(skillId);
+            int columns = 4;
+            int rows = 4;
+            int cellWidth = pairedSystemIconSheet.width / columns;
+            int cellHeight = pairedSystemIconSheet.height / rows;
+            int column = Mathf.Clamp(index % columns, 0, columns - 1);
+            int rowFromTop = Mathf.Clamp(index / columns, 0, rows - 1);
+            Rect rect = new Rect(column * cellWidth, pairedSystemIconSheet.height - (rowFromTop + 1) * cellHeight, cellWidth, cellHeight);
+            Sprite sprite = Sprite.Create(pairedSystemIconSheet, rect, new Vector2(0.5f, 0.5f), Mathf.Max(cellWidth, cellHeight));
+            pairedSystemSprites[skillId] = sprite;
+            return sprite;
+        }
+
+        private static int ResolvePairIconIndex(string pairId)
+        {
+            switch (pairId)
+            {
+                case "system_pair_territory_casting_component_boosts":
+                    return 1;
+                case "system_pair_territory_casting_sacrifice_casting":
+                    return 0;
+                case "system_pair_territory_casting_rhythm_casting":
+                    return 2;
+                case "system_pair_territory_casting_spell_tension":
+                    return 3;
+                case "system_pair_component_boosts_sacrifice_casting":
+                    return 4;
+                case "system_pair_component_boosts_rhythm_casting":
+                    return 5;
+                case "system_pair_component_boosts_spell_tension":
+                    return 8;
+                case "system_pair_sacrifice_casting_rhythm_casting":
+                    return 9;
+                case "system_pair_sacrifice_casting_spell_tension":
+                    return 10;
+                case "system_pair_rhythm_casting_spell_tension":
+                    return 11;
+                case "system_pair_territory_casting_spell_weaving":
+                    return 2;
+                case "system_pair_territory_casting_runic_magic":
+                    return 3;
+                case "system_pair_component_boosts_spell_weaving":
+                    return 6;
+                case "system_pair_component_boosts_runic_magic":
+                    return 7;
+                case "system_pair_sacrifice_casting_spell_weaving":
+                    return 9;
+                case "system_pair_sacrifice_casting_runic_magic":
+                    return 10;
+                case "system_pair_spell_tension_spell_weaving":
+                    return 11;
+                case "system_pair_spell_tension_runic_magic":
+                    return 12;
+                case "system_pair_spell_weaving_runic_magic":
+                    return 15;
+            }
+
+            unchecked
+            {
+                int hash = 17;
+                for (int i = 0; i < pairId.Length; i++)
+                {
+                    hash = hash * 31 + pairId[i];
+                }
+
+                return Mathf.Abs(hash) % 16;
+            }
+        }
+
+        private static string CreateSystemPairId(string firstSystemId, string secondSystemId)
+        {
+            string first = NormalizeSystemPairPart(firstSystemId);
+            string second = NormalizeSystemPairPart(secondSystemId);
+            if (SystemRank(first) > SystemRank(second))
+            {
+                (first, second) = (second, first);
+            }
+
+            return "system_pair_" + first + "_" + second;
+        }
+
+        private static string NormalizeSystemPairPart(string systemId)
+        {
+            if (string.IsNullOrEmpty(systemId))
+            {
+                return string.Empty;
+            }
+
+            return systemId.StartsWith("system_") ? systemId.Substring("system_".Length) : systemId;
+        }
+
+        private static int SystemRank(string systemPart)
+        {
+            switch (systemPart)
+            {
+                case "territory_casting":
+                    return 0;
+                case "component_boosts":
+                    return 1;
+                case "sacrifice_casting":
+                    return 2;
+                case "rhythm_casting":
+                    return 3;
+                case "spell_tension":
+                    return 4;
+                case "echo_casting":
+                    return 5;
+                case "spell_weaving":
+                    return 6;
+                case "runic_magic":
+                    return 7;
+                default:
+                    return 100;
+            }
+        }
+
+        private static bool ContainsPairForSynergy(List<string> ids, string synergyId)
+        {
+            string pairId = SynergyToPairId(synergyId);
+            return !string.IsNullOrEmpty(pairId) && ids.Contains(pairId);
+        }
+
+        private static bool IsPairUpgradeMatch(string pairId, string synergyId)
+        {
+            return pairId.StartsWith("system_pair_") && pairId == SynergyToPairId(synergyId);
+        }
+
+        private static string SynergyToPairId(string synergyId)
+        {
+            switch (synergyId)
+            {
+                case "system_synergy_territory_components":
+                    return "system_pair_territory_casting_component_boosts";
+                case "system_synergy_territory_sacrifice":
+                    return "system_pair_territory_casting_sacrifice_casting";
+                case "system_synergy_territory_rhythm":
+                    return "system_pair_territory_casting_rhythm_casting";
+                case "system_synergy_territory_tension":
+                    return "system_pair_territory_casting_spell_tension";
+                case "system_synergy_components_sacrifice":
+                    return "system_pair_component_boosts_sacrifice_casting";
+                case "system_synergy_components_rhythm":
+                    return "system_pair_component_boosts_rhythm_casting";
+                case "system_synergy_components_tension":
+                    return "system_pair_component_boosts_spell_tension";
+                case "system_synergy_sacrifice_rhythm":
+                    return "system_pair_sacrifice_casting_rhythm_casting";
+                case "system_synergy_sacrifice_tension":
+                    return "system_pair_sacrifice_casting_spell_tension";
+                case "system_synergy_rhythm_tension":
+                    return "system_pair_rhythm_casting_spell_tension";
+                default:
+                    return string.Empty;
+            }
         }
 
         private void RefreshCooldownVisuals()
