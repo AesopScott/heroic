@@ -71,6 +71,13 @@ namespace Heroic.Systems
                 Skill("poison_disease", "Disease", "Details pending Skills session.", UpgradeManager.AbilityType.AreaOfEffectEnemy),
 
                 System("system_territory_casting", "Territory Casting", "Reveal arena territories that boost damage, range, recovery, or all spell stats."),
+                System("system_component_boosts", "Component Magic", "Prototype UI shell: collect components for timed damage, range, and recovery boosts."),
+                System("system_sacrifice_casting", "Sacrificial Casting", "Prototype UI shell: trade safety for stronger spell output."),
+                System("system_echo_casting", "Incantation Casting", "Prototype UI shell: proc double-casts, damage surges, and cooldown recovery."),
+                System("system_spell_weaving", "Spell Weaving", "Prototype UI shell: cross-proc effects from learned magic schools."),
+                System("system_runic_magic", "Runic Magic", "Prototype UI shell: area spells leave rune traps."),
+                System("system_rhythm_casting", "Rhythm Casting", "Legacy UI shell: timing-based casting feedback if retained."),
+                System("system_spell_tension", "Spell Tension", "Legacy UI shell: hold-cast charge and debt feedback if retained."),
                 Boost("upgrade_system_territory_casting_more_territories", "Territory Casting: More Territories", "Keep more territory circles active at once."),
                 Boost("upgrade_system_territory_casting_larger_territories", "Territory Casting: Larger Territories", "Increase territory circle radius."),
                 Boost("upgrade_system_territory_casting_stronger_territories", "Territory Casting: Stronger Territories", "Increase territory bonus strength."),

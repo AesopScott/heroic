@@ -1,5 +1,6 @@
 using Heroic.Player;
 using Heroic.Systems;
+using Heroic.World;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Heroic.UI
         [SerializeField] private PlayerTemporaryBuffs temporaryBuffs;
         [SerializeField] private SpellStatModifier spellStats;
         [SerializeField] private TerritoryCastingController territoryCasting;
+        [SerializeField] private TerrainManager terrainManager;
         [SerializeField] private TMP_Text healthText;
         [SerializeField] private TMP_Text experienceText;
         [SerializeField] private TMP_Text levelText;
@@ -34,6 +36,7 @@ namespace Heroic.UI
             temporaryBuffs ??= FindAnyObjectByType<PlayerTemporaryBuffs>();
             spellStats ??= FindAnyObjectByType<SpellStatModifier>();
             territoryCasting ??= FindAnyObjectByType<TerritoryCastingController>();
+            terrainManager ??= FindAnyObjectByType<TerrainManager>();
         }
 
         private void OnEnable()
@@ -104,6 +107,7 @@ namespace Heroic.UI
             AppendLearnedSkills("Abilities", false, false);
             AppendMovementSkills();
             AppendLearnedSkills("Systems", true, false);
+            AppendSystemInterfaces();
             AppendUpgradeTiers();
             skillListText.text = builder.ToString();
         }
@@ -181,6 +185,35 @@ namespace Heroic.UI
             }
         }
 
+        private void AppendSystemInterfaces()
+        {
+            if (buildState == null)
+            {
+                return;
+            }
+
+            bool wroteHeader = false;
+            foreach (string skillId in buildState.LearnedSkillIds)
+            {
+                if (!skillId.StartsWith("system_"))
+                {
+                    continue;
+                }
+
+                if (!wroteHeader)
+                {
+                    builder.AppendLine("System UI:");
+                    wroteHeader = true;
+                }
+
+                SystemInterfaceCatalog.InterfaceDefinition definition = SystemInterfaceCatalog.ForSystem(skillId);
+                builder.Append("- ");
+                builder.Append(definition.DisplayName);
+                builder.Append(": ");
+                builder.AppendLine(definition.CurrentStatus);
+            }
+        }
+
         private void RefreshBonuses()
         {
             if (bonusListText == null)
@@ -227,6 +260,18 @@ namespace Heroic.UI
             {
                 builder.AppendLine(territoryCasting.ActiveBonusSummary);
                 hasBonus = true;
+            }
+
+            terrainManager ??= TerrainManager.Instance ?? FindAnyObjectByType<TerrainManager>();
+            if (terrainManager != null && playerExperience != null)
+            {
+                string terrainBonus = terrainManager.GetCurrentTerrainBonusSummary(playerExperience.transform.position);
+                if (!string.IsNullOrEmpty(terrainBonus))
+                {
+                    builder.Append("- ");
+                    builder.AppendLine(terrainBonus);
+                    hasBonus = true;
+                }
             }
 
             if (!hasBonus && spellStats != null)
@@ -284,7 +329,16 @@ namespace Heroic.UI
             builderScratch.Clear();
             for (int i = 0; i < parts.Length; i++)
             {
-                if (parts[i] == "arcane" || parts[i] == "fire" || parts[i] == "system" || parts[i] == "movement")
+                if (parts[i] == "arcane" ||
+                    parts[i] == "fire" ||
+                    parts[i] == "cold" ||
+                    parts[i] == "lightning" ||
+                    parts[i] == "earth" ||
+                    parts[i] == "mind" ||
+                    parts[i] == "blood" ||
+                    parts[i] == "poison" ||
+                    parts[i] == "system" ||
+                    parts[i] == "movement")
                 {
                     continue;
                 }
