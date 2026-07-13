@@ -588,8 +588,8 @@ namespace Heroic.Systems
             string skillId = ResolveSystemSkillId(choiceId);
             if (IsSystemSynergyUpgrade(choiceId))
             {
-                string[] prerequisites = ResolveSystemSynergyPrerequisites(choiceId);
-                if (buildState == null || prerequisites.Length != 2 || !buildState.HasSkill(prerequisites[0]) || !buildState.HasSkill(prerequisites[1]))
+                bool hasPrerequisites = SystemPairDefinitions.TryGetPrerequisites(choiceId, out string firstSystemId, out string secondSystemId);
+                if (buildState == null || !hasPrerequisites || !buildState.HasSkill(firstSystemId) || !buildState.HasSkill(secondSystemId))
                 {
                     return;
                 }
@@ -636,9 +636,9 @@ namespace Heroic.Systems
                 return "system_territory_casting";
             }
 
-            if (choiceId.StartsWith("upgrade_system_synergy_"))
+            if (SystemPairDefinitions.IsPairUpgrade(choiceId))
             {
-                return choiceId.Replace("upgrade_", string.Empty);
+                return SystemPairDefinitions.ResolvePairId(choiceId);
             }
 
             if (choiceId.StartsWith("upgrade_system_component_boosts"))
@@ -666,36 +666,7 @@ namespace Heroic.Systems
 
         private static bool IsSystemSynergyUpgrade(string choiceId)
         {
-            return choiceId.StartsWith("upgrade_system_synergy_");
-        }
-
-        private static string[] ResolveSystemSynergyPrerequisites(string choiceId)
-        {
-            switch (choiceId)
-            {
-                case "upgrade_system_synergy_territory_components":
-                    return new[] { "system_territory_casting", "system_component_boosts" };
-                case "upgrade_system_synergy_territory_sacrifice":
-                    return new[] { "system_territory_casting", "system_sacrifice_casting" };
-                case "upgrade_system_synergy_territory_rhythm":
-                    return new[] { "system_territory_casting", "system_rhythm_casting" };
-                case "upgrade_system_synergy_territory_tension":
-                    return new[] { "system_territory_casting", "system_spell_tension" };
-                case "upgrade_system_synergy_components_sacrifice":
-                    return new[] { "system_component_boosts", "system_sacrifice_casting" };
-                case "upgrade_system_synergy_components_rhythm":
-                    return new[] { "system_component_boosts", "system_rhythm_casting" };
-                case "upgrade_system_synergy_components_tension":
-                    return new[] { "system_component_boosts", "system_spell_tension" };
-                case "upgrade_system_synergy_sacrifice_rhythm":
-                    return new[] { "system_sacrifice_casting", "system_rhythm_casting" };
-                case "upgrade_system_synergy_sacrifice_tension":
-                    return new[] { "system_sacrifice_casting", "system_spell_tension" };
-                case "upgrade_system_synergy_rhythm_tension":
-                    return new[] { "system_rhythm_casting", "system_spell_tension" };
-                default:
-                    return new string[0];
-            }
+            return SystemPairDefinitions.IsPairUpgrade(choiceId);
         }
 
         private int Value(int tier, int basic, int advanced, int expert, int master, int grandmaster)

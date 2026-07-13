@@ -242,6 +242,11 @@ namespace Heroic.Systems
                 return ChoiceLane.System;
             }
 
+            if (IsSystemSynergyBoost(choice))
+            {
+                return ChoiceLane.System;
+            }
+
             return ChoiceLane.Ability;
         }
 
@@ -261,12 +266,12 @@ namespace Heroic.Systems
 
                 if (IsSystemSynergyBoost(choice))
                 {
-                    string[] prerequisites = ResolveSystemSynergyPrerequisites(choice.Id);
+                    bool hasPrerequisites = SystemPairDefinitions.TryGetPrerequisites(choice.Id, out string firstSystemId, out string secondSystemId);
                     string synergyId = ResolveBoostedSkillId(choice.Id);
-                    return prerequisites.Length == 2
+                    return hasPrerequisites
                         && buildState != null
-                        && buildState.HasSkill(prerequisites[0])
-                        && buildState.HasSkill(prerequisites[1])
+                        && buildState.HasSkill(firstSystemId)
+                        && buildState.HasSkill(secondSystemId)
                         && buildState.GetSkillPathTier(synergyId, choice.Id) < 5;
                 }
 
@@ -299,7 +304,7 @@ namespace Heroic.Systems
 
         private static bool IsSystemSynergyBoost(DraftChoice choice)
         {
-            return choice.Category == UpgradeCategory.Boost && choice.Id.StartsWith("upgrade_system_synergy_");
+            return choice.Category == UpgradeCategory.Boost && SystemPairDefinitions.IsPairUpgrade(choice.Id);
         }
 
         private bool IsMovementEquipped(string choiceId)
@@ -560,9 +565,9 @@ namespace Heroic.Systems
                 return "system_territory_casting";
             }
 
-            if (choiceId.StartsWith("upgrade_system_synergy_"))
+            if (SystemPairDefinitions.IsPairUpgrade(choiceId))
             {
-                return choiceId.Replace("upgrade_", string.Empty);
+                return SystemPairDefinitions.ResolvePairId(choiceId);
             }
 
             if (choiceId.StartsWith("upgrade_system_component_boosts"))
@@ -633,33 +638,5 @@ namespace Heroic.Systems
             return string.Empty;
         }
 
-        private static string[] ResolveSystemSynergyPrerequisites(string choiceId)
-        {
-            switch (choiceId)
-            {
-                case "upgrade_system_synergy_territory_components":
-                    return new[] { "system_territory_casting", "system_component_boosts" };
-                case "upgrade_system_synergy_territory_sacrifice":
-                    return new[] { "system_territory_casting", "system_sacrifice_casting" };
-                case "upgrade_system_synergy_territory_rhythm":
-                    return new[] { "system_territory_casting", "system_rhythm_casting" };
-                case "upgrade_system_synergy_territory_tension":
-                    return new[] { "system_territory_casting", "system_spell_tension" };
-                case "upgrade_system_synergy_components_sacrifice":
-                    return new[] { "system_component_boosts", "system_sacrifice_casting" };
-                case "upgrade_system_synergy_components_rhythm":
-                    return new[] { "system_component_boosts", "system_rhythm_casting" };
-                case "upgrade_system_synergy_components_tension":
-                    return new[] { "system_component_boosts", "system_spell_tension" };
-                case "upgrade_system_synergy_sacrifice_rhythm":
-                    return new[] { "system_sacrifice_casting", "system_rhythm_casting" };
-                case "upgrade_system_synergy_sacrifice_tension":
-                    return new[] { "system_sacrifice_casting", "system_spell_tension" };
-                case "upgrade_system_synergy_rhythm_tension":
-                    return new[] { "system_rhythm_casting", "system_spell_tension" };
-                default:
-                    return new string[0];
-            }
-        }
     }
 }

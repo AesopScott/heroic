@@ -85,6 +85,13 @@ namespace Heroic.Systems
 
         public void ApplyUpgrade(string choiceId, int tier)
         {
+            if (SystemPairDefinitions.IsPairUpgrade(choiceId))
+            {
+                ApplySystemPairUpgrade(choiceId, tier);
+                ApplySystemStats();
+                return;
+            }
+
             switch (choiceId)
             {
                 case "upgrade_system_component_boosts_potent_components":
@@ -124,39 +131,29 @@ namespace Heroic.Systems
                 case "upgrade_system_spell_tension_debt_control":
                     tensionRecoveryDebt = Value(tier, 0.1f, 0.08f, 0.05f, 0.02f, 0f);
                     break;
-                case "upgrade_system_synergy_territory_components":
-                    SetSynergy(choiceId, tier, 0.08f, 0.12f, 0.18f, 0.25f, 0.34f, 0.08f, 0.12f, 0.18f, 0.25f, 0.34f, 0.06f, 0.1f, 0.15f, 0.21f, 0.3f);
-                    break;
-                case "upgrade_system_synergy_territory_sacrifice":
-                    SetSynergy(choiceId, tier, 0.12f, 0.2f, 0.3f, 0.42f, 0.58f, 0f, 0f, 0f, 0f, 0f, 0.03f, 0.06f, 0.1f, 0.15f, 0.22f, 0f, 2, 4, 6, 9, 12);
-                    break;
-                case "upgrade_system_synergy_territory_rhythm":
-                    SetSynergy(choiceId, tier, 0.04f, 0.08f, 0.13f, 0.19f, 0.27f, 0.06f, 0.1f, 0.15f, 0.22f, 0.3f, 0.1f, 0.16f, 0.24f, 0.34f, 0.46f);
-                    break;
-                case "upgrade_system_synergy_territory_tension":
-                    SetSynergy(choiceId, tier, 0.1f, 0.16f, 0.24f, 0.34f, 0.46f, 0.08f, 0.14f, 0.22f, 0.32f, 0.44f, 0.02f, 0.04f, 0.07f, 0.11f, 0.16f);
-                    break;
-                case "upgrade_system_synergy_components_sacrifice":
-                    SetSynergy(choiceId, tier, 0.1f, 0.18f, 0.28f, 0.4f, 0.56f, 0.02f, 0.04f, 0.07f, 0.11f, 0.16f, 0.02f, 0.05f, 0.08f, 0.12f, 0.18f, 0f, 2, 3, 5, 7, 10);
-                    break;
-                case "upgrade_system_synergy_components_rhythm":
-                    SetSynergy(choiceId, tier, 0.04f, 0.08f, 0.13f, 0.19f, 0.27f, 0.08f, 0.14f, 0.21f, 0.3f, 0.42f, 0.08f, 0.14f, 0.21f, 0.3f, 0.42f);
-                    break;
-                case "upgrade_system_synergy_components_tension":
-                    SetSynergy(choiceId, tier, 0.1f, 0.17f, 0.26f, 0.38f, 0.52f, 0.08f, 0.14f, 0.22f, 0.32f, 0.44f, 0.03f, 0.06f, 0.1f, 0.15f, 0.22f);
-                    break;
-                case "upgrade_system_synergy_sacrifice_rhythm":
-                    SetSynergy(choiceId, tier, 0.08f, 0.14f, 0.22f, 0.32f, 0.45f, 0f, 0f, 0f, 0f, 0f, 0.08f, 0.14f, 0.22f, 0.32f, 0.45f, 0.02f, 2, 4, 6, 8, 11);
-                    break;
-                case "upgrade_system_synergy_sacrifice_tension":
-                    SetSynergy(choiceId, tier, 0.14f, 0.24f, 0.36f, 0.52f, 0.72f, 0.04f, 0.08f, 0.13f, 0.19f, 0.27f, 0f, 0f, 0f, 0f, 0f, 0f, 1, 3, 5, 7, 9);
-                    break;
-                case "upgrade_system_synergy_rhythm_tension":
-                    SetSynergy(choiceId, tier, 0.08f, 0.14f, 0.21f, 0.3f, 0.42f, 0.05f, 0.1f, 0.16f, 0.24f, 0.34f, 0.12f, 0.2f, 0.3f, 0.42f, 0.56f);
-                    break;
             }
 
             ApplySystemStats();
+        }
+
+        private void ApplySystemPairUpgrade(string choiceId, int tier)
+        {
+            if (choiceId.EndsWith("_amplify"))
+            {
+                SetSynergy(choiceId, tier, 0.05f, 0.09f, 0.14f, 0.2f, 0.28f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
+                return;
+            }
+
+            if (choiceId.EndsWith("_extend"))
+            {
+                SetSynergy(choiceId, tier, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.09f, 0.14f, 0.2f, 0.28f, 0f, 0f, 0f, 0f, 0f);
+                return;
+            }
+
+            if (choiceId.EndsWith("_recover"))
+            {
+                SetSynergy(choiceId, tier, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0.04f, 0.08f, 0.12f, 0.17f, 0.24f);
+            }
         }
 
         private void ApplySystemStats()

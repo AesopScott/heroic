@@ -11,7 +11,7 @@ namespace Heroic.UI
         [SerializeField] private RunBuildState buildState;
         [SerializeField] private RectTransform abilityRoot;
         [SerializeField] private RectTransform systemRoot;
-        [SerializeField] private int maxVisibleSlots = 12;
+        [SerializeField] private int maxVisibleSlots = 24;
         [SerializeField] private float slotSize = 144f;
         [SerializeField] private float slotSpacing = 158f;
         [SerializeField] private float upgradeBadgeWidth = 180f;
@@ -199,7 +199,7 @@ namespace Heroic.UI
 
                 if (skillId.StartsWith("system_"))
                 {
-                    if (!skillId.StartsWith("system_synergy_"))
+                    if (!skillId.StartsWith("system_pair_"))
                     {
                         systemIds.Add(skillId);
                     }
@@ -208,6 +208,8 @@ namespace Heroic.UI
 
                 abilityIds.Add(skillId);
             }
+
+            SystemPairDefinitions.AddActivePairs(buildState.LearnedSkillIds, systemIds);
 
             ApplyList(abilityIds, abilitySlots, ref lastAbilitySignature, 0f, true);
             ApplyList(systemIds, systemSlots, ref lastSystemSignature, slotSpacing + 12f, false);
@@ -394,9 +396,9 @@ namespace Heroic.UI
                 label = label.Substring(skillId.Length + 1);
             }
 
-            if (label.StartsWith("system_synergy_"))
+            if (label.StartsWith("system_pair_"))
             {
-                label = label.Substring("system_synergy_".Length);
+                label = label.Substring("system_pair_".Length);
             }
 
             label = label.Replace('_', ' ');

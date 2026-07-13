@@ -41,6 +41,11 @@ namespace Heroic.UI
             }
 
             string id = choiceId.ToLowerInvariant();
+            if (SystemPairDefinitions.IsPairUpgrade(id))
+            {
+                return SystemPairDefinitions.ResolvePairId(id);
+            }
+
             string[] knownPrefixes =
             {
                 "arcane_magic_missile",
@@ -148,7 +153,7 @@ namespace Heroic.UI
 
             if (id.StartsWith("system_"))
             {
-                return Hex("C8C3FF");
+                return id.StartsWith("system_pair_") ? Hex("F4D35E") : Hex("C8C3FF");
             }
 
             if (id.StartsWith("fire_"))

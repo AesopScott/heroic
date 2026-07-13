@@ -1,10 +1,12 @@
+using System.Collections.Generic;
+
 namespace Heroic.Systems
 {
     public static class PrototypeDraftChoices
     {
         public static UpgradeManager.DraftChoice[] Create()
         {
-            return new[]
+            var choices = new List<UpgradeManager.DraftChoice>
             {
                 Skill("arcane_arcane_blast", "Arcane Blast", "Unlock a targeted Arcane impact.", UpgradeManager.AbilityType.NearestEnemy),
                 Skill("arcane_warp_pulse", "Warp Pulse", "Unlock a close Arcane control pulse.", UpgradeManager.AbilityType.AreaOfEffectCaster),
@@ -87,22 +89,12 @@ namespace Heroic.Systems
                 Boost("upgrade_system_rhythm_casting_perfect_beat", "Rhythm Casting: Perfect Beat", "Increase rhythm damage payoff."),
                 Boost("upgrade_system_rhythm_casting_clean_timing", "Rhythm Casting: Clean Timing", "Increase rhythm range payoff."),
                 System("system_spell_tension", "Spell Tension", "Charge incantations for power while managing casting debt."),
-                System("system_echo_casting", "Echo Casting", "Details pending Skills session."),
-                System("system_spell_weaving", "Spell Weaving", "Details pending Skills session."),
-                System("system_runic_magic", "Runic Magic", "Details pending Skills session."),
+                System("system_echo_casting", "Incantation Casting", "Proc extra casts, damage spikes, and immediate recovery windows."),
+                System("system_spell_weaving", "Spell Weaving", "Blend elemental effects when more than one element is available."),
+                System("system_runic_magic", "Runic Magic", "Turn area spells into triggered runes and traps."),
                 Boost("upgrade_system_spell_tension_charged_incantations", "Spell Tension: Charged Incantations", "Increase tension damage payoff."),
                 Boost("upgrade_system_spell_tension_longer_chants", "Spell Tension: Longer Chants", "Increase tension range payoff."),
                 Boost("upgrade_system_spell_tension_debt_control", "Spell Tension: Debt Control", "Reduce incantation debt."),
-                Boost("upgrade_system_synergy_territory_components", "Territory + Components", "Components become stronger when shaped by territories."),
-                Boost("upgrade_system_synergy_territory_sacrifice", "Territory + Sacrifice", "Sacrifices hit harder when anchored to territory control."),
-                Boost("upgrade_system_synergy_territory_rhythm", "Territory + Rhythm", "Rhythm windows become cleaner inside territorial magic."),
-                Boost("upgrade_system_synergy_territory_tension", "Territory + Tension", "Territories stabilize charged incantations."),
-                Boost("upgrade_system_synergy_components_sacrifice", "Components + Sacrifice", "Components make sacrifice casting more efficient and violent."),
-                Boost("upgrade_system_synergy_components_rhythm", "Components + Rhythm", "Well-timed components improve range and recovery."),
-                Boost("upgrade_system_synergy_components_tension", "Components + Tension", "Components channel charged spells into sharper output."),
-                Boost("upgrade_system_synergy_sacrifice_rhythm", "Sacrifice + Rhythm", "Clean timing makes sacrifice casting faster and less costly."),
-                Boost("upgrade_system_synergy_sacrifice_tension", "Sacrifice + Tension", "Debt and sacrifice combine into heavier burst power."),
-                Boost("upgrade_system_synergy_rhythm_tension", "Rhythm + Tension", "Rhythm controls incantation debt and improves charged casting."),
 
                 Boost("upgrade_arcane_magic_missile_split_shot", "Magic Missile: Split Shot", "Add more missiles."),
                 Boost("upgrade_arcane_magic_missile_seeking_shot", "Magic Missile: Seeking Shot", "Improve homing strength."),
@@ -296,6 +288,19 @@ namespace Heroic.Systems
                 Movement("movement_tunnel", "Tunnel", "Travel underground and erupt at the destination."),
                 Movement("movement_flight", "Flight", "Fly over terrain and land with optional impact.")
             };
+
+            AddSystemPairChoices(choices);
+            return choices.ToArray();
+        }
+
+        private static void AddSystemPairChoices(List<UpgradeManager.DraftChoice> choices)
+        {
+            foreach (SystemPairDefinitions.PairDefinition pair in SystemPairDefinitions.Pairs)
+            {
+                choices.Add(Boost("upgrade_" + pair.PairId + "_amplify", pair.DisplayName + ": Amplify", "Increase the paired system's damage payoff."));
+                choices.Add(Boost("upgrade_" + pair.PairId + "_extend", pair.DisplayName + ": Extend", "Increase the paired system's range and area payoff."));
+                choices.Add(Boost("upgrade_" + pair.PairId + "_recover", pair.DisplayName + ": Recover", "Increase the paired system's recovery and uptime payoff."));
+            }
         }
 
         private static UpgradeManager.DraftChoice Skill(string id, string name, string description, UpgradeManager.AbilityType abilityType)

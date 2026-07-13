@@ -861,9 +861,9 @@ namespace Heroic.UI
                 return "system_territory_casting";
             }
 
-            if (choiceId.StartsWith("upgrade_system_synergy_"))
+            if (SystemPairDefinitions.IsPairUpgrade(choiceId))
             {
-                return choiceId.Replace("upgrade_", string.Empty);
+                return SystemPairDefinitions.ResolvePairId(choiceId);
             }
 
             if (choiceId.StartsWith("upgrade_system_component_boosts"))
