@@ -4,6 +4,7 @@ using Heroic.Core;
 using Heroic.Data;
 using Heroic.Player;
 using Heroic.Visuals;
+using Heroic.World;
 
 namespace Heroic.Enemies
 {
@@ -18,6 +19,8 @@ namespace Heroic.Enemies
         [SerializeField] private float spawnRateMultiplier = 0.7f;
         [SerializeField] private int spawnRollCount = 5;
         [SerializeField] private float rollInterval = 3f;
+        [SerializeField] private DynamicTerrainGrid terrainGrid;
+        [SerializeField] private float blockedSpawnCheckRadius = 0.75f;
 
         private float nextSpawnTime;
 
@@ -31,6 +34,11 @@ namespace Heroic.Enemies
             if (playerExperience == null)
             {
                 playerExperience = FindAnyObjectByType<PlayerExperience>();
+            }
+
+            if (terrainGrid == null)
+            {
+                terrainGrid = FindAnyObjectByType<DynamicTerrainGrid>();
             }
         }
 
@@ -81,7 +89,12 @@ namespace Heroic.Enemies
                 return;
             }
 
-            Vector3 spawnPosition = playerTarget.position + new Vector3(spawnOffset.x, spawnOffset.y, 0f);
+            Vector3 spawnPosition = ResolveSpawnPosition(spawnOffset);
+            if (terrainGrid != null && terrainGrid.IsSpawnLocationBlocked(spawnPosition, blockedSpawnCheckRadius))
+            {
+                return;
+            }
+
             EnemyController enemy = Instantiate(prefab, spawnPosition, Quaternion.identity);
             enemy.SetTarget(playerTarget);
             ApplyDefinition(enemy, enemyDefinition);
@@ -153,6 +166,27 @@ namespace Heroic.Enemies
             }
 
             return direction * spawnRadius;
+        }
+
+        private Vector3 ResolveSpawnPosition(Vector2 spawnOffset)
+        {
+            Vector3 firstPosition = playerTarget.position + new Vector3(spawnOffset.x, spawnOffset.y, 0f);
+            if (terrainGrid == null || !terrainGrid.IsSpawnLocationBlocked(firstPosition, blockedSpawnCheckRadius))
+            {
+                return firstPosition;
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                Vector2 retryOffset = GetSpawnOffset() + Random.insideUnitCircle * 1.25f;
+                Vector3 retryPosition = playerTarget.position + new Vector3(retryOffset.x, retryOffset.y, 0f);
+                if (!terrainGrid.IsSpawnLocationBlocked(retryPosition, blockedSpawnCheckRadius))
+                {
+                    return retryPosition;
+                }
+            }
+
+            return firstPosition;
         }
 
         private WaveDefinition GetActiveWave()

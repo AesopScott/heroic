@@ -1,20 +1,24 @@
+using Heroic.World;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Heroic.Visuals
 {
     public class ArenaBackdrop : MonoBehaviour
     {
         [SerializeField] private int textureSize = 512;
-        [SerializeField] private int gridSpacing = 32;
-        [SerializeField] private Color baseColor = new Color(0.025f, 0.045f, 0.055f, 1f);
-        [SerializeField] private Color gridColor = new Color(0.12f, 0.32f, 0.36f, 0.42f);
-        [SerializeField] private Color runeColor = new Color(0.24f, 0.74f, 0.88f, 0.28f);
-        [SerializeField] private Color vignetteColor = new Color(0.006f, 0.012f, 0.02f, 1f);
+        [SerializeField] private Color dirtBaseColor = new Color(0.35f, 0.22f, 0.12f, 1f);
+        [SerializeField] private Color dirtLightColor = new Color(0.47f, 0.31f, 0.17f, 1f);
+        [SerializeField] private Color dirtDarkColor = new Color(0.22f, 0.13f, 0.07f, 1f);
+        [SerializeField] private Color rockColor = new Color(0.30f, 0.28f, 0.24f, 1f);
+        [SerializeField] private Color pebbleColor = new Color(0.42f, 0.36f, 0.28f, 1f);
+        [SerializeField] private Color edgeVignetteColor = new Color(0.12f, 0.07f, 0.035f, 1f);
         [SerializeField] private Vector2 worldSize = new Vector2(60f, 60f);
 
         private void Awake()
         {
             Build();
+            EnsureTerrainManager();
         }
 
         public void Build()
@@ -38,22 +42,28 @@ namespace Heroic.Visuals
                     Vector2 uv = new Vector2(x / (float)(textureSize - 1), y / (float)(textureSize - 1));
                     Vector2 centered = (uv - Vector2.one * 0.5f) * 2f;
                     float distance = centered.magnitude;
-                    bool grid = x % gridSpacing == 0 || y % gridSpacing == 0;
-                    bool majorGrid = x % (gridSpacing * 4) == 0 || y % (gridSpacing * 4) == 0;
-                    float ring = Mathf.Max(RingLine(distance, 0.32f, 0.006f), RingLine(distance, 0.58f, 0.005f));
-                    float diagonal = Mathf.Abs(Mathf.Abs(centered.x) - Mathf.Abs(centered.y)) < 0.012f
-                        ? 0.08f * Mathf.SmoothStep(0.35f, 1f, distance)
-                        : 0f;
-                    float star = Hash01(x, y) > 0.997f ? 0.45f : 0f;
 
-                    Color color = baseColor;
-                    if (grid)
-                    {
-                        color = Color.Lerp(color, gridColor, majorGrid ? gridColor.a * 1.5f : gridColor.a);
-                    }
+                    float fineNoise = Hash01(x, y);
+                    float softNoise = (
+                        Hash01(x / 4, y / 4) +
+                        Hash01((x + 19) / 8, (y + 37) / 8) +
+                        Hash01((x + 71) / 16, (y + 11) / 16)) / 3f;
 
-                    color = Color.Lerp(color, runeColor, Mathf.Clamp01(ring + diagonal + star));
-                    color = Color.Lerp(color, vignetteColor, Mathf.Clamp01(Mathf.InverseLerp(0.45f, 1.25f, distance)));
+                    Color color = Color.Lerp(dirtDarkColor, dirtLightColor, softNoise);
+                    color = Color.Lerp(color, dirtBaseColor, 0.45f);
+
+                    // Decorative only: rocks and pebbles are baked into the backdrop texture, no colliders.
+                    float rock = RockMask(x, y, 41, 0.16f);
+                    float pebble = fineNoise > 0.982f ? 0.32f : 0f;
+                    color = Color.Lerp(color, pebbleColor, pebble);
+                    color = Color.Lerp(color, rockColor, rock);
+
+                    float grain = (fineNoise - 0.5f) * 0.08f;
+                    color.r = Mathf.Clamp01(color.r + grain);
+                    color.g = Mathf.Clamp01(color.g + grain);
+                    color.b = Mathf.Clamp01(color.b + grain);
+
+                    color = Color.Lerp(color, edgeVignetteColor, Mathf.Clamp01(Mathf.InverseLerp(0.7f, 1.3f, distance)) * 0.45f);
                     texture.SetPixel(x, y, color);
                 }
             }
@@ -64,9 +74,21 @@ namespace Heroic.Visuals
             transform.localScale = Vector3.one;
         }
 
-        private static float RingLine(float distance, float radius, float halfWidth)
+        private static float RockMask(int x, int y, int cellSize, float chance)
         {
-            return Mathf.Clamp01(1f - Mathf.Abs(distance - radius) / halfWidth);
+            int cellX = Mathf.FloorToInt(x / (float)cellSize);
+            int cellY = Mathf.FloorToInt(y / (float)cellSize);
+            float cellRoll = Hash01(cellX, cellY);
+            if (cellRoll > chance)
+            {
+                return 0f;
+            }
+
+            float centerX = (cellX + 0.5f + (Hash01(cellX + 13, cellY) - 0.5f) * 0.45f) * cellSize;
+            float centerY = (cellY + 0.5f + (Hash01(cellX, cellY + 29) - 0.5f) * 0.45f) * cellSize;
+            float radius = Mathf.Lerp(3f, 8f, Hash01(cellX + 7, cellY + 5));
+            float distance = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
+            return Mathf.Clamp01(1f - distance / radius);
         }
 
         private static float Hash01(int x, int y)
@@ -77,6 +99,22 @@ namespace Heroic.Visuals
                 hash = (hash ^ (hash >> 13)) * 1274126177u;
                 return (hash ^ (hash >> 16)) / 4294967295f;
             }
+        }
+
+        private void EnsureTerrainManager()
+        {
+            if (SceneManager.GetActiveScene().name != "Game")
+            {
+                return;
+            }
+
+            if (FindAnyObjectByType<TerrainManager>() != null)
+            {
+                return;
+            }
+
+            GameObject terrainObject = new GameObject("TerrainManager");
+            terrainObject.AddComponent<TerrainManager>();
         }
     }
 }

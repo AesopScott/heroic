@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "date": "2026-07-12",
+  "status": "placeholder-artifact-manifest",
+  "note": "Final art should preserve these keys so UI and gameplay references remain stable.",
+  "categories": [
+    {"key":"icon.category.attack","glyph":"ATK","color":"#FF6A2A","neededFor":"Draft cards and spellbook filters"},
+    {"key":"icon.category.defense","glyph":"DEF","color":"#7CE3FF","neededFor":"Draft cards and future defense lane"},
+    {"key":"icon.category.movement","glyph":"MOV","color":"#88F7B0","neededFor":"Draft cards and movement slot UI"},
+    {"key":"icon.category.system","glyph":"SYS","color":"#C8C3FF","neededFor":"Draft cards and spell system UI"},
+    {"key":"icon.category.boost","glyph":"UPG","color":"#FFD45A","neededFor":"Draft cards and upgrade tiers"}
+  ],
+  "schools": [
+    {"key":"icon.school.arcane","glyph":"ARC","color":"#78D7FF"},
+    {"key":"icon.school.fire","glyph":"FIR","color":"#FF6A2A"},
+    {"key":"icon.school.cold","glyph":"CLD","color":"#7FE7FF"},
+    {"key":"icon.school.lightning","glyph":"LTN","color":"#F5E84B"},
+    {"key":"icon.school.earth","glyph":"ERT","color":"#A8743D"},
+    {"key":"icon.school.mind","glyph":"MND","color":"#D889FF"},
+    {"key":"icon.school.blood","glyph":"BLD","color":"#C0263E"},
+    {"key":"icon.school.poison","glyph":"PSN","color":"#76D94E"}
+  ],
+  "systems": [
+    {"key":"icon.system.territory_casting","glyph":"TC","color":"#C8C3FF"},
+    {"key":"icon.system.component_magic","glyph":"CM","color":"#6EF1C8"},
+    {"key":"icon.system.sacrificial_casting","glyph":"SC","color":"#D43A4E"},
+    {"key":"icon.system.incantation_casting","glyph":"IC","color":"#B7E7FF"},
+    {"key":"icon.system.spell_weaving","glyph":"SW","color":"#EAA8FF"},
+    {"key":"icon.system.runic_magic","glyph":"RM","color":"#D6B36A"},
+    {"key":"icon.system.rhythm_casting","glyph":"RC","color":"#F8D56A"},
+    {"key":"icon.system.spell_tension","glyph":"ST","color":"#F06F86"},
+    {"key":"icon.system.paired_synergy","glyph":"PX","color":"#FFFFFF"}
+  ],
+  "movement": [
+    {"key":"icon.movement.blink","glyph":"BL","color":"#88F7B0"},
+    {"key":"icon.movement.lunge","glyph":"LG","color":"#88F7B0"},
+    {"key":"icon.movement.teleport","glyph":"TP","color":"#88F7B0"},
+    {"key":"icon.movement.whirlwind","glyph":"WH","color":"#88F7B0"},
+    {"key":"icon.movement.cloud_walk","glyph":"CW","color":"#88F7B0"}
+  ],
+  "skills": [
+    {"key":"icon.skill.magic_missile","glyph":"MM","color":"#78D7FF"},
+    {"key":"icon.skill.arcane_blast","glyph":"AB","color":"#78D7FF"},
+    {"key":"icon.skill.warp_pulse","glyph":"WP","color":"#78D7FF"},
+    {"key":"icon.skill.spell_echo","glyph":"SE","color":"#78D7FF"},
+    {"key":"icon.skill.arcane_orbit","glyph":"AO","color":"#78D7FF"},
+    {"key":"icon.skill.fire_bolt","glyph":"FB","color":"#FF6A2A"},
+    {"key":"icon.skill.flame_wave","glyph":"FW","color":"#FF6A2A"},
+    {"key":"icon.skill.burning_ground","glyph":"BG","color":"#FF6A2A"},
+    {"key":"icon.skill.frost_ring","glyph":"FR","color":"#7FE7FF"},
+    {"key":"icon.skill.ice_shard","glyph":"IS","color":"#7FE7FF"},
+    {"key":"icon.skill.glacial_field","glyph":"GF","color":"#7FE7FF"},
+    {"key":"icon.skill.crystal_prison","glyph":"CP","color":"#7FE7FF"},
+    {"key":"icon.skill.shatter_line","glyph":"SL","color":"#7FE7FF"},
+    {"key":"icon.skill.chain_bolt","glyph":"CB","color":"#F5E84B"},
+    {"key":"icon.skill.static_field","glyph":"SF","color":"#F5E84B"},
+    {"key":"icon.skill.thunder_lance","glyph":"TL","color":"#F5E84B"},
+    {"key":"icon.skill.spark_surge","glyph":"SS","color":"#F5E84B"},
+    {"key":"icon.skill.storm_call","glyph":"SC","color":"#F5E84B"}
+  ],
+  "statuses": [
+    {"key":"marker.status.burn","glyph":"BRN","color":"#FF6A2A"},
+    {"key":"marker.status.slow","glyph":"SLW","color":"#7FE7FF"},
+    {"key":"marker.status.freeze","glyph":"FRZ","color":"#B9F4FF"},
+    {"key":"marker.status.stun","glyph":"STN","color":"#F5E84B"},
+    {"key":"marker.status.knockdown","glyph":"KDN","color":"#A8743D"},
+    {"key":"marker.status.fear","glyph":"FEA","color":"#D889FF"},
+    {"key":"marker.status.confuse","glyph":"CNF","color":"#D889FF"},
+    {"key":"marker.status.bleed","glyph":"BLD","color":"#C0263E"},
+    {"key":"marker.status.drain","glyph":"DRN","color":"#C0263E"},
+    {"key":"marker.status.poison","glyph":"PSN","color":"#76D94E"},
+    {"key":"marker.status.disabled","glyph":"DIS","color":"#76D94E"}
+  ],
+  "enemies": [
+    {"key":"enemy.crash","glyph":"CR","color":"#9BA3AA"},
+    {"key":"enemy.shooter","glyph":"SH","color":"#9BA3AA"},
+    {"key":"enemy.caster","glyph":"CA","color":"#C8C3FF"},
+    {"key":"enemy.fast","glyph":"FM","color":"#88F7B0"},
+    {"key":"enemy.defensive","glyph":"DF","color":"#A8743D"},
+    {"key":"enemy.swarm","glyph":"SW","color":"#76D94E"},
+    {"key":"enemy.boss","glyph":"BO","color":"#FFD45A"}
+  ],
+  "worldVfx": [
+    {"key":"world.territory.damage","glyph":"DMG","color":"#FF6A2A"},
+    {"key":"world.territory.range","glyph":"RNG","color":"#7FE7FF"},
+    {"key":"world.territory.recovery","glyph":"REC","color":"#88F7B0"},
+    {"key":"world.territory.confluence","glyph":"ALL","color":"#C8C3FF"},
+    {"key":"world.component.damage","glyph":"CD","color":"#FF6A2A"},
+    {"key":"world.component.range","glyph":"CR","color":"#7FE7FF"},
+    {"key":"world.component.recovery","glyph":"CC","color":"#88F7B0"},
+    {"key":"world.rune.generic","glyph":"RN","color":"#D6B36A"},
+    {"key":"world.sacrifice.flash","glyph":"SX","color":"#D43A4E"},
+    {"key":"world.rhythm.beat","glyph":"BT","color":"#F8D56A"},
+    {"key":"world.tension.charge","glyph":"CH","color":"#F06F86"}
+  ]
+}

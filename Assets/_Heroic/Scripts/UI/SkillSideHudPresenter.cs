@@ -17,10 +17,12 @@ namespace Heroic.UI
         [SerializeField] private float upgradeBadgeWidth = 180f;
         [SerializeField] private float upgradeBadgeHeight = 30f;
         [SerializeField] private float upgradeBadgeSpacing = 34f;
+        [SerializeField] private Texture2D pairedSystemIconSheet;
 
         private readonly List<IconSlot> abilitySlots = new List<IconSlot>();
         private readonly List<IconSlot> systemSlots = new List<IconSlot>();
         private readonly Dictionary<string, float> nextReadyAt = new Dictionary<string, float>();
+        private readonly Dictionary<string, Sprite> pairedSystemSprites = new Dictionary<string, Sprite>();
         private readonly List<string> abilityIds = new List<string>();
         private readonly List<string> systemIds = new List<string>();
         private float nextRefreshAt;
@@ -234,7 +236,7 @@ namespace Heroic.UI
                     RectTransform rect = slot.Root.GetComponent<RectTransform>();
                     rect.anchoredPosition = new Vector2(0f, -i * slotSpacing - yOffset);
                     string skillId = SkillIconRegistry.ResolveSkillId(ids[i]);
-                    slot.Icon.sprite = SkillIconRegistry.GetIcon(skillId);
+                    slot.Icon.sprite = LoadSkillIconResource(skillId) ?? ResolveSystemPairIcon(skillId) ?? SkillIconRegistry.GetIcon(skillId);
                     slot.Icon.color = Color.white;
                     ApplyUpgradeBadges(slot, skillId, badgesToRight);
                     if (!nextReadyAt.ContainsKey(skillId))
@@ -425,6 +427,84 @@ namespace Heroic.UI
             }
 
             return string.Join(" ", words);
+        }
+
+        private static Sprite LoadSkillIconResource(string skillId)
+        {
+            return string.IsNullOrEmpty(skillId) ? null : Resources.Load<Sprite>("SkillIcons/" + skillId);
+        }
+
+        private Sprite ResolveSystemPairIcon(string skillId)
+        {
+            if (pairedSystemIconSheet == null || string.IsNullOrEmpty(skillId) || !skillId.StartsWith("system_pair_"))
+            {
+                return null;
+            }
+
+            if (pairedSystemSprites.TryGetValue(skillId, out Sprite cached))
+            {
+                return cached;
+            }
+
+            int index = ResolvePairIconIndex(skillId);
+            int columns = 4;
+            int rows = 4;
+            int cellWidth = pairedSystemIconSheet.width / columns;
+            int cellHeight = pairedSystemIconSheet.height / rows;
+            int column = Mathf.Clamp(index % columns, 0, columns - 1);
+            int rowFromTop = Mathf.Clamp(index / columns, 0, rows - 1);
+            Rect rect = new Rect(column * cellWidth, pairedSystemIconSheet.height - (rowFromTop + 1) * cellHeight, cellWidth, cellHeight);
+            Sprite sprite = Sprite.Create(pairedSystemIconSheet, rect, new Vector2(0.5f, 0.5f), Mathf.Max(cellWidth, cellHeight));
+            pairedSystemSprites[skillId] = sprite;
+            return sprite;
+        }
+
+        private static int ResolvePairIconIndex(string pairId)
+        {
+            switch (pairId)
+            {
+                case "system_pair_territorial_components":
+                    return 0;
+                case "system_pair_blood_territory":
+                    return 1;
+                case "system_pair_inscribed_territory":
+                    return 2;
+                case "system_pair_woven_territory":
+                    return 3;
+                case "system_pair_runemarked_territory":
+                    return 4;
+                case "system_pair_blood_reagents":
+                    return 5;
+                case "system_pair_chanted_components":
+                    return 6;
+                case "system_pair_woven_reagents":
+                    return 7;
+                case "system_pair_runic_components":
+                    return 8;
+                case "system_pair_blood_incantations":
+                    return 9;
+                case "system_pair_sacrificial_weave":
+                    return 10;
+                case "system_pair_blood_runes":
+                    return 11;
+                case "system_pair_woven_incantations":
+                    return 12;
+                case "system_pair_runic_incantations":
+                    return 13;
+                case "system_pair_woven_runes":
+                    return 14;
+            }
+
+            unchecked
+            {
+                int hash = 17;
+                for (int i = 0; i < pairId.Length; i++)
+                {
+                    hash = hash * 31 + pairId[i];
+                }
+
+                return Mathf.Abs(hash) % 16;
+            }
         }
 
         private void RefreshCooldownVisuals()
