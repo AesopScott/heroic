@@ -312,7 +312,7 @@ namespace Heroic.Enemies
                      definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel2 ||
                      definition.VisualPreset == VisualPresetApplier.Preset.CrashLevel3)
             {
-                enemy.ConfigureContactBehavior(true, true);
+                enemy.ConfigureContactBehavior(true, false);
             }
 
             var damageable = enemy.GetComponent<Damageable>();

@@ -85,7 +85,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Player.ExperiencePickup
   experienceValue: 1
-  magnetRange: 20
+  magnetRange: 1
   magnetSpeed: 11
 --- !u!114 &3689102152490028707
 MonoBehaviour:

@@ -44,19 +44,19 @@ namespace Heroic.Enemies
         [SerializeField] private int experienceValue = 1;
         [SerializeField] private LootTier[] healthRestoreTiers =
         {
-            new LootTier(1, 1, 0.1f, 8),
-            new LootTier(2, 3, 0.08f, 14),
-            new LootTier(3, 5, 0.06f, 22),
-            new LootTier(4, 8, 0.04f, 35),
-            new LootTier(5, 12, 0.025f, 55)
+            new LootTier(1, 1, 0.08f, 8),
+            new LootTier(2, 3, 0.065f, 14),
+            new LootTier(3, 5, 0.05f, 22),
+            new LootTier(4, 8, 0.035f, 35),
+            new LootTier(5, 12, 0.02f, 55)
         };
         [SerializeField] private LootTier[] experienceBoostTiers =
         {
-            new LootTier(1, 1, 0.04f, 0, 10f, 1.5f),
-            new LootTier(2, 3, 0.035f, 0, 10f, 2f),
-            new LootTier(3, 5, 0.025f, 0, 10f, 2.5f),
-            new LootTier(4, 8, 0.015f, 0, 10f, 3f),
-            new LootTier(5, 12, 0.01f, 0, 10f, 3.5f)
+            new LootTier(1, 1, 0.03f, 0, 10f, 1.5f),
+            new LootTier(2, 3, 0.026f, 0, 10f, 2f),
+            new LootTier(3, 5, 0.02f, 0, 10f, 2.5f),
+            new LootTier(4, 8, 0.014f, 0, 10f, 3f),
+            new LootTier(5, 12, 0.008f, 0, 10f, 3.5f)
         };
         [SerializeField] private LootTier[] speedBoostTiers =
         {
@@ -68,11 +68,11 @@ namespace Heroic.Enemies
         };
         [SerializeField] private LootTier[] invulnerabilityTiers =
         {
-            new LootTier(1, 2, 0.015f, 0, 1.25f),
-            new LootTier(2, 4, 0.012f, 0, 1.75f),
-            new LootTier(3, 6, 0.009f, 0, 2.25f),
+            new LootTier(1, 2, 0.012f, 0, 1.25f),
+            new LootTier(2, 4, 0.01f, 0, 1.75f),
+            new LootTier(3, 6, 0.008f, 0, 2.25f),
             new LootTier(4, 9, 0.006f, 0, 3f),
-            new LootTier(5, 13, 0.003f, 0, 4f)
+            new LootTier(5, 13, 0.004f, 0, 4f)
         };
 
         private Damageable damageable;

@@ -19,7 +19,7 @@ namespace Heroic.Spells
         }
 
         [SerializeField] private MindSkill skill;
-        [SerializeField] private float castInterval = 1.6f;
+        [SerializeField] private float castInterval = 3.2f;
         [SerializeField] private float range = 6f;
         [SerializeField] private float radius = 1.4f;
         [SerializeField] private float width = 1.2f;
@@ -84,7 +84,7 @@ namespace Heroic.Spells
                     StartCoroutine(CloneRoutine(targetPosition));
                     break;
                 case MindSkill.Confuse:
-                    Area(targetPosition, false, true, damage);
+                    ConfuseArea(targetPosition);
                     break;
                 case MindSkill.MindCrush:
                     MindCrush(targetPosition);
@@ -160,6 +160,17 @@ namespace Heroic.Spells
             foreach (Collider2D hit in Overlap(position, ModifiedRange(radius)))
             {
                 ApplyMindHit(hit, baseDamage, fear, confuse);
+            }
+        }
+
+        private void ConfuseArea(Vector2 position)
+        {
+            float activeRadius = ModifiedRange(radius);
+            TemporaryVisualEffect.CreateCircle(position, new Color(0.95f, 0.35f, 1f, 0.36f), activeRadius * 1.15f, 0.45f);
+            TemporaryVisualEffect.CreateCircle(position, new Color(0.25f, 0.9f, 1f, 0.22f), activeRadius * 0.62f, 0.55f);
+            foreach (Collider2D hit in Overlap(position, activeRadius))
+            {
+                ApplyMindHit(hit, damage, false, true);
             }
         }
 

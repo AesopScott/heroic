@@ -58,7 +58,11 @@ namespace Heroic.UI
 
         public void ShowPause()
         {
-            SetOnlyActive(pauseRoot);
+            SetRootActive(mainMenuRoot, false);
+            SetRootActive(gameUiRoot, true);
+            SetRootActive(resultsRoot, false);
+            SetRootActive(levelUpDraftRoot, false);
+            SetRootActive(pauseRoot, true);
         }
 
         private void HandleStateChanged(RunManager.RunState state)

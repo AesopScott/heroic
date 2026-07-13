@@ -14,9 +14,9 @@ namespace Heroic.UI
         [SerializeField] private int maxVisibleSlots = 24;
         [SerializeField] private float slotSize = 144f;
         [SerializeField] private float slotSpacing = 158f;
-        [SerializeField] private float upgradeBadgeWidth = 180f;
-        [SerializeField] private float upgradeBadgeHeight = 30f;
-        [SerializeField] private float upgradeBadgeSpacing = 34f;
+        [SerializeField] private float upgradeBadgeWidth = 54f;
+        [SerializeField] private float upgradeBadgeHeight = 54f;
+        [SerializeField] private float upgradeBadgeSpacing = 60f;
         [SerializeField] private Texture2D pairedSystemIconSheet;
 
         private readonly List<IconSlot> abilitySlots = new List<IconSlot>();
@@ -35,6 +35,7 @@ namespace Heroic.UI
             public Image Icon;
             public Image CooldownOverlay;
             public TMP_Text CooldownText;
+            public TMP_Text StatText;
             public readonly List<UpgradeBadge> UpgradeBadges = new List<UpgradeBadge>();
         }
 
@@ -42,8 +43,8 @@ namespace Heroic.UI
         {
             public GameObject Root;
             public Image Background;
-            public Image ColorChip;
-            public TMP_Text Label;
+            public Image Icon;
+            public TMP_Text TierText;
         }
 
         private void Awake()
@@ -90,7 +91,7 @@ namespace Heroic.UI
 
             if (systemRoot == null)
             {
-                systemRoot = CreateRail("SystemSkillRail", parent, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-88f, -132f));
+                systemRoot = CreateRail("SystemSkillRail", parent, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-88f, -172f));
             }
         }
 
@@ -122,7 +123,10 @@ namespace Heroic.UI
             IconSlot header = CreateSlot(systemRoot, "MagicSystemsHeader", Vector2.zero);
             header.Icon.sprite = SkillIconRegistry.GetIcon("system_magic_systems");
             header.Icon.color = Color.white;
+            header.CooldownOverlay.enabled = false;
+            header.CooldownText.text = string.Empty;
             header.Root.SetActive(true);
+            ConfigureTooltip(header.Root, "system_magic_systems");
 
             GameObject line = new GameObject("MagicSystemsDivider");
             line.transform.SetParent(systemRoot, false);
@@ -131,7 +135,7 @@ namespace Heroic.UI
             lineRect.anchorMax = new Vector2(0.5f, 1f);
             lineRect.pivot = new Vector2(0.5f, 0.5f);
             lineRect.sizeDelta = new Vector2(slotSize + 8f, 3f);
-            lineRect.anchoredPosition = new Vector2(0f, -slotSize - 10f);
+            lineRect.anchoredPosition = new Vector2(0f, -slotSize * 0.5f - 12f);
             Image image = line.AddComponent<Image>();
             image.color = new Color(0.78f, 0.77f, 1f, 0.75f);
         }
@@ -149,7 +153,8 @@ namespace Heroic.UI
 
             Image icon = root.AddComponent<Image>();
             icon.preserveAspect = true;
-            icon.raycastTarget = false;
+            icon.raycastTarget = true;
+            root.AddComponent<SkillTooltipTrigger>();
 
             GameObject overlayObject = new GameObject("CooldownOverlay");
             overlayObject.transform.SetParent(root.transform, false);
@@ -177,13 +182,32 @@ namespace Heroic.UI
             text.color = Color.white;
             text.raycastTarget = false;
 
+            GameObject statObject = new GameObject("SkillStats");
+            statObject.transform.SetParent(root.transform, false);
+            RectTransform statRect = statObject.AddComponent<RectTransform>();
+            statRect.anchorMin = new Vector2(0f, 0f);
+            statRect.anchorMax = new Vector2(1f, 0f);
+            statRect.pivot = new Vector2(0.5f, 1f);
+            statRect.sizeDelta = new Vector2(0f, 42f);
+            statRect.anchoredPosition = new Vector2(0f, -4f);
+            TMP_Text statText = statObject.AddComponent<TextMeshProUGUI>();
+            statText.text = string.Empty;
+            statText.alignment = TextAlignmentOptions.Top;
+            statText.fontSize = 13f;
+            statText.fontStyle = FontStyles.Bold;
+            statText.color = new Color(0.88f, 0.94f, 1f, 0.94f);
+            statText.enableWordWrapping = false;
+            statText.overflowMode = TextOverflowModes.Ellipsis;
+            statText.raycastTarget = false;
+
             root.SetActive(false);
             return new IconSlot
             {
                 Root = root,
                 Icon = icon,
                 CooldownOverlay = overlay,
-                CooldownText = text
+                CooldownText = text,
+                StatText = statText
             };
         }
 
@@ -214,7 +238,7 @@ namespace Heroic.UI
             SystemPairDefinitions.AddActivePairs(buildState.LearnedSkillIds, systemIds);
 
             ApplyList(abilityIds, abilitySlots, ref lastAbilitySignature, 0f, true);
-            ApplyList(systemIds, systemSlots, ref lastSystemSignature, slotSpacing + 12f, false);
+            ApplyList(systemIds, systemSlots, ref lastSystemSignature, slotSize + 30f, false);
         }
 
         private void ApplyList(List<string> ids, List<IconSlot> slots, ref string signature, float yOffset, bool badgesToRight)
@@ -238,6 +262,8 @@ namespace Heroic.UI
                     string skillId = SkillIconRegistry.ResolveSkillId(ids[i]);
                     slot.Icon.sprite = LoadSkillIconResource(skillId) ?? ResolveSystemPairIcon(skillId) ?? SkillIconRegistry.GetIcon(skillId);
                     slot.Icon.color = Color.white;
+                    slot.StatText.text = FormatStats(skillId);
+                    ConfigureTooltip(slot.Root, skillId);
                     ApplyUpgradeBadges(slot, skillId, badgesToRight);
                     if (!nextReadyAt.ContainsKey(skillId))
                     {
@@ -299,10 +325,31 @@ namespace Heroic.UI
                 rect.anchoredPosition = new Vector2(x, y);
 
                 Color color = SkillIconRegistry.GetColor(skillId);
-                badge.Background.color = new Color(color.r * 0.25f, color.g * 0.25f, color.b * 0.25f, 0.84f);
-                badge.ColorChip.color = color;
-                badge.Label.text = FormatUpgradeLabel(upgrade.UpgradePathId, skillId) + " " + upgrade.Tier;
+                Color tierColor = SkillIconRegistry.GetTierColor(upgrade.Tier);
+                badge.Background.color = new Color(tierColor.r, tierColor.g, tierColor.b, 0.92f);
+                badge.Icon.sprite = SkillIconRegistry.GetUpgradeIcon(upgrade.UpgradePathId) ?? SkillIconRegistry.GetIcon(skillId);
+                badge.Icon.color = Color.white;
+                badge.TierText.text = upgrade.Tier.ToString();
+                badge.TierText.color = Color.white;
+                ConfigureTooltip(badge.Root, upgrade.SkillId, SkillTooltipText.UpgradeBody(upgrade.UpgradePathId, upgrade.Tier));
             }
+        }
+
+        private static void ConfigureTooltip(GameObject target, string skillId, string extra = "")
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            SkillTooltipTrigger tooltip = target.GetComponent<SkillTooltipTrigger>();
+            if (tooltip == null)
+            {
+                tooltip = target.AddComponent<SkillTooltipTrigger>();
+            }
+
+            string resolvedSkillId = SkillIconRegistry.ResolveSkillId(skillId);
+            tooltip.Configure(SkillTooltipText.TitleFor(resolvedSkillId), SkillTooltipText.BodyFor(resolvedSkillId, extra));
         }
 
         private List<RunBuildState.SkillUpgradeState> UpgradesForSkill(string skillId)
@@ -346,42 +393,41 @@ namespace Heroic.UI
             rect.sizeDelta = new Vector2(upgradeBadgeWidth, upgradeBadgeHeight);
 
             Image background = root.AddComponent<Image>();
-            background.raycastTarget = false;
+            background.raycastTarget = true;
+            root.AddComponent<SkillTooltipTrigger>();
 
-            GameObject chipObject = new GameObject("ColorChip");
-            chipObject.transform.SetParent(root.transform, false);
-            RectTransform chipRect = chipObject.AddComponent<RectTransform>();
-            chipRect.anchorMin = new Vector2(0f, 0.5f);
-            chipRect.anchorMax = new Vector2(0f, 0.5f);
-            chipRect.pivot = new Vector2(0f, 0.5f);
-            chipRect.sizeDelta = new Vector2(8f, upgradeBadgeHeight);
-            chipRect.anchoredPosition = Vector2.zero;
-            Image chip = chipObject.AddComponent<Image>();
-            chip.raycastTarget = false;
+            GameObject iconObject = new GameObject("Icon");
+            iconObject.transform.SetParent(root.transform, false);
+            RectTransform iconRect = iconObject.AddComponent<RectTransform>();
+            iconRect.anchorMin = Vector2.zero;
+            iconRect.anchorMax = Vector2.one;
+            iconRect.offsetMin = new Vector2(5f, 5f);
+            iconRect.offsetMax = new Vector2(-5f, -5f);
+            Image icon = iconObject.AddComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
 
-            GameObject labelObject = new GameObject("Label");
-            labelObject.transform.SetParent(root.transform, false);
-            RectTransform labelRect = labelObject.AddComponent<RectTransform>();
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = new Vector2(14f, 0f);
-            labelRect.offsetMax = new Vector2(-6f, 0f);
-            TMP_Text label = labelObject.AddComponent<TextMeshProUGUI>();
-            label.alignment = TextAlignmentOptions.MidlineLeft;
-            label.fontSize = 15f;
-            label.fontStyle = FontStyles.Bold;
-            label.color = Color.white;
-            label.enableWordWrapping = false;
-            label.overflowMode = TextOverflowModes.Ellipsis;
-            label.raycastTarget = false;
+            GameObject tierObject = new GameObject("Tier");
+            tierObject.transform.SetParent(root.transform, false);
+            RectTransform tierRect = tierObject.AddComponent<RectTransform>();
+            tierRect.anchorMin = new Vector2(1f, 0f);
+            tierRect.anchorMax = new Vector2(1f, 0f);
+            tierRect.pivot = new Vector2(1f, 0f);
+            tierRect.sizeDelta = new Vector2(24f, 22f);
+            tierRect.anchoredPosition = new Vector2(-3f, 2f);
+            TMP_Text tierText = tierObject.AddComponent<TextMeshProUGUI>();
+            tierText.alignment = TextAlignmentOptions.Center;
+            tierText.fontSize = 16f;
+            tierText.fontStyle = FontStyles.Bold;
+            tierText.raycastTarget = false;
 
             root.SetActive(false);
             return new UpgradeBadge
             {
                 Root = root,
                 Background = background,
-                ColorChip = chip,
-                Label = label
+                Icon = icon,
+                TierText = tierText
             };
         }
 
@@ -463,36 +509,26 @@ namespace Heroic.UI
         {
             switch (pairId)
             {
-                case "system_pair_territorial_components":
+                case "system_pair_territory_components":
                     return 0;
-                case "system_pair_blood_territory":
+                case "system_pair_territory_sacrifice":
                     return 1;
-                case "system_pair_inscribed_territory":
+                case "system_pair_territory_rhythm":
                     return 2;
-                case "system_pair_woven_territory":
+                case "system_pair_territory_tension":
                     return 3;
-                case "system_pair_runemarked_territory":
+                case "system_pair_components_sacrifice":
                     return 4;
-                case "system_pair_blood_reagents":
+                case "system_pair_components_rhythm":
                     return 5;
-                case "system_pair_chanted_components":
+                case "system_pair_components_tension":
                     return 6;
-                case "system_pair_woven_reagents":
+                case "system_pair_sacrifice_rhythm":
                     return 7;
-                case "system_pair_runic_components":
+                case "system_pair_sacrifice_tension":
                     return 8;
-                case "system_pair_blood_incantations":
+                case "system_pair_rhythm_tension":
                     return 9;
-                case "system_pair_sacrificial_weave":
-                    return 10;
-                case "system_pair_blood_runes":
-                    return 11;
-                case "system_pair_woven_incantations":
-                    return 12;
-                case "system_pair_runic_incantations":
-                    return 13;
-                case "system_pair_woven_runes":
-                    return 14;
             }
 
             unchecked
@@ -546,22 +582,18 @@ namespace Heroic.UI
 
         private static float CooldownFor(string skillId)
         {
-            switch (skillId)
+            return SkillRuntimeCatalog.Get(skillId).Cooldown;
+        }
+
+        private static string FormatStats(string skillId)
+        {
+            SkillRuntimeStats stats = SkillRuntimeCatalog.Get(skillId);
+            if (skillId.StartsWith("system_"))
             {
-                case "arcane_magic_missile":
-                    return 0.75f;
-                case "fire_fire_bolt":
-                    return 1f;
-                case "lightning_spark_surge":
-                    return 1.1f;
-                case "cold_frost_ring":
-                case "fire_flame_wave":
-                    return 3.2f;
-                case "system_territory_casting":
-                    return 0f;
-                default:
-                    return 2.4f;
+                return stats.Effect;
             }
+
+            return stats.BaseSpec;
         }
     }
 }

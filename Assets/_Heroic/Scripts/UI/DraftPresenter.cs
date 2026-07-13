@@ -90,6 +90,7 @@ namespace Heroic.UI
 
                 ApplyChoiceVisuals(i, choices[i]);
                 PositionChoiceButton(i, choices[i], laneTotals, laneIndices);
+                ConfigureTooltip(choiceButtons[i].gameObject, choices[i]);
             }
         }
 
@@ -105,18 +106,50 @@ namespace Heroic.UI
                 return;
             }
 
+            SkillTooltipTrigger.HideActiveTooltip();
             upgradeManager.ApplyChoice(currentChoices[index].Id);
         }
 
         private static string FormatChoiceLabel(UpgradeManager.DraftChoice choice)
         {
             string category = choice.Category.ToString().ToUpperInvariant();
+            string skillId = SkillIconRegistry.ResolveSkillId(choice);
+            string stats = FormatRuntimeStats(skillId, choice.Category);
             if (string.IsNullOrWhiteSpace(choice.Description))
             {
-                return $"<size=82%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>";
+                return $"<size=82%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>\n<size=78%><color=#FFDFA3>{stats}</color></size>";
             }
 
-            return $"<size=82%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>\n<size=86%><color=#C7E6F5>{choice.Description}</color></size>";
+            return $"<size=82%><color=#87C8FF>{category}</color></size>\n<b>{choice.DisplayName}</b>\n<size=86%><color=#C7E6F5>{choice.Description}</color></size>\n<size=78%><color=#FFDFA3>{stats}</color></size>";
+        }
+
+        private static string FormatRuntimeStats(string skillId, UpgradeManager.UpgradeCategory category)
+        {
+            SkillRuntimeStats stats = SkillRuntimeCatalog.Get(skillId);
+            if (category == UpgradeManager.UpgradeCategory.System || skillId.StartsWith("system_"))
+            {
+                return stats.Effect;
+            }
+
+            return stats.BaseSpec;
+        }
+
+        private static void ConfigureTooltip(GameObject target, UpgradeManager.DraftChoice choice)
+        {
+            if (target == null || choice == null)
+            {
+                return;
+            }
+
+            SkillTooltipTrigger tooltip = target.GetComponent<SkillTooltipTrigger>();
+            if (tooltip == null)
+            {
+                tooltip = target.AddComponent<SkillTooltipTrigger>();
+            }
+
+            string skillId = SkillIconRegistry.ResolveSkillId(choice);
+            string extra = string.IsNullOrWhiteSpace(choice.Description) ? string.Empty : choice.Description;
+            tooltip.Configure(choice.DisplayName, SkillTooltipText.BodyFor(skillId, extra));
         }
 
         private void PositionChoiceButton(int index, UpgradeManager.DraftChoice choice, int[] laneTotals, int[] laneIndices)

@@ -17,6 +17,13 @@ namespace Heroic.World
         }
 
         [SerializeField] private Texture2D[] terrainSheets = new Texture2D[0];
+        [SerializeField] private Texture2D[] dirtTextures = new Texture2D[0];
+        [SerializeField] private Texture2D[] decorativeTextures = new Texture2D[0];
+        [SerializeField] private Texture2D[] mudTextures = new Texture2D[0];
+        [SerializeField] private Texture2D[] waterTextures = new Texture2D[0];
+        [SerializeField] private Texture2D[] looseStoneTextures = new Texture2D[0];
+        [SerializeField] private Texture2D[] highGroundTextures = new Texture2D[0];
+        [SerializeField] private Texture2D[] blockerTextures = new Texture2D[0];
         [SerializeField] private Transform playerReference;
         [SerializeField] private PlayerExperience playerExperience;
         [SerializeField] private Vector2 worldSize = new Vector2(60f, 60f);
@@ -28,8 +35,14 @@ namespace Heroic.World
         [SerializeField] private int baseSortingOrder = -99;
         [SerializeField] private int featureSortingOrder = -96;
         [SerializeField] private int blockerSortingOrder = -94;
+        [SerializeField] private float baseTileOverlap = 0.28f;
 
         private readonly List<Sprite> sheetSprites = new();
+        private readonly List<Sprite> baseSprites = new();
+        private readonly List<Sprite> decorativeSprites = new();
+        private readonly List<Sprite> slowSprites = new();
+        private readonly List<Sprite> highGroundSprites = new();
+        private readonly List<Sprite> blockerSprites = new();
         private readonly List<Vector2> hardBlockerCenters = new();
         private System.Random random;
 
@@ -88,10 +101,25 @@ namespace Heroic.World
         {
             ClearChildren();
             sheetSprites.Clear();
+            baseSprites.Clear();
+            decorativeSprites.Clear();
+            slowSprites.Clear();
+            highGroundSprites.Clear();
+            blockerSprites.Clear();
             hardBlockerCenters.Clear();
             random = new System.Random(runSeed + profile.Level * 4099);
 
-            BuildSpriteCache(SelectTerrainSheet(profile.Level));
+            if (profile.Level <= 9)
+            {
+                return;
+            }
+
+            BuildTypedSpriteCache();
+            if (sheetSprites.Count == 0)
+            {
+                BuildSpriteCache(SelectTerrainSheet(profile.Level), profile.Level);
+            }
+
             if (sheetSprites.Count == 0)
             {
                 return;
@@ -133,10 +161,59 @@ namespace Heroic.World
             return terrainSheets[band] != null ? terrainSheets[band] : terrainSheets[0];
         }
 
-        private void BuildSpriteCache(Texture2D texture)
+        private void BuildTypedSpriteCache()
+        {
+            AddSpritesFromTextures(baseSprites, dirtTextures);
+            AddSpritesFromTextures(decorativeSprites, decorativeTextures);
+            AddSpritesFromTextures(slowSprites, mudTextures);
+            AddSpritesFromTextures(slowSprites, waterTextures);
+            AddSpritesFromTextures(slowSprites, looseStoneTextures);
+            AddSpritesFromTextures(highGroundSprites, highGroundTextures);
+            AddSpritesFromTextures(blockerSprites, blockerTextures);
+
+            sheetSprites.AddRange(baseSprites);
+            sheetSprites.AddRange(decorativeSprites);
+            sheetSprites.AddRange(slowSprites);
+            sheetSprites.AddRange(highGroundSprites);
+            sheetSprites.AddRange(blockerSprites);
+        }
+
+        private void AddSpritesFromTextures(List<Sprite> target, Texture2D[] textures)
+        {
+            if (textures == null)
+            {
+                return;
+            }
+
+            foreach (Texture2D texture in textures)
+            {
+                if (texture == null)
+                {
+                    continue;
+                }
+
+                target.Add(CreateTerrainSprite(texture, new Rect(0f, 0f, texture.width, texture.height), Mathf.Max(texture.width, texture.height)));
+            }
+        }
+
+        private void BuildSpriteCache(Texture2D texture, int level)
         {
             if (texture == null)
             {
+                return;
+            }
+
+            if (texture.width == 1024 && texture.height == 1536)
+            {
+                if (level <= 1)
+                {
+                    BuildLevelOneDirtOnlyCache(texture);
+                }
+                else
+                {
+                    BuildTerrainOneSpriteCache(texture);
+                }
+
                 return;
             }
 
@@ -154,8 +231,110 @@ namespace Heroic.World
                     }
 
                     Rect rect = new Rect(column * cellSize, y, cellSize, cellSize);
-                    Sprite sprite = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), cellSize);
-                    sheetSprites.Add(sprite);
+                    Sprite sprite = CreateTerrainSprite(texture, rect, cellSize);
+                    RegisterGenericSprite(row, column, sprite);
+                }
+            }
+        }
+
+        private void BuildLevelOneDirtOnlyCache(Texture2D texture)
+        {
+            const int cropSize = 256;
+            const int pixelsPerUnit = 256;
+            const int dirtX = 341;
+            const int dirtY = 1195;
+
+            Add(
+                baseSprites,
+                CreateTerrainSprite(texture, new Rect(dirtX + 26, dirtY + 28, cropSize, cropSize), pixelsPerUnit),
+                CreateTerrainSprite(texture, new Rect(dirtX + 52, dirtY + 52, cropSize, cropSize), pixelsPerUnit),
+                CreateTerrainSprite(texture, new Rect(dirtX + 18, dirtY + 76, cropSize, cropSize), pixelsPerUnit),
+                CreateTerrainSprite(texture, new Rect(dirtX + 70, dirtY + 20, cropSize, cropSize), pixelsPerUnit));
+
+            sheetSprites.AddRange(baseSprites);
+        }
+
+        private void BuildTerrainOneSpriteCache(Texture2D texture)
+        {
+            const int cellSize = 341;
+
+            Sprite rockGrass = CreateTerrainSprite(texture, new Rect(0, 1195, cellSize, cellSize), cellSize);
+            Sprite packedDirt = CreateTerrainSprite(texture, new Rect(341, 1195, cellSize, cellSize), cellSize);
+            Sprite brush = CreateTerrainSprite(texture, new Rect(682, 1195, cellSize, cellSize), cellSize);
+            Sprite mud = CreateTerrainSprite(texture, new Rect(0, 854, cellSize, cellSize), cellSize);
+            Sprite water = CreateTerrainSprite(texture, new Rect(341, 854, cellSize, cellSize), cellSize);
+            Sprite looseStone = CreateTerrainSprite(texture, new Rect(682, 854, cellSize, cellSize), cellSize);
+            Sprite raisedDirt = CreateTerrainSprite(texture, new Rect(0, 513, cellSize, cellSize), cellSize);
+            Sprite stoneFloor = CreateTerrainSprite(texture, new Rect(341, 513, cellSize, cellSize), cellSize);
+            Sprite boulder = CreateTerrainSprite(texture, new Rect(682, 513, cellSize, cellSize), cellSize);
+            Sprite wallLeft = CreateTerrainSprite(texture, new Rect(0, 172, cellSize, cellSize), cellSize);
+            Sprite pillar = CreateTerrainSprite(texture, new Rect(341, 172, cellSize, cellSize), cellSize);
+            Sprite wallRight = CreateTerrainSprite(texture, new Rect(682, 172, cellSize, cellSize), cellSize);
+            Sprite roughDirtLeft = CreateTerrainSprite(texture, new Rect(0, 0, 512, 172), cellSize);
+            Sprite roughDirtRight = CreateTerrainSprite(texture, new Rect(512, 0, 512, 172), cellSize);
+
+            Add(
+                sheetSprites,
+                rockGrass,
+                packedDirt,
+                brush,
+                mud,
+                water,
+                looseStone,
+                raisedDirt,
+                stoneFloor,
+                boulder,
+                wallLeft,
+                pillar,
+                wallRight,
+                roughDirtLeft,
+                roughDirtRight);
+            Add(baseSprites, packedDirt, roughDirtLeft, roughDirtRight);
+            Add(decorativeSprites, rockGrass, brush, raisedDirt);
+            Add(slowSprites, mud, brush, water);
+            Add(highGroundSprites, raisedDirt, stoneFloor);
+            Add(blockerSprites, looseStone, boulder, wallLeft, pillar, wallRight);
+        }
+
+        private void RegisterGenericSprite(int row, int column, Sprite sprite)
+        {
+            sheetSprites.Add(sprite);
+
+            int index = row * 3 + column;
+            if (index == 1 || index >= 12)
+            {
+                baseSprites.Add(sprite);
+            }
+            else if (index == 2 || index == 3 || index == 4)
+            {
+                slowSprites.Add(sprite);
+            }
+            else if (index == 6 || index == 7)
+            {
+                highGroundSprites.Add(sprite);
+            }
+            else if (index == 8 || index == 9 || index == 10 || index == 11)
+            {
+                blockerSprites.Add(sprite);
+            }
+            else
+            {
+                decorativeSprites.Add(sprite);
+            }
+        }
+
+        private Sprite CreateTerrainSprite(Texture2D texture, Rect rect, float pixelsPerUnit)
+        {
+            return Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), pixelsPerUnit);
+        }
+
+        private static void Add(List<Sprite> target, params Sprite[] sprites)
+        {
+            foreach (Sprite sprite in sprites)
+            {
+                if (sprite != null)
+                {
+                    target.Add(sprite);
                 }
             }
         }
@@ -253,7 +432,7 @@ namespace Heroic.World
             renderer.sprite = PickSprite(role);
             renderer.sortingOrder = hardBlocker ? blockerSortingOrder : role == TileRole.Base ? baseSortingOrder : featureSortingOrder;
             renderer.color = GetRoleTint(role);
-            FitRendererToFootprint(renderer, footprint);
+            FitRendererToFootprint(renderer, role, footprint);
 
             int quarterTurns = random.Next(0, 4);
             tile.transform.localRotation = Quaternion.Euler(0f, 0f, quarterTurns * 90f);
@@ -269,24 +448,15 @@ namespace Heroic.World
 
         private Sprite PickSprite(TileRole role)
         {
-            int[] preferredIndices = role switch
+            List<Sprite> candidates = role switch
             {
-                TileRole.Decorative => new[] { 0, 5, 12, 13 },
-                TileRole.Slow => new[] { 2, 3, 4, 5 },
-                TileRole.HighGround => new[] { 6, 7 },
-                TileRole.Blocker => new[] { 8, 9, 10, 11, 0 },
-                TileRole.LargeBlocker => new[] { 0, 8, 10, 11 },
-                _ => new[] { 1, 12, 13, 14 },
+                TileRole.Decorative => decorativeSprites,
+                TileRole.Slow => slowSprites,
+                TileRole.HighGround => highGroundSprites,
+                TileRole.Blocker => blockerSprites,
+                TileRole.LargeBlocker => blockerSprites,
+                _ => baseSprites,
             };
-
-            List<Sprite> candidates = new List<Sprite>();
-            foreach (int index in preferredIndices)
-            {
-                if (index >= 0 && index < sheetSprites.Count)
-                {
-                    candidates.Add(sheetSprites[index]);
-                }
-            }
 
             if (candidates.Count == 0)
             {
@@ -307,7 +477,7 @@ namespace Heroic.World
             };
         }
 
-        private void FitRendererToFootprint(SpriteRenderer renderer, Vector2Int footprint)
+        private void FitRendererToFootprint(SpriteRenderer renderer, TileRole role, Vector2Int footprint)
         {
             if (renderer.sprite == null)
             {
@@ -320,8 +490,9 @@ namespace Heroic.World
                 return;
             }
 
-            float targetWidth = tileWorldSize * footprint.x;
-            float targetHeight = tileWorldSize * footprint.y;
+            float overlap = role == TileRole.Base ? Mathf.Max(0f, baseTileOverlap) : 0f;
+            float targetWidth = tileWorldSize * footprint.x + overlap;
+            float targetHeight = tileWorldSize * footprint.y + overlap;
             renderer.transform.localScale = new Vector3(targetWidth / spriteSize.x, targetHeight / spriteSize.y, 1f);
         }
 

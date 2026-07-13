@@ -32,6 +32,18 @@ namespace Heroic.Editor
         private const string ScriptableObjects = Root + "/ScriptableObjects";
         private const string RuntimeFontPath = "Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
         private const string PairedSystemIconSheetPath = "Assets/mobs/paired_systems.png";
+        private const string PickupIconRoot = "Assets/Resources/PickupIcons/pickup-art";
+        private const string AbilitiesCurrentSourcePath = "G:/My Drive/heroic/reference/abilities-current.md";
+        private const string AbilitiesCurrentResourcePath = "Assets/Resources/Reference/abilities-current.txt";
+        private static readonly string[] EarlyLevelMudTexturePaths =
+        {
+            "Assets/_Heroic/Art/TerrainSlices/terrain_i_mud.png",
+            "Assets/_Heroic/Art/TerrainSlices/terrain_ii_mud.png",
+            "Assets/_Heroic/Art/TerrainSlices/terrain_iii_mud.png",
+            "Assets/_Heroic/Art/TerrainSlices/terrain_iv_mud.png",
+            "Assets/_Heroic/Art/TerrainSlices/terrain_v_mud.png"
+        };
+        private const string DefaultArenaBackgroundPath = "Assets/mobs/dirt II 8192.png";
         private const int TerrainLayer = 8;
         private const int TerrainLayerMask = 1 << TerrainLayer;
         private static readonly string[] TerrainSheetPaths =
@@ -115,17 +127,22 @@ namespace Heroic.Editor
         public static void BuildPrototypeContent()
         {
             EnsureFolders();
+            SyncAbilitiesCurrentReference();
             runtimeFont = CreateOrLoadRuntimeFont();
 
             GameObject xpPickup = CreateXpPickupPrefab();
+            GameObject healthLoot = CreateLootPickupPrefab("Loot_HealthRestore", LootPickup.LootKind.HealthRestore);
+            GameObject experienceLoot = CreateLootPickupPrefab("Loot_ExperienceBoost", LootPickup.LootKind.ExperienceBoost);
+            GameObject speedLoot = CreateLootPickupPrefab("Loot_SpeedBoost", LootPickup.LootKind.SpeedBoost);
+            GameObject invulnerabilityLoot = CreateLootPickupPrefab("Loot_Invulnerability", LootPickup.LootKind.Invulnerability);
             GameObject projectile = CreateMagicMissilePrefab();
             GameObject fireProjectile = CreateFireProjectilePrefab();
             GameObject enemyMissile = CreateEnemyMissilePrefab();
             GameObject orb = CreateArcaneOrbPrefab();
-            GameObject enemy = CreateEnemyPrefab(xpPickup);
-            GameObject wall = CreateWallPrefab(xpPickup);
-            GameObject Thrower = CreateThrowerEnemyPrefab(xpPickup, enemyMissile);
-            GameObject boss = CreateBossPrefab(xpPickup);
+            GameObject enemy = CreateEnemyPrefab(xpPickup, healthLoot, experienceLoot, speedLoot, invulnerabilityLoot);
+            GameObject wall = CreateWallPrefab(xpPickup, healthLoot, experienceLoot, speedLoot, invulnerabilityLoot);
+            GameObject Thrower = CreateThrowerEnemyPrefab(xpPickup, healthLoot, experienceLoot, speedLoot, invulnerabilityLoot, enemyMissile);
+            GameObject boss = CreateBossPrefab(xpPickup, healthLoot, experienceLoot, speedLoot, invulnerabilityLoot);
 
             EnemyDefinition crashOneDefinition = CreateEnemyDefinition("Enemy_Crash_01", "Crash I", enemy, 10, 2f, 10, 1, VisualPresetApplier.Preset.CrashLevel1, false);
             EnemyDefinition crashTwoDefinition = CreateEnemyDefinition("Enemy_Crash_02", "Crash II", enemy, 12, 2.15f, 10, 1, VisualPresetApplier.Preset.CrashLevel2, false);
@@ -168,6 +185,26 @@ namespace Heroic.Editor
             EnsureFolder(Root, "ScriptableObjects");
             EnsureFolder(ScriptableObjects, "Enemies");
             EnsureFolder(ScriptableObjects, "Waves");
+            EnsureFolder("Assets", "Resources");
+            EnsureFolder("Assets/Resources", "Reference");
+        }
+
+        private static void SyncAbilitiesCurrentReference()
+        {
+            if (!File.Exists(AbilitiesCurrentSourcePath))
+            {
+                Debug.LogWarning($"Canonical abilities-current source not found: {AbilitiesCurrentSourcePath}");
+                return;
+            }
+
+            string targetDirectory = Path.GetDirectoryName(AbilitiesCurrentResourcePath);
+            if (!string.IsNullOrEmpty(targetDirectory))
+            {
+                Directory.CreateDirectory(targetDirectory);
+            }
+
+            File.Copy(AbilitiesCurrentSourcePath, AbilitiesCurrentResourcePath, true);
+            AssetDatabase.ImportAsset(AbilitiesCurrentResourcePath, ImportAssetOptions.ForceSynchronousImport);
         }
 
         private static TMP_FontAsset CreateOrLoadRuntimeFont()
@@ -318,7 +355,7 @@ namespace Heroic.Editor
             CircleCollider2D collider = go.AddComponent<CircleCollider2D>();
             collider.isTrigger = true;
             ExperiencePickup pickup = go.AddComponent<ExperiencePickup>();
-            SetFloat(pickup, "magnetRange", 20f);
+            SetFloat(pickup, "magnetRange", 1f);
             SetFloat(pickup, "magnetSpeed", 11f);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.ExperiencePickup);
@@ -326,7 +363,46 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Pickups/XP_Pickup.prefab");
         }
 
-        private static GameObject CreateEnemyPrefab(GameObject xpPickup)
+        private static GameObject CreateLootPickupPrefab(string name, LootPickup.LootKind kind)
+        {
+            GameObject go = new GameObject(name);
+            CircleCollider2D collider = go.AddComponent<CircleCollider2D>();
+            collider.isTrigger = true;
+            LootPickup pickup = go.AddComponent<LootPickup>();
+            SetEnum(pickup, "kind", kind);
+            SetFloat(pickup, "magnetRange", 0.5f);
+            SetFloat(pickup, "magnetSpeed", 9f);
+            Sprite icon = LoadPickupIcon(kind);
+            if (icon != null)
+            {
+                SetObject(pickup, "iconSprite", icon);
+            }
+
+            AddAudioFeedback(go, ProceduralAudioFeedback.Preset.Pickup, 0.3f);
+            return SavePrefab(go, Prefabs + "/Pickups/" + name + ".prefab");
+        }
+
+        private static Sprite LoadPickupIcon(LootPickup.LootKind kind)
+        {
+            string path = kind switch
+            {
+                LootPickup.LootKind.HealthRestore => PickupIconRoot + "/pickup_health_potion.png",
+                LootPickup.LootKind.ExperienceBoost => PickupIconRoot + "/pickup_xp_crystal.png",
+                LootPickup.LootKind.SpeedBoost => PickupIconRoot + "/pickup_speed_boot.png",
+                LootPickup.LootKind.Invulnerability => PickupIconRoot + "/pickup_invulnerability_shield.png",
+                _ => string.Empty
+            };
+
+            if (string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+
+            EnsureTextureReadable(path);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        private static GameObject CreateEnemyPrefab(GameObject xpPickup, GameObject healthLoot, GameObject experienceLoot, GameObject speedLoot, GameObject invulnerabilityLoot)
         {
             GameObject go = new GameObject("Enemy_Crash");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
@@ -338,6 +414,7 @@ namespace Heroic.Editor
             SetLayerMask(controller, "blockingLayers", TerrainLayerMask);
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            WireLootDropper(dropper, healthLoot, experienceLoot, speedLoot, invulnerabilityLoot);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.CrashLevel1);
             SetObjectArray(visual, "crashLevel2Frames", LoadTextures(Crash2FramePaths));
@@ -359,7 +436,7 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Crash.prefab");
         }
 
-        private static GameObject CreateWallPrefab(GameObject xpPickup)
+        private static GameObject CreateWallPrefab(GameObject xpPickup, GameObject healthLoot, GameObject experienceLoot, GameObject speedLoot, GameObject invulnerabilityLoot)
         {
             GameObject go = new GameObject("Enemy_Wall");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
@@ -373,6 +450,7 @@ namespace Heroic.Editor
             SetBool(controller, "suppressExperienceOnContactDamage", false);
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            WireLootDropper(dropper, healthLoot, experienceLoot, speedLoot, invulnerabilityLoot);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.WallLevel1);
             SetObject(visual, "wallLevel1Texture", AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/mobs/Wall I.png"));
@@ -385,7 +463,7 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Wall.prefab");
         }
 
-        private static GameObject CreateThrowerEnemyPrefab(GameObject xpPickup, GameObject enemyMissile)
+        private static GameObject CreateThrowerEnemyPrefab(GameObject xpPickup, GameObject healthLoot, GameObject experienceLoot, GameObject speedLoot, GameObject invulnerabilityLoot, GameObject enemyMissile)
         {
             GameObject go = new GameObject("Enemy_Thrower");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
@@ -405,8 +483,10 @@ namespace Heroic.Editor
             SetBool(controller, "suppressExperienceOnContactDamage", false);
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            WireLootDropper(dropper, healthLoot, experienceLoot, speedLoot, invulnerabilityLoot);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.ThrowerLevel1);
+            SetObjectArray(visual, "throwerLevel1Frames", LoadTextures(Thrower1FramePaths));
             go.AddComponent<HitFlashVisual>();
             go.AddComponent<DeathBurstVisual>();
             go.AddComponent<WorldHealthBar>();
@@ -415,7 +495,7 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Thrower.prefab");
         }
 
-        private static GameObject CreateBossPrefab(GameObject xpPickup)
+        private static GameObject CreateBossPrefab(GameObject xpPickup, GameObject healthLoot, GameObject experienceLoot, GameObject speedLoot, GameObject invulnerabilityLoot)
         {
             GameObject go = new GameObject("Enemy_Boss_ArcaneWarden");
             Rigidbody2D body = go.AddComponent<Rigidbody2D>();
@@ -430,6 +510,7 @@ namespace Heroic.Editor
             go.AddComponent<BossController>();
             ExperienceDropper dropper = go.AddComponent<ExperienceDropper>();
             SetObject(dropper, "pickupPrefab", xpPickup.GetComponent<ExperiencePickup>());
+            WireLootDropper(dropper, healthLoot, experienceLoot, speedLoot, invulnerabilityLoot);
             VisualPresetApplier visual = go.AddComponent<VisualPresetApplier>();
             SetEnum(visual, "preset", VisualPresetApplier.Preset.Boss);
             go.AddComponent<HitFlashVisual>();
@@ -441,6 +522,14 @@ namespace Heroic.Editor
             return SavePrefab(go, Prefabs + "/Enemies/Enemy_Boss_ArcaneWarden.prefab");
         }
 
+        private static void WireLootDropper(ExperienceDropper dropper, GameObject healthLoot, GameObject experienceLoot, GameObject speedLoot, GameObject invulnerabilityLoot)
+        {
+            SetObject(dropper, "healthRestorePrefab", healthLoot.GetComponent<LootPickup>());
+            SetObject(dropper, "experienceBoostPrefab", experienceLoot.GetComponent<LootPickup>());
+            SetObject(dropper, "speedBoostPrefab", speedLoot.GetComponent<LootPickup>());
+            SetObject(dropper, "invulnerabilityPrefab", invulnerabilityLoot.GetComponent<LootPickup>());
+        }
+
         private static void CreateGameScene(GameObject projectile, GameObject fireProjectile, GameObject orb, GameObject enemy, GameObject boss, GameObject xpPickup, EnemyDefinition bossDefinition, WaveDefinition[] waves)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -448,7 +537,10 @@ namespace Heroic.Editor
 
             GameObject arena = new GameObject("ArenaBackdrop");
             arena.transform.position = Vector3.zero;
-            arena.AddComponent<ArenaBackdrop>();
+            ArenaBackdrop arenaBackdrop = arena.AddComponent<ArenaBackdrop>();
+            EnsureTextureReadable(DefaultArenaBackgroundPath);
+            SetObject(arenaBackdrop, "dirtSourceTexture", AssetDatabase.LoadAssetAtPath<Texture2D>(DefaultArenaBackgroundPath));
+            SetBool(arenaBackdrop, "useSourceTextureDirectly", true);
 
             GameObject managers = new GameObject("GameManagers");
             RunManager runManager = managers.AddComponent<RunManager>();
@@ -483,6 +575,13 @@ namespace Heroic.Editor
             GameObject terrainObject = new GameObject("DynamicTerrainGrid");
             DynamicTerrainGrid terrainGrid = terrainObject.AddComponent<DynamicTerrainGrid>();
             SetObjectArray(terrainGrid, "terrainSheets", LoadTextures(TerrainSheetPaths));
+            SetObjectArray(terrainGrid, "dirtTextures", LoadTerrainSlices("dirt", "rough_dirt_left", "rough_dirt_right"));
+            SetObjectArray(terrainGrid, "decorativeTextures", LoadTerrainSlices("rock_grass", "brush", "raised_dirt"));
+            SetObjectArray(terrainGrid, "mudTextures", LoadTerrainSlices("mud"));
+            SetObjectArray(terrainGrid, "waterTextures", LoadTerrainSlices("water"));
+            SetObjectArray(terrainGrid, "looseStoneTextures", LoadTerrainSlices("loose_stone"));
+            SetObjectArray(terrainGrid, "highGroundTextures", LoadTerrainSlices("raised_dirt", "stone_floor"));
+            SetObjectArray(terrainGrid, "blockerTextures", LoadTerrainSlices("boulder", "wall_left", "wall_right", "pillar"));
             SetObject(terrainGrid, "playerReference", player.transform);
             SetObject(terrainGrid, "playerExperience", playerExperience);
             SetInt(terrainGrid, "terrainLayer", TerrainLayer);
@@ -556,6 +655,8 @@ namespace Heroic.Editor
             player.AddComponent<TerritoryCastingController>();
             player.AddComponent<MagicSystemController>();
             player.AddComponent<PlayerHealth>();
+            player.AddComponent<PlayerStealth>();
+            player.AddComponent<PlayerTemporaryBuffs>();
             PlayerExperience playerExperience = player.AddComponent<PlayerExperience>();
             SetInt(playerExperience, "baseExperienceToLevel", 15);
             player.AddComponent<ArcaneDoubleCast>();
@@ -583,6 +684,7 @@ namespace Heroic.Editor
             player.AddComponent<HitFlashVisual>();
             player.AddComponent<WorldHealthBar>();
             player.AddComponent<DamageNumberEmitter>();
+            player.AddComponent<PlayerBuffReadout>();
             AddAudioFeedback(player, ProceduralAudioFeedback.Preset.Player, 0.45f);
 
             GameObject firePoint = new GameObject("FirePoint");
@@ -684,6 +786,7 @@ namespace Heroic.Editor
             draftBackdrop.color = new Color(0.005f, 0.012f, 0.018f, 0.72f);
             Image pauseBackdrop = pauseRoot.AddComponent<Image>();
             pauseBackdrop.color = new Color(0.005f, 0.012f, 0.018f, 0.68f);
+            pauseBackdrop.raycastTarget = false;
             Image resultsBackdrop = resultsRoot.AddComponent<Image>();
             resultsBackdrop.color = new Color(0.005f, 0.012f, 0.018f, 0.78f);
 
@@ -692,20 +795,25 @@ namespace Heroic.Editor
             SetObject(hud, "playerExperience", experience);
             SetObject(hud, "runManager", runManager);
 
-            TMP_Text levelText = CreateText("LevelText", gameRoot.transform, "Level 1", new Vector2(150f, 32f), new Vector2(90f, -30f));
-            TMP_Text timerText = CreateText("TimerText", gameRoot.transform, "00:00", new Vector2(150f, 32f), new Vector2(0f, -30f));
-            TMP_Text healthText = CreateText("HealthText", gameRoot.transform, "HP 100/100", new Vector2(160f, 26f), new Vector2(-90f, -30f));
-            TMP_Text experienceText = CreateText("ExperienceText", gameRoot.transform, "XP 0/15", new Vector2(160f, 24f), new Vector2(90f, -30f));
-            TMP_Text showcaseText = CreateText("ShowcaseLabel", gameRoot.transform, "Heroic 1.0 Showcase", new Vector2(360f, 32f), new Vector2(0f, -68f));
-            Slider healthSlider = CreateSlider("HealthBar", gameRoot.transform, new Vector2(300f, 14f), new Vector2(0f, -55f), new Color(0.92f, 0.24f, 0.2f, 0.95f));
-            Slider experienceSlider = CreateSlider("ExperienceBar", gameRoot.transform, new Vector2(300f, 10f), new Vector2(0f, -77f), new Color(0.24f, 0.64f, 1f, 0.95f));
-            AnchorTopCenter(healthText.rectTransform, new Vector2(-170f, -28f));
-            AnchorTopCenter(timerText.rectTransform, new Vector2(0f, -28f));
-            AnchorTopCenter(levelText.rectTransform, new Vector2(170f, -28f));
-            AnchorTopCenter(experienceText.rectTransform, new Vector2(0f, -98f));
-            AnchorTopCenter(healthSlider.GetComponent<RectTransform>(), new Vector2(0f, -56f));
-            AnchorTopCenter(experienceSlider.GetComponent<RectTransform>(), new Vector2(0f, -78f));
-            AnchorTopCenter(showcaseText.rectTransform, new Vector2(0f, -122f));
+            TMP_Text levelText = CreateText("LevelText", gameRoot.transform, "Level 1", new Vector2(300f, 64f), new Vector2(180f, -30f));
+            levelText.fontSize = 44f;
+            TMP_Text timerText = CreateText("TimerText", gameRoot.transform, "00:00", new Vector2(300f, 64f), new Vector2(0f, -30f));
+            timerText.fontSize = 44f;
+            TMP_Text healthText = CreateText("HealthText", gameRoot.transform, "HP 100/100", new Vector2(320f, 52f), new Vector2(-180f, -30f));
+            healthText.fontSize = 40f;
+            TMP_Text experienceText = CreateText("ExperienceText", gameRoot.transform, "XP 0/15", new Vector2(320f, 48f), new Vector2(90f, -30f));
+            experienceText.fontSize = 36f;
+            TMP_Text showcaseText = CreateText("ShowcaseLabel", gameRoot.transform, "Heroic 1.0 Showcase", new Vector2(720f, 64f), new Vector2(0f, -68f));
+            showcaseText.fontSize = 34f;
+            Slider healthSlider = CreateSlider("HealthBar", gameRoot.transform, new Vector2(600f, 28f), new Vector2(0f, -55f), new Color(0.92f, 0.24f, 0.2f, 0.95f));
+            Slider experienceSlider = CreateSlider("ExperienceBar", gameRoot.transform, new Vector2(600f, 20f), new Vector2(0f, -77f), new Color(0.24f, 0.64f, 1f, 0.95f));
+            AnchorTopCenter(healthText.rectTransform, new Vector2(-340f, -36f));
+            AnchorTopCenter(timerText.rectTransform, new Vector2(0f, -36f));
+            AnchorTopCenter(levelText.rectTransform, new Vector2(340f, -36f));
+            AnchorTopCenter(experienceText.rectTransform, new Vector2(0f, -128f));
+            AnchorTopCenter(healthSlider.GetComponent<RectTransform>(), new Vector2(0f, -76f));
+            AnchorTopCenter(experienceSlider.GetComponent<RectTransform>(), new Vector2(0f, -106f));
+            AnchorTopCenter(showcaseText.rectTransform, new Vector2(0f, -168f));
             SetObject(hud, "levelText", levelText);
             SetObject(hud, "timerText", timerText);
             SetObject(hud, "healthText", healthText);
@@ -720,7 +828,7 @@ namespace Heroic.Editor
             SkillSideHudPresenter sideHud = gameRoot.AddComponent<SkillSideHudPresenter>();
             SetObject(sideHud, "buildState", buildState);
             SetObject(sideHud, "pairedSystemIconSheet", AssetDatabase.LoadAssetAtPath<Texture2D>(PairedSystemIconSheetPath));
-            CreateAudioControlsPanel(gameRoot.transform, new Vector2(-176f, -42f));
+            CreateAudioControlsPanel(gameRoot.transform, new Vector2(-22f, 154f), true);
 
             for (int i = 0; i < 3; i++)
             {
@@ -830,7 +938,6 @@ namespace Heroic.Editor
             SetObjectArray(draft, "elementNameLabels", elementNameLabels);
 
             CreatePausePanel(pauseRoot.transform);
-            CreateAudioControlsPanel(pauseRoot.transform, new Vector2(-176f, -42f));
 
             ResultsPresenter results = resultsRoot.AddComponent<ResultsPresenter>();
             SetObject(results, "runManager", runManager);
@@ -838,7 +945,7 @@ namespace Heroic.Editor
             SetString(results, "mainMenuSceneName", "MainMenu");
 
             GameObject resultsPanel = CreateCenteredPanel("ResultsPanel", resultsRoot.transform, new Vector2(560f, 320f), Vector2.zero, new Color(0.015f, 0.04f, 0.052f, 0.9f));
-            CreateAudioControlsPanel(resultsRoot.transform, new Vector2(-176f, -42f));
+            CreateAudioControlsPanel(resultsRoot.transform, new Vector2(-22f, 154f), true);
             TMP_Text resultText = CreateText("ResultText", resultsPanel.transform, "ARCANE WARDEN DEFEATED", new Vector2(500f, 58f), new Vector2(0f, 92f));
             resultText.fontSize = 28f;
             resultText.color = new Color(0.82f, 0.96f, 1f);
@@ -884,17 +991,17 @@ namespace Heroic.Editor
 
         private static void CreatePausePanel(Transform parent)
         {
-            GameObject panel = CreateCenteredPanel("PausePanel", parent, new Vector2(520f, 260f), Vector2.zero, new Color(0.015f, 0.04f, 0.052f, 0.9f));
-            TMP_Text title = CreateText("PauseTitle", panel.transform, "PAUSED", new Vector2(420f, 58f), new Vector2(0f, 72f));
-            title.fontSize = 34f;
+            GameObject panel = CreateCenteredPanel("PausePanel", parent, new Vector2(820f, 420f), Vector2.zero, new Color(0.015f, 0.04f, 0.052f, 0.9f));
+            TMP_Text title = CreateText("PauseTitle", panel.transform, "PAUSED", new Vector2(720f, 110f), new Vector2(0f, 124f));
+            title.fontSize = 68f;
             title.color = new Color(0.82f, 0.96f, 1f);
 
-            TMP_Text resume = CreateText("PauseResume", panel.transform, "Press Esc to resume the run.", new Vector2(430f, 34f), new Vector2(0f, 18f));
-            resume.fontSize = 20f;
+            TMP_Text resume = CreateText("PauseResume", panel.transform, "Press Esc to resume the run.", new Vector2(720f, 70f), new Vector2(0f, 32f));
+            resume.fontSize = 40f;
             resume.color = new Color(0.9f, 0.96f, 0.98f);
 
-            TMP_Text controls = CreateText("PauseControls", panel.transform, "Audio: M mute music   - / + master volume\nSafety: F8 defeat   F9 victory", new Vector2(450f, 70f), new Vector2(0f, -54f));
-            controls.fontSize = 17f;
+            TMP_Text controls = CreateText("PauseControls", panel.transform, "Audio: M mute music   - / + master volume\nSafety: F8 defeat   F9 victory", new Vector2(740f, 140f), new Vector2(0f, -106f));
+            controls.fontSize = 34f;
             controls.color = new Color(0.72f, 0.88f, 0.92f);
             controls.textWrappingMode = TextWrappingModes.Normal;
         }
@@ -1094,45 +1201,45 @@ namespace Heroic.Editor
             MainMenuPresenter presenter = presenterObject.AddComponent<MainMenuPresenter>();
             SetString(presenter, "gameSceneName", "Game");
 
-            TMP_Text title = CreateText("Title", parent, "HEROIC", new Vector2(520f, 90f), new Vector2(0f, 170f));
-            title.fontSize = 58f;
+            TMP_Text title = CreateText("Title", parent, "HEROIC", new Vector2(900f, 170f), new Vector2(0f, 240f));
+            title.fontSize = 116f;
             title.color = new Color(0.72f, 0.96f, 1f);
 
-            TMP_Text subtitle = CreateText("Subtitle", parent, "Living Spellbook Bullet Heaven Prototype", new Vector2(620f, 36f), new Vector2(0f, 108f));
-            subtitle.fontSize = 22f;
+            TMP_Text subtitle = CreateText("Subtitle", parent, "Living Spellbook Bullet Heaven Prototype", new Vector2(1000f, 72f), new Vector2(0f, 126f));
+            subtitle.fontSize = 44f;
             subtitle.color = new Color(0.78f, 0.88f, 0.92f);
 
-            TMP_Text pitch = CreateText("Pitch", parent, "Arcane spells. Strategic movement. Survive the Warden.", new Vector2(680f, 44f), new Vector2(0f, 58f));
-            pitch.fontSize = 20f;
+            TMP_Text pitch = CreateText("Pitch", parent, "Arcane spells. Strategic movement. Survive the Warden.", new Vector2(1100f, 88f), new Vector2(0f, 48f));
+            pitch.fontSize = 40f;
             pitch.color = new Color(0.68f, 0.78f, 0.84f);
 
-            Button startButton = CreateButton("Start Run", parent, new Vector2(260f, 56f), new Vector2(0f, -20f));
+            Button startButton = CreateButton("Start Run", parent, new Vector2(440f, 100f), new Vector2(0f, -70f));
             UnityEventTools.AddPersistentListener(startButton.onClick, presenter.StartGame);
             TMP_Text startLabel = startButton.GetComponentInChildren<TMP_Text>();
             if (startLabel != null)
             {
                 startLabel.text = "Start Run";
-                startLabel.fontSize = 22f;
+                startLabel.fontSize = 44f;
             }
 
-            TMP_Text controls = CreateText("Controls", parent, "Move: WASD / Arrows    Skills: 1, 2, 3    Pause: Esc    Music: M    Volume: - / +", new Vector2(820f, 36f), new Vector2(0f, -100f));
-            controls.fontSize = 18f;
+            TMP_Text controls = CreateText("Controls", parent, "Move: WASD / Arrows    Skills: 1, 2, 3    Pause: Esc    Music: M    Volume: - / +", new Vector2(1280f, 72f), new Vector2(0f, -190f));
+            controls.fontSize = 36f;
             controls.color = new Color(0.7f, 0.84f, 0.9f);
-            CreateAudioControlsPanel(parent, new Vector2(0f, -192f));
+            CreateAudioControlsPanel(parent, new Vector2(0f, -292f));
 
-            TMP_Text demoNote = CreateText("DemoNote", parent, "1.0 Showcase Mode preloads Arcane tools so the first run shows the core fantasy immediately.", new Vector2(760f, 48f), new Vector2(0f, -145f));
-            demoNote.fontSize = 16f;
+            TMP_Text demoNote = CreateText("DemoNote", parent, "1.0 Showcase Mode preloads Arcane tools so the first run shows the core fantasy immediately.", new Vector2(1280f, 96f), new Vector2(0f, -244f));
+            demoNote.fontSize = 32f;
             demoNote.color = new Color(0.58f, 0.72f, 0.78f);
         }
 
-        private static AudioControlsPresenter CreateAudioControlsPanel(Transform parent, Vector2 anchoredPosition)
+        private static AudioControlsPresenter CreateAudioControlsPanel(Transform parent, Vector2 anchoredPosition, bool anchorBottomRight = false)
         {
             GameObject panel = new GameObject("AudioControls");
             panel.transform.SetParent(parent, false);
             RectTransform rect = panel.AddComponent<RectTransform>();
-            rect.anchorMin = new Vector2(1f, 1f);
-            rect.anchorMax = new Vector2(1f, 1f);
-            rect.pivot = new Vector2(1f, 1f);
+            rect.anchorMin = anchorBottomRight ? new Vector2(1f, 0f) : new Vector2(1f, 1f);
+            rect.anchorMax = anchorBottomRight ? new Vector2(1f, 0f) : new Vector2(1f, 1f);
+            rect.pivot = anchorBottomRight ? new Vector2(1f, 0f) : new Vector2(1f, 1f);
             rect.sizeDelta = new Vector2(260f, 74f);
             rect.anchoredPosition = anchoredPosition;
             return panel.AddComponent<AudioControlsPresenter>();
@@ -1259,6 +1366,48 @@ namespace Heroic.Editor
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        private static void EnsureTextureReadable(string assetPath)
+        {
+            AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+            TextureImporter importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+            if (importer == null)
+            {
+                return;
+            }
+
+            bool changed = false;
+            if (!importer.isReadable)
+            {
+                importer.isReadable = true;
+                changed = true;
+            }
+
+            if (importer.textureType != TextureImporterType.Sprite)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                changed = true;
+            }
+
+            if (importer.spriteImportMode != SpriteImportMode.Single)
+            {
+                importer.spriteImportMode = SpriteImportMode.Single;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                importer.SaveAndReimport();
+            }
+        }
+
+        private static void EnsureTexturesReadable(string[] assetPaths)
+        {
+            foreach (string assetPath in assetPaths)
+            {
+                EnsureTextureReadable(assetPath);
+            }
+        }
+
         private static void SetObjectArray<T>(Object target, string property, T[] values) where T : Object
         {
             SerializedObject serialized = new SerializedObject(target);
@@ -1371,6 +1520,27 @@ namespace Heroic.Editor
             }
 
             return textures;
+        }
+
+        private static Texture2D[] LoadTerrainSlices(params string[] types)
+        {
+            var textures = new System.Collections.Generic.List<Texture2D>();
+            string[] packIds = { "i", "ii", "iii", "iv", "v" };
+            foreach (string packId in packIds)
+            {
+                foreach (string type in types)
+                {
+                    string path = $"Assets/_Heroic/Art/TerrainSlices/terrain_{packId}_{type}.png";
+                    EnsureTextureReadable(path);
+                    Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+                    if (texture != null)
+                    {
+                        textures.Add(texture);
+                    }
+                }
+            }
+
+            return textures.ToArray();
         }
     }
 }

@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using Heroic.Combat;
+using Heroic.UI;
 using Heroic.Visuals;
 
 namespace Heroic.Player
@@ -141,29 +142,47 @@ namespace Heroic.Player
         [SerializeField] private float stoneskinPulseInterval = 0.5f;
         [SerializeField] private float tunnelDuration = 0.7f;
         [SerializeField] private float tunnelEruptionRadius = 1.1f;
-        [SerializeField] private float flightDuration = 0.55f;
+        [SerializeField] private float flightDuration = 4f;
+        [SerializeField] private float flightSpeedMultiplier = 1.35f;
         [SerializeField] private float flightLandingRadius = 0.9f;
         [SerializeField] private bool equipPrototypeMovementSetOnStart = true;
 
         private PlayerController playerController;
         private CloudWalkController cloudWalkController;
         private PlayerHealth playerHealth;
+        private PlayerStealth playerStealth;
         private Coroutine activeLunge;
         private Coroutine activeWhirlwind;
         private Coroutine activeInvisibility;
         private Coroutine activeStoneskin;
         private Coroutine activeTunnel;
         private Coroutine activeFlight;
+        private float whirlwindEndsAt;
+        private float invisibilityEndsAt;
+        private float stoneskinEndsAt;
+        private float tunnelEndsAt;
+        private float flightEndsAt;
         private int activeSlotIndex;
 
         public event Action<MovementSkillId> MovementActivated;
         public event Action<int> ActiveSlotChanged;
+        public bool HasActiveWhirlwind => Time.time < whirlwindEndsAt;
+        public bool HasActiveInvisibility => Time.time < invisibilityEndsAt;
+        public bool HasActiveStoneskin => Time.time < stoneskinEndsAt;
+        public bool HasActiveTunnel => Time.time < tunnelEndsAt;
+        public bool HasActiveFlight => Time.time < flightEndsAt;
+        public float WhirlwindRemaining => Mathf.Max(0f, whirlwindEndsAt - Time.time);
+        public float InvisibilityRemaining => Mathf.Max(0f, invisibilityEndsAt - Time.time);
+        public float StoneskinRemaining => Mathf.Max(0f, stoneskinEndsAt - Time.time);
+        public float TunnelRemaining => Mathf.Max(0f, tunnelEndsAt - Time.time);
+        public float FlightRemaining => Mathf.Max(0f, flightEndsAt - Time.time);
 
         private void Awake()
         {
             playerController = GetComponent<PlayerController>();
             cloudWalkController = GetComponent<CloudWalkController>();
             playerHealth = GetComponent<PlayerHealth>();
+            playerStealth = GetComponent<PlayerStealth>();
 
             if (movementSlots.Length != 3)
             {
@@ -233,6 +252,7 @@ namespace Heroic.Player
             }
 
             playerHealth?.SetInvulnerable(false);
+            playerStealth?.SetInvisible(false);
         }
 
         public void EquipMovementSkill(int slotIndex, MovementSkillId skillId)
@@ -350,6 +370,7 @@ namespace Heroic.Player
             if (activated)
             {
                 slot.StartCooldown();
+                SkillTooltipTrigger.HideActiveTooltip();
                 MovementActivated?.Invoke(slot.Skill);
                 SelectFirstAvailableSlot();
             }
@@ -577,7 +598,7 @@ namespace Heroic.Player
         public void SetStoneskinPulseDamageTier(int tier) => SetMovementDamageTier(MovementSkillId.Stoneskin, tier);
         public void SetTunnelDurationTier(int tier) => tunnelDuration = Value(tier, 0.85f, 1f, 1.18f, 1.38f, 1.65f);
         public void SetTunnelEruptionRadiusTier(int tier) => tunnelEruptionRadius = Value(tier, 1.25f, 1.45f, 1.7f, 2f, 2.4f);
-        public void SetFlightDurationTier(int tier) => flightDuration = Value(tier, 0.48f, 0.42f, 0.36f, 0.3f, 0.24f);
+        public void SetFlightDurationTier(int tier) => flightDuration = Value(tier, 4.6f, 5.2f, 5.9f, 6.7f, 7.6f);
         public void SetFlightLandingRadiusTier(int tier) => flightLandingRadius = Value(tier, 1.05f, 1.25f, 1.5f, 1.85f, 2.25f);
 
         private IEnumerator LungeRoutine(Vector2 destination, int damage)
@@ -612,6 +633,7 @@ namespace Heroic.Player
         {
             float elapsed = 0f;
             float nextTickTime = 0f;
+            whirlwindEndsAt = Time.time + duration;
             SpinningWhirlwindVisual.Attach(transform, whirlwindHitRadius, duration, whirlwindVisualSpinSpeed);
 
             if (playerController != null)
@@ -639,12 +661,15 @@ namespace Heroic.Player
             }
 
             activeWhirlwind = null;
+            whirlwindEndsAt = 0f;
         }
 
         private IEnumerator InvisibilityRoutine(MovementSlot slot)
         {
             float elapsed = 0f;
+            invisibilityEndsAt = Time.time + invisibilityDuration;
             playerHealth?.SetInvulnerable(true);
+            playerStealth?.SetInvisible(true);
             playerController?.SetTemporarySpeedMultiplier(invisibilitySpeedMultiplier);
             TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.55f, 0.65f, 1f, 0.22f), 1f, 0.18f);
 
@@ -655,16 +680,19 @@ namespace Heroic.Player
             }
 
             playerHealth?.SetInvulnerable(false);
+            playerStealth?.SetInvisible(false);
             playerController?.SetTemporarySpeedMultiplier(1f);
             TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.55f, 0.65f, 1f, 0.34f), 1.1f, 0.18f);
             DamageAround(transform.position, invisibilityExitDamage, Mathf.Max(0.75f, slot.Range * 0.35f));
             activeInvisibility = null;
+            invisibilityEndsAt = 0f;
         }
 
         private IEnumerator StoneskinRoutine(MovementSlot slot)
         {
             float elapsed = 0f;
             float nextPulseAt = 0f;
+            stoneskinEndsAt = Time.time + stoneskinDuration;
             playerHealth?.SetInvulnerable(true);
             playerController?.SetTemporarySpeedMultiplier(stoneskinSpeedMultiplier);
             TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.62f, 0.52f, 0.36f, 0.34f), 1.1f, 0.18f);
@@ -685,12 +713,14 @@ namespace Heroic.Player
             playerHealth?.SetInvulnerable(false);
             playerController?.SetTemporarySpeedMultiplier(1f);
             activeStoneskin = null;
+            stoneskinEndsAt = 0f;
         }
 
         private IEnumerator TunnelRoutine(Vector2 destination, int damage)
         {
             Vector2 start = transform.position;
             float elapsed = 0f;
+            tunnelEndsAt = Time.time + tunnelDuration;
             playerHealth?.SetInvulnerable(true);
             playerController?.SetMovementLocked(true);
             TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.42f, 0.28f, 0.14f, 0.3f), 0.9f, 0.16f);
@@ -710,32 +740,40 @@ namespace Heroic.Player
             playerHealth?.SetInvulnerable(false);
             playerController?.SetMovementLocked(false);
             activeTunnel = null;
+            tunnelEndsAt = 0f;
         }
 
         private IEnumerator FlightRoutine(Vector2 destination, int damage)
         {
-            Vector2 start = transform.position;
             float elapsed = 0f;
+            flightEndsAt = Time.time + flightDuration;
             playerHealth?.SetInvulnerable(true);
-            playerController?.SetMovementLocked(true);
-            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.88f, 0.96f, 1f, 0.28f), 0.95f, 0.14f);
+            playerController?.SetTemporarySpeedMultiplier(flightSpeedMultiplier);
+            FlightWingVisual.Attach(transform, flightDuration);
+            TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.88f, 0.96f, 1f, 0.34f), 1.15f, 0.24f);
 
             while (elapsed < flightDuration)
             {
                 elapsed += Time.deltaTime;
                 float percent = Mathf.Clamp01(elapsed / flightDuration);
-                float eased = Mathf.Sin(percent * Mathf.PI * 0.5f);
-                transform.position = Vector2.Lerp(start, destination, eased);
-                TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.82f, 0.94f, 1f, 0.18f), 0.5f, 0.07f);
+
+                if (Time.frameCount % 5 == 0)
+                {
+                    float liftPulse = Mathf.Sin(percent * Mathf.PI);
+                    float ringSize = Mathf.Lerp(0.9f, 0.55f, percent) + liftPulse * 0.18f;
+                    TemporaryVisualEffect.CreateCircle(transform.position, new Color(0.72f, 0.94f, 1f, 0.22f), ringSize, 0.18f);
+                }
+
                 yield return null;
             }
 
-            transform.position = destination;
-            DamageAround(destination, damage, flightLandingRadius);
-            TemporaryVisualEffect.CreateCircle(destination, new Color(0.88f, 0.96f, 1f, 0.34f), flightLandingRadius, 0.16f);
+            Vector2 landingPosition = transform.position;
+            DamageAround(landingPosition, damage, flightLandingRadius);
+            TemporaryVisualEffect.CreateCircle(landingPosition, new Color(0.88f, 0.96f, 1f, 0.38f), flightLandingRadius, 0.2f);
             playerHealth?.SetInvulnerable(false);
-            playerController?.SetMovementLocked(false);
+            playerController?.SetTemporarySpeedMultiplier(1f);
             activeFlight = null;
+            flightEndsAt = 0f;
         }
 
         private Vector2 FindValidDestination(Vector2 origin, Vector2 direction, float range)

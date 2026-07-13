@@ -12,12 +12,13 @@ namespace Heroic.Audio
         [SerializeField] private bool playOnStart = true;
         [SerializeField] private bool loop = true;
         [SerializeField] private bool retryAfterFirstInput = true;
+        [SerializeField] private float retryInterval = 0.75f;
 
         private static readonly List<BackgroundMusicPlayer> Instances = new List<BackgroundMusicPlayer>();
         private static bool musicMuted;
 
         private AudioSource source;
-        private bool inputRetryUsed;
+        private float nextRetryAt;
 
         public static bool MusicMuted => musicMuted;
 
@@ -41,6 +42,11 @@ namespace Heroic.Audio
             if (musicClip == null && !string.IsNullOrWhiteSpace(resourcesClipPath))
             {
                 musicClip = Resources.Load<AudioClip>(resourcesClipPath);
+            }
+
+            if (musicClip == null)
+            {
+                musicClip = CreateFallbackLoop();
             }
 
             ApplyAudioState();
@@ -71,14 +77,19 @@ namespace Heroic.Audio
 
         private void Update()
         {
-            if (!retryAfterFirstInput || inputRetryUsed || source == null || musicClip == null || source.isPlaying)
+            if (!retryAfterFirstInput || source == null || musicClip == null || source.isPlaying || musicMuted)
+            {
+                return;
+            }
+
+            if (Time.unscaledTime < nextRetryAt)
             {
                 return;
             }
 
             if (Input.anyKeyDown || Input.GetMouseButtonDown(0) || Input.touchCount > 0)
             {
-                inputRetryUsed = true;
+                nextRetryAt = Time.unscaledTime + retryInterval;
                 Play();
             }
         }
@@ -115,6 +126,7 @@ namespace Heroic.Audio
 
             if (!source.isPlaying)
             {
+                source.UnPause();
                 source.Play();
             }
         }
@@ -136,6 +148,27 @@ namespace Heroic.Audio
 
             source.volume = volume;
             source.mute = musicMuted;
+        }
+
+        private static AudioClip CreateFallbackLoop()
+        {
+            const int sampleRate = 44100;
+            const float duration = 8f;
+            int sampleCount = Mathf.CeilToInt(sampleRate * duration);
+            float[] samples = new float[sampleCount];
+            for (int i = 0; i < sampleCount; i++)
+            {
+                float t = i / (float)sampleRate;
+                float pulse = 0.55f + 0.45f * Mathf.Sin(2f * Mathf.PI * 0.5f * t);
+                float drone = Mathf.Sin(2f * Mathf.PI * 110f * t) * 0.08f;
+                float fifth = Mathf.Sin(2f * Mathf.PI * 165f * t) * 0.04f;
+                float shimmer = Mathf.Sin(2f * Mathf.PI * 440f * t) * 0.015f * pulse;
+                samples[i] = drone + fifth + shimmer;
+            }
+
+            AudioClip clip = AudioClip.Create("HeroicFallbackMusicLoop", sampleCount, 1, sampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
         }
     }
 }

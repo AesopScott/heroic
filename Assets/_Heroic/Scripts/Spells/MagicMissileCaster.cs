@@ -14,7 +14,7 @@ namespace Heroic.Spells
         [SerializeField] private int damage = 10;
         [SerializeField] private int projectileCount = 1;
         [SerializeField] private float spreadAngle = 12f;
-        [SerializeField] private float homingStrength = 0f;
+        [SerializeField] private float homingStrength = 4f;
         [SerializeField] private int pierceCount = 0;
         [SerializeField] private Transform firePoint;
         [SerializeField] private ArcaneDoubleCast doubleCast;
@@ -51,10 +51,9 @@ namespace Heroic.Spells
                 return;
             }
 
-            Transform targetTransform = target.transform;
-            Cast(targetTransform);
-            doubleCast?.TrySchedule(() => CastIfTargetAlive(targetTransform));
-            spellEcho?.Echo(() => CastIfTargetAlive(targetTransform));
+            Cast(target.transform);
+            doubleCast?.TrySchedule(CastAtNearestTarget);
+            spellEcho?.Echo(CastAtNearestTarget);
             nextCastTime = Time.time + ModifiedCooldown(castInterval);
         }
 
@@ -100,7 +99,7 @@ namespace Heroic.Spells
                 Vector3 rotatedDirection = Quaternion.Euler(0f, 0f, angleOffset) * (Vector3)direction;
                 Vector2 missileDirection = rotatedDirection.normalized;
                 Projectile projectile = Instantiate(projectilePrefab, spawnPosition, Quaternion.identity);
-                projectile.Launch(missileDirection, projectileSpeed, target, homingStrength);
+                projectile.Launch(missileDirection, projectileSpeed, target, Mathf.Max(1.5f, homingStrength));
 
                 var hit = projectile.GetComponent<ProjectileHit>();
                 if (hit != null)
@@ -119,6 +118,15 @@ namespace Heroic.Spells
             }
 
             Cast(target);
+        }
+
+        private void CastAtNearestTarget()
+        {
+            EnemyController target = FindNearestEnemy();
+            if (target != null)
+            {
+                Cast(target.transform);
+            }
         }
 
         private EnemyController FindNearestEnemy()

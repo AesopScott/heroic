@@ -85,6 +85,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Combat.Projectile
   speed: 10
   homingStrength: 0
+  retargetRange: 12
 --- !u!114 &5944360898991633725
 MonoBehaviour:
   m_ObjectHideFlags: 0

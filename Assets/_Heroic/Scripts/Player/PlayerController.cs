@@ -7,6 +7,7 @@ namespace Heroic.Player
     {
         [SerializeField] private float baseMoveSpeed = 6f;
         [SerializeField] private float lootSpeedMultiplier = 1f;
+        [SerializeField] private Vector2 arenaHalfExtents = new Vector2(29.2f, 29.2f);
 
         private Rigidbody2D rb;
         private Vector2 moveInput;
@@ -55,6 +56,7 @@ namespace Heroic.Player
             }
 
             rb.linearVelocity = moveInput * CurrentMoveSpeed;
+            ClampToArena();
         }
 
         public void SetMoveSpeed(float newMoveSpeed)
@@ -80,6 +82,26 @@ namespace Heroic.Player
         public void SetMovementLocked(bool isLocked)
         {
             movementLocked = isLocked;
+        }
+
+        private void ClampToArena()
+        {
+            if (arenaHalfExtents.x <= 0f || arenaHalfExtents.y <= 0f)
+            {
+                return;
+            }
+
+            Vector2 position = rb.position;
+            Vector2 clamped = new Vector2(
+                Mathf.Clamp(position.x, -arenaHalfExtents.x, arenaHalfExtents.x),
+                Mathf.Clamp(position.y, -arenaHalfExtents.y, arenaHalfExtents.y));
+
+            if ((clamped - position).sqrMagnitude > 0.0001f)
+            {
+                rb.position = clamped;
+                transform.position = new Vector3(clamped.x, clamped.y, transform.position.z);
+                rb.linearVelocity = Vector2.zero;
+            }
         }
     }
 }

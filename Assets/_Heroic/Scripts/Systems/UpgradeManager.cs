@@ -180,21 +180,31 @@ namespace Heroic.Systems
             int lowerChoiceCount = Mathf.Clamp(minimumChoices, 1, Mathf.Max(1, maximumChoices));
             int upperChoiceCount = Mathf.Max(lowerChoiceCount, maximumChoices);
             int desiredMovementChoices = includeMovementChoice ? Mathf.Min(Mathf.Max(1, movementChoicesOnMovementDraft), movementEligible.Count) : 0;
+            int desiredAbilityChoices = (includeMovementChoice || includeSystemChoice) ? Mathf.Min(2, abilityEligible.Count) : 0;
+            int desiredSystemChoices = includeSystemChoice ? Mathf.Min(3, systemEligible.Count) : 0;
             int targetCount = Mathf.Min(UnityEngine.Random.Range(lowerChoiceCount, upperChoiceCount + 1), eligibleCount);
-            targetCount = Mathf.Min(eligibleCount, Mathf.Max(targetCount, desiredMovementChoices));
+            if (includeSystemChoice)
+            {
+                targetCount = Mathf.Min(eligibleCount, desiredSystemChoices + desiredAbilityChoices);
+            }
+            else
+            {
+                targetCount = Mathf.Min(eligibleCount, Mathf.Max(targetCount, desiredMovementChoices));
+                targetCount = Mathf.Min(eligibleCount, Mathf.Max(targetCount, desiredMovementChoices + desiredAbilityChoices));
+            }
 
             while (movementEligible.Count > 0 && currentChoices.Count < desiredMovementChoices)
             {
                 AddRandomChoice(movementEligible);
             }
 
-            int reservedSystemSlots = systemEligible.Count > 0 && currentChoices.Count < targetCount ? 1 : 0;
+            int reservedSystemSlots = Mathf.Max(0, desiredSystemChoices - CountCurrentLane(ChoiceLane.System));
             while (abilityEligible.Count > 0 && currentChoices.Count < targetCount - reservedSystemSlots)
             {
                 AddRandomChoice(abilityEligible);
             }
 
-            while (systemEligible.Count > 0 && currentChoices.Count < targetCount)
+            while (systemEligible.Count > 0 && CountCurrentLane(ChoiceLane.System) < desiredSystemChoices && currentChoices.Count < targetCount)
             {
                 AddRandomChoice(systemEligible);
             }
@@ -217,6 +227,20 @@ namespace Heroic.Systems
             choices.RemoveAt(index);
         }
 
+        private int CountCurrentLane(ChoiceLane lane)
+        {
+            int count = 0;
+            foreach (DraftChoice choice in currentChoices)
+            {
+                if (ResolveLane(choice) == lane)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
         private void RemoveChoicesInLane(DraftChoice selected)
         {
             ChoiceLane selectedLane = ResolveLane(selected);
@@ -233,6 +257,11 @@ namespace Heroic.Systems
         private static ChoiceLane ResolveLane(DraftChoice choice)
         {
             if (choice.Category == UpgradeCategory.Movement)
+            {
+                return ChoiceLane.Movement;
+            }
+
+            if (IsMovementBoost(choice))
             {
                 return ChoiceLane.Movement;
             }
@@ -286,7 +315,9 @@ namespace Heroic.Systems
 
             if (choice.Category == UpgradeCategory.System)
             {
-                return includeSystemChoice && (buildState == null || !buildState.HasSkill(choice.Id));
+                return includeSystemChoice
+                    && (buildState == null || !buildState.HasSkill(choice.Id))
+                    && (!IsRunicMagic(choice.Id) || HasLearnedAreaOfEffectSkill());
             }
 
             if (choice.Category == UpgradeCategory.Attack)
@@ -305,6 +336,63 @@ namespace Heroic.Systems
         private static bool IsSystemSynergyBoost(DraftChoice choice)
         {
             return choice.Category == UpgradeCategory.Boost && SystemPairDefinitions.IsPairUpgrade(choice.Id);
+        }
+
+        private static bool IsRunicMagic(string choiceId)
+        {
+            return choiceId == "system_runic_magic";
+        }
+
+        private bool HasLearnedAreaOfEffectSkill()
+        {
+            if (buildState == null)
+            {
+                return false;
+            }
+
+            foreach (string learnedSkillId in buildState.LearnedSkillIds)
+            {
+                if (IsAreaOfEffectSkill(learnedSkillId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsAreaOfEffectSkill(string skillId)
+        {
+            switch (skillId)
+            {
+                case "arcane_warp_pulse":
+                case "fire_burning_ground":
+                case "fire_inferno":
+                case "cold_frost_ring":
+                case "cold_glacial_field":
+                case "cold_crystal_prison":
+                case "cold_blizzard":
+                case "lightning_static_field":
+                case "lightning_storm_call":
+                case "earth_stone_spike":
+                case "earth_quake":
+                case "earth_mud_trap":
+                case "earth_quicksand":
+                case "earth_brambles":
+                case "mind_confuse":
+                case "mind_mass_charm":
+                case "blood_blood_nova":
+                case "blood_blood_boil":
+                case "poison_toxic_cloud":
+                case "poison_venom_trail":
+                case "poison_infection":
+                case "poison_rot_bloom":
+                case "poison_poison_cloud":
+                case "poison_disease":
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         private bool IsMovementEquipped(string choiceId)

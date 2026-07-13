@@ -17,9 +17,9 @@ namespace Heroic.UI
         [SerializeField] private TMP_Text cooldownText;
         [SerializeField] private Image cooldownFill;
         [SerializeField] private Image backgroundImage;
-        [SerializeField] private float upgradeBadgeWidth = 172f;
-        [SerializeField] private float upgradeBadgeHeight = 30f;
-        [SerializeField] private float upgradeBadgeSpacing = 34f;
+        [SerializeField] private float upgradeBadgeWidth = 54f;
+        [SerializeField] private float upgradeBadgeHeight = 54f;
+        [SerializeField] private float upgradeBadgeSpacing = 60f;
         private CanvasGroup canvasGroup;
         private RectTransform rectTransform;
         private Outline activeOutline;
@@ -30,8 +30,8 @@ namespace Heroic.UI
         {
             public GameObject Root;
             public Image Background;
-            public Image ColorChip;
-            public TMP_Text Label;
+            public Image Icon;
+            public TMP_Text TierText;
         }
 
         private void Awake()
@@ -62,6 +62,7 @@ namespace Heroic.UI
 
             activeOutline.effectColor = new Color(1f, 0.84f, 0.2f, 1f);
             activeOutline.effectDistance = new Vector2(4f, 4f);
+            gameObject.AddComponent<SkillTooltipTrigger>();
 
             ForceSquareWindow();
             EnsureIcon();
@@ -95,7 +96,7 @@ namespace Heroic.UI
                 backgroundImage.sprite = hasSkill ? GetSkillIconSprite(skill) : null;
                 backgroundImage.preserveAspect = true;
                 backgroundImage.type = Image.Type.Simple;
-                backgroundImage.raycastTarget = false;
+                backgroundImage.raycastTarget = hasSkill;
                 backgroundImage.color = !hasSkill
                     ? new Color(0.05f, 0.08f, 0.1f, 0.12f)
                     : isReady
@@ -134,6 +135,7 @@ namespace Heroic.UI
             }
 
             RefreshUpgradeBadges(hasSkill ? movementSkillId : string.Empty);
+            ConfigureTooltip(hasSkill ? movementSkillId : string.Empty);
         }
 
         private void ForceSquareWindow()
@@ -213,11 +215,40 @@ namespace Heroic.UI
                 }
 
                 ApplyBadgePlacement(badge.Root.GetComponent<RectTransform>(), i);
-                Color color = SkillIconRegistry.GetColor(movementSkillId);
-                badge.Background.color = new Color(color.r * 0.22f, color.g * 0.22f, color.b * 0.22f, 0.88f);
-                badge.ColorChip.color = color;
-                badge.Label.text = FormatUpgradeLabel(upgrades[i].UpgradePathId, movementSkillId) + " " + upgrades[i].Tier;
+                RunBuildState.SkillUpgradeState upgrade = upgrades[i];
+                Color tierColor = SkillIconRegistry.GetTierColor(upgrade.Tier);
+                badge.Background.color = new Color(tierColor.r, tierColor.g, tierColor.b, 0.92f);
+                badge.Icon.sprite = SkillIconRegistry.GetUpgradeIcon(upgrade.UpgradePathId) ?? SkillIconRegistry.GetIcon(movementSkillId);
+                badge.Icon.color = Color.white;
+                badge.TierText.text = upgrade.Tier.ToString();
+                badge.TierText.color = Color.white;
+                ConfigureBadgeTooltip(badge.Root, upgrade);
             }
+        }
+
+        private void ConfigureTooltip(string movementSkillId)
+        {
+            SkillTooltipTrigger tooltip = GetComponent<SkillTooltipTrigger>();
+            if (tooltip == null)
+            {
+                tooltip = gameObject.AddComponent<SkillTooltipTrigger>();
+            }
+
+            tooltip.Configure(
+                string.IsNullOrEmpty(movementSkillId) ? string.Empty : SkillTooltipText.TitleFor(movementSkillId),
+                string.IsNullOrEmpty(movementSkillId) ? string.Empty : SkillTooltipText.BodyFor(movementSkillId));
+        }
+
+        private static void ConfigureBadgeTooltip(GameObject target, RunBuildState.SkillUpgradeState upgrade)
+        {
+            SkillTooltipTrigger tooltip = target.GetComponent<SkillTooltipTrigger>();
+            if (tooltip == null)
+            {
+                tooltip = target.AddComponent<SkillTooltipTrigger>();
+            }
+
+            string skillId = SkillIconRegistry.ResolveSkillId(upgrade.SkillId);
+            tooltip.Configure(SkillTooltipText.TitleFor(skillId), SkillTooltipText.BodyFor(skillId, SkillTooltipText.UpgradeBody(upgrade.UpgradePathId, upgrade.Tier)));
         }
 
         private void ApplyBadgePlacement(RectTransform badgeRect, int badgeIndex)
@@ -282,42 +313,41 @@ namespace Heroic.UI
             rootRect.sizeDelta = new Vector2(upgradeBadgeWidth, upgradeBadgeHeight);
 
             Image background = root.AddComponent<Image>();
-            background.raycastTarget = false;
+            background.raycastTarget = true;
+            root.AddComponent<SkillTooltipTrigger>();
 
-            GameObject chipObject = new GameObject("ColorChip");
-            chipObject.transform.SetParent(root.transform, false);
-            RectTransform chipRect = chipObject.AddComponent<RectTransform>();
-            chipRect.anchorMin = new Vector2(0f, 0.5f);
-            chipRect.anchorMax = new Vector2(0f, 0.5f);
-            chipRect.pivot = new Vector2(0f, 0.5f);
-            chipRect.sizeDelta = new Vector2(8f, upgradeBadgeHeight);
-            chipRect.anchoredPosition = Vector2.zero;
-            Image chip = chipObject.AddComponent<Image>();
-            chip.raycastTarget = false;
+            GameObject iconObject = new GameObject("Icon");
+            iconObject.transform.SetParent(root.transform, false);
+            RectTransform iconRect = iconObject.AddComponent<RectTransform>();
+            iconRect.anchorMin = Vector2.zero;
+            iconRect.anchorMax = Vector2.one;
+            iconRect.offsetMin = new Vector2(5f, 5f);
+            iconRect.offsetMax = new Vector2(-5f, -5f);
+            Image icon = iconObject.AddComponent<Image>();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
 
-            GameObject labelObject = new GameObject("Label");
-            labelObject.transform.SetParent(root.transform, false);
-            RectTransform labelRect = labelObject.AddComponent<RectTransform>();
-            labelRect.anchorMin = Vector2.zero;
-            labelRect.anchorMax = Vector2.one;
-            labelRect.offsetMin = new Vector2(14f, 0f);
-            labelRect.offsetMax = new Vector2(-6f, 0f);
-            TMP_Text label = labelObject.AddComponent<TextMeshProUGUI>();
-            label.alignment = TextAlignmentOptions.MidlineLeft;
-            label.fontSize = 15f;
-            label.fontStyle = FontStyles.Bold;
-            label.color = Color.white;
-            label.enableWordWrapping = false;
-            label.overflowMode = TextOverflowModes.Ellipsis;
-            label.raycastTarget = false;
+            GameObject tierObject = new GameObject("Tier");
+            tierObject.transform.SetParent(root.transform, false);
+            RectTransform tierRect = tierObject.AddComponent<RectTransform>();
+            tierRect.anchorMin = new Vector2(1f, 0f);
+            tierRect.anchorMax = new Vector2(1f, 0f);
+            tierRect.pivot = new Vector2(1f, 0f);
+            tierRect.sizeDelta = new Vector2(24f, 22f);
+            tierRect.anchoredPosition = new Vector2(-3f, 2f);
+            TMP_Text tierText = tierObject.AddComponent<TextMeshProUGUI>();
+            tierText.alignment = TextAlignmentOptions.Center;
+            tierText.fontSize = 16f;
+            tierText.fontStyle = FontStyles.Bold;
+            tierText.raycastTarget = false;
 
             root.SetActive(false);
             return new UpgradeBadge
             {
                 Root = root,
                 Background = background,
-                ColorChip = chip,
-                Label = label
+                Icon = icon,
+                TierText = tierText
             };
         }
 

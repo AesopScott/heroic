@@ -18,6 +18,88 @@ namespace Heroic.UI
             return sprite != null ? sprite : Resources.GetBuiltinResource<Sprite>("UI/Skin/UISprite.psd");
         }
 
+        public static Sprite GetUpgradeIcon(string upgradeId)
+        {
+            if (string.IsNullOrEmpty(upgradeId))
+            {
+                return null;
+            }
+
+            string normalizedUpgradeId = upgradeId.ToLowerInvariant();
+            Sprite exactSprite = LoadGeneratedUpgradeIcon(normalizedUpgradeId);
+            if (exactSprite != null)
+            {
+                return exactSprite;
+            }
+
+            string synergyIconId = ResolveSystemSynergyUpgradeIconId(normalizedUpgradeId);
+            if (!string.IsNullOrEmpty(synergyIconId))
+            {
+                Sprite synergySprite = LoadGeneratedUpgradeIcon(synergyIconId);
+                if (synergySprite != null)
+                {
+                    return synergySprite;
+                }
+            }
+
+            return null;
+        }
+
+        private static Sprite LoadGeneratedUpgradeIcon(string upgradeId)
+        {
+            string[] categories =
+            {
+                "ability",
+                "movement",
+                "system",
+                "system-synergy"
+            };
+
+            for (int i = 0; i < categories.Length; i++)
+            {
+                Sprite sprite = Resources.Load<Sprite>(IconRoot + "Generated/" + categories[i] + "/" + upgradeId);
+                if (sprite != null)
+                {
+                    return sprite;
+                }
+            }
+
+            return null;
+        }
+
+        private static string ResolveSystemSynergyUpgradeIconId(string upgradeId)
+        {
+            if (!SystemPairDefinitions.IsPairUpgrade(upgradeId))
+            {
+                return string.Empty;
+            }
+
+            string pairId = SystemPairDefinitions.ResolvePairId(upgradeId);
+            if (string.IsNullOrEmpty(pairId) || !pairId.StartsWith("system_pair_"))
+            {
+                return string.Empty;
+            }
+
+            return "upgrade_system_synergy_" + pairId.Substring("system_pair_".Length);
+        }
+
+        public static Color GetTierColor(int tier)
+        {
+            switch (Mathf.Clamp(tier, 1, 5))
+            {
+                case 1:
+                    return Hex("76D94E");
+                case 2:
+                    return Hex("4BB3FD");
+                case 3:
+                    return Hex("B75CFF");
+                case 4:
+                    return Hex("F4D35E");
+                default:
+                    return Hex("FF7A45");
+            }
+        }
+
         public static string ResolveSkillId(UpgradeManager.DraftChoice choice)
         {
             if (choice == null)

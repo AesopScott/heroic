@@ -14,6 +14,9 @@ namespace Heroic.Visuals
         [SerializeField] private Color pebbleColor = new Color(0.42f, 0.36f, 0.28f, 1f);
         [SerializeField] private Color edgeVignetteColor = new Color(0.12f, 0.07f, 0.035f, 1f);
         [SerializeField] private Vector2 worldSize = new Vector2(60f, 60f);
+        [SerializeField] private Texture2D dirtSourceTexture;
+        [SerializeField] private Texture2D[] dirtSourceTextures = new Texture2D[0];
+        [SerializeField] private bool useSourceTextureDirectly;
 
         private void Awake()
         {
@@ -29,9 +32,21 @@ namespace Heroic.Visuals
                 renderer = gameObject.AddComponent<SpriteRenderer>();
             }
 
+            if (useSourceTextureDirectly && dirtSourceTexture != null)
+            {
+                renderer.sprite = Sprite.Create(
+                    dirtSourceTexture,
+                    new Rect(0f, 0f, dirtSourceTexture.width, dirtSourceTexture.height),
+                    new Vector2(0.5f, 0.5f),
+                    dirtSourceTexture.width / worldSize.x);
+                renderer.sortingOrder = -100;
+                transform.localScale = Vector3.one;
+                return;
+            }
+
             Texture2D texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false)
             {
-                filterMode = FilterMode.Point,
+                filterMode = FilterMode.Bilinear,
                 wrapMode = TextureWrapMode.Repeat
             };
 
@@ -49,14 +64,9 @@ namespace Heroic.Visuals
                         Hash01((x + 19) / 8, (y + 37) / 8) +
                         Hash01((x + 71) / 16, (y + 11) / 16)) / 3f;
 
-                    Color color = Color.Lerp(dirtDarkColor, dirtLightColor, softNoise);
-                    color = Color.Lerp(color, dirtBaseColor, 0.45f);
-
-                    // Decorative only: rocks and pebbles are baked into the backdrop texture, no colliders.
-                    float rock = RockMask(x, y, 41, 0.16f);
-                    float pebble = fineNoise > 0.982f ? 0.32f : 0f;
-                    color = Color.Lerp(color, pebbleColor, pebble);
-                    color = Color.Lerp(color, rockColor, rock);
+                    Color color = HasSourceTextures()
+                        ? SampleTerrainSource(uv, softNoise)
+                        : Color.Lerp(Color.Lerp(dirtDarkColor, dirtLightColor, softNoise), dirtBaseColor, 0.45f);
 
                     float grain = (fineNoise - 0.5f) * 0.08f;
                     color.r = Mathf.Clamp01(color.r + grain);
@@ -72,6 +82,55 @@ namespace Heroic.Visuals
             renderer.sprite = Sprite.Create(texture, new Rect(0f, 0f, textureSize, textureSize), new Vector2(0.5f, 0.5f), textureSize / worldSize.x);
             renderer.sortingOrder = -100;
             transform.localScale = Vector3.one;
+        }
+
+        private Color SampleTerrainSource(Vector2 uv, float softNoise)
+        {
+            Texture2D source = PickSourceTexture(uv);
+            if (source == null)
+            {
+                return dirtBaseColor;
+            }
+
+            Vector2 tiled = new Vector2(uv.x * 3.2f, uv.y * 3.2f);
+            tiled += new Vector2(softNoise * 0.08f, Hash01(Mathf.FloorToInt(uv.x * 17f), Mathf.FloorToInt(uv.y * 17f)) * 0.08f);
+            float u = Mathf.PingPong(tiled.x, 1f);
+            float v = Mathf.PingPong(tiled.y, 1f);
+            Color sampled = source.GetPixelBilinear(u, v);
+            return Color.Lerp(sampled, dirtBaseColor, 0.12f);
+        }
+
+        private bool HasSourceTextures()
+        {
+            if (dirtSourceTextures != null)
+            {
+                for (int i = 0; i < dirtSourceTextures.Length; i++)
+                {
+                    if (dirtSourceTextures[i] != null)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return dirtSourceTexture != null;
+        }
+
+        private Texture2D PickSourceTexture(Vector2 uv)
+        {
+            if (dirtSourceTextures != null && dirtSourceTextures.Length > 0)
+            {
+                int cellX = Mathf.FloorToInt(uv.x * 6f);
+                int cellY = Mathf.FloorToInt(uv.y * 6f);
+                int index = Mathf.Abs(Mathf.FloorToInt(Hash01(cellX, cellY) * dirtSourceTextures.Length)) % dirtSourceTextures.Length;
+                Texture2D picked = dirtSourceTextures[index];
+                if (picked != null)
+                {
+                    return picked;
+                }
+            }
+
+            return dirtSourceTexture;
         }
 
         private static float RockMask(int x, int y, int cellSize, float chance)

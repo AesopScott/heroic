@@ -1,0 +1,46 @@
+[
+  {
+    "iconId": "pickup_health_potion",
+    "filename": "Assets\\Resources\\PickupIcons\\pickup-art\\pickup_health_potion.png",
+    "masterFilename": "Assets\\_Heroic\\Art\\Pickups\\pickup-art\\pickup_health_potion.png",
+    "prompt": "Create a single polished square game icon for Heroic representing: a readable red healing potion pickup, glass bottle silhouette, cork stopper, warm healing glow, instantly recognizable as health recovery. Visual language: dark heroic fantasy spellcraft, crisp readable silhouette, premium Unity action-RPG HUD asset, painterly but clean, luminous magical materials, controlled rim light, subtle bevel depth, high contrast, centered subject, consistent three-quarter icon perspective, consistent line weight, generous padding. Use the requested chroma-key color as one flat solid background only: #FE00FF. The subject must not use that chroma-key color or any near match. No words, no letters, no numbers, no watermark, no UI frame, no surrounding scene, no mockup, no unrelated objects.",
+    "model": "gpt-image-1.5",
+    "status": "success",
+    "attemptCount": 1,
+    "generationTimestamp": "2026-07-13T02:17:10.279Z",
+    "runtimeSize": 256
+  },
+  {
+    "iconId": "pickup_xp_crystal",
+    "filename": "Assets\\Resources\\PickupIcons\\pickup-art\\pickup_xp_crystal.png",
+    "masterFilename": "Assets\\_Heroic\\Art\\Pickups\\pickup-art\\pickup_xp_crystal.png",
+    "prompt": "Create a single polished square game icon for Heroic representing: a bright blue experience crystal pickup, faceted magical gem silhouette, luminous arcane energy, instantly recognizable as experience gain. Visual language: dark heroic fantasy spellcraft, crisp readable silhouette, premium Unity action-RPG HUD asset, painterly but clean, luminous magical materials, controlled rim light, subtle bevel depth, high contrast, centered subject, consistent three-quarter icon perspective, consistent line weight, generous padding. Use the requested chroma-key color as one flat solid background only: #FE00FF. The subject must not use that chroma-key color or any near match. No words, no letters, no numbers, no watermark, no UI frame, no surrounding scene, no mockup, no unrelated objects.",
+    "model": "gpt-image-1.5",
+    "status": "success",
+    "attemptCount": 1,
+    "generationTimestamp": "2026-07-13T02:17:26.014Z",
+    "runtimeSize": 256
+  },
+  {
+    "iconId": "pickup_speed_boot",
+    "filename": "Assets\\Resources\\PickupIcons\\pickup-art\\pickup_speed_boot.png",
+    "masterFilename": "Assets\\_Heroic\\Art\\Pickups\\pickup-art\\pickup_speed_boot.png",
+    "prompt": "Create a single polished square game icon for Heroic representing: a golden winged boot pickup, fast motion silhouette, feathered wing accents, instantly recognizable as a speed boost. Visual language: dark heroic fantasy spellcraft, crisp readable silhouette, premium Unity action-RPG HUD asset, painterly but clean, luminous magical materials, controlled rim light, subtle bevel depth, high contrast, centered subject, consistent three-quarter icon perspective, consistent line weight, generous padding. Use the requested chroma-key color as one flat solid background only: #FE00FF. The subject must not use that chroma-key color or any near match. No words, no letters, no numbers, no watermark, no UI frame, no surrounding scene, no mockup, no unrelated objects.",
+    "model": "gpt-image-1.5",
+    "status": "success",
+    "attemptCount": 1,
+    "generationTimestamp": "2026-07-13T02:17:41.744Z",
+    "runtimeSize": 256
+  },
+  {
+    "iconId": "pickup_invulnerability_shield",
+    "filename": "Assets\\Resources\\PickupIcons\\pickup-art\\pickup_invulnerability_shield.png",
+    "masterFilename": "Assets\\_Heroic\\Art\\Pickups\\pickup-art\\pickup_invulnerability_shield.png",
+    "prompt": "Create a single polished square game icon for Heroic representing: a purple magical shield pickup, strong protective shield silhouette, radiant barrier energy, instantly recognizable as temporary invulnerability. Visual language: dark heroic fantasy spellcraft, crisp readable silhouette, premium Unity action-RPG HUD asset, painterly but clean, luminous magical materials, controlled rim light, subtle bevel depth, high contrast, centered subject, consistent three-quarter icon perspective, consistent line weight, generous padding. Use the requested chroma-key color as one flat solid background only: #FE00FF. The subject must not use that chroma-key color or any near match. No words, no letters, no numbers, no watermark, no UI frame, no surrounding scene, no mockup, no unrelated objects.",
+    "model": "gpt-image-1.5",
+    "status": "success",
+    "attemptCount": 1,
+    "generationTimestamp": "2026-07-13T02:17:55.593Z",
+    "runtimeSize": 256
+  }
+]

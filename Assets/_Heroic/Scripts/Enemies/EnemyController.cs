@@ -16,7 +16,8 @@ namespace Heroic.Enemies
         [SerializeField] private EnemyBehavior behavior = EnemyBehavior.Crash;
         [SerializeField] private float moveSpeed = 2f;
         [SerializeField] private int contactDamage = 10;
-        [SerializeField] private float contactRange = 0.85f;
+        [SerializeField] private float contactRange = 1.35f;
+        [SerializeField] private float contactSurfaceRange = 0.18f;
         [SerializeField] private float contactDamageInterval = 1f;
         [SerializeField] private bool destroyAfterContactDamage = true;
         [SerializeField] private bool suppressExperienceOnContactDamage = true;
@@ -30,6 +31,9 @@ namespace Heroic.Enemies
         [SerializeField] private float terrainCollisionRadius = 0.42f;
 
         private Transform target;
+        private Collider2D selfCollider;
+        private Collider2D targetCollider;
+        private PlayerStealth targetStealth;
         private float nextContactDamageTime;
         private float nextShotTime;
         private float slowMultiplier = 1f;
@@ -49,9 +53,16 @@ namespace Heroic.Enemies
         public bool IsFeared => Time.time < fearEndsAt;
         public bool IsConfused => Time.time < confuseEndsAt;
 
+        private void Awake()
+        {
+            selfCollider = GetComponent<Collider2D>();
+        }
+
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
+            targetCollider = target != null ? target.GetComponent<Collider2D>() : null;
+            targetStealth = target != null ? target.GetComponent<PlayerStealth>() : null;
             if (behavior == EnemyBehavior.Thrower)
             {
                 nextShotTime = Time.time + ThrowerFireInterval;
@@ -73,6 +84,11 @@ namespace Heroic.Enemies
         private void Update()
         {
             if (target == null)
+            {
+                return;
+            }
+
+            if (targetStealth != null && targetStealth.IsInvisible)
             {
                 return;
             }
@@ -155,12 +171,17 @@ namespace Heroic.Enemies
                 return confusedDirection;
             }
 
+            if (targetStealth != null && targetStealth.IsInvisible)
+            {
+                return Vector2.zero;
+            }
+
             return ((Vector2)target.position - (Vector2)transform.position).normalized;
         }
 
         private void TryApplyContactDamage()
         {
-            if (Vector3.Distance(transform.position, target.position) <= contactRange)
+            if (IsTouchingPlayer())
             {
                 if (Time.time < nextContactDamageTime)
                 {
@@ -192,6 +213,39 @@ namespace Heroic.Enemies
                     }
                 }
             }
+        }
+
+        private bool IsTouchingPlayer()
+        {
+            if (target == null)
+            {
+                return false;
+            }
+
+            if (targetStealth != null && targetStealth.IsInvisible)
+            {
+                return false;
+            }
+
+            if (selfCollider != null && targetCollider != null)
+            {
+                ColliderDistance2D distance = selfCollider.Distance(targetCollider);
+                if (distance.isOverlapped || distance.distance <= contactSurfaceRange)
+                {
+                    return true;
+                }
+            }
+
+            if (targetCollider != null)
+            {
+                Vector2 closestPlayerPoint = targetCollider.ClosestPoint(transform.position);
+                if (Vector2.Distance(transform.position, closestPlayerPoint) <= contactRange)
+                {
+                    return true;
+                }
+            }
+
+            return Vector3.Distance(transform.position, target.position) <= contactRange;
         }
 
         private void UpdateThrower()

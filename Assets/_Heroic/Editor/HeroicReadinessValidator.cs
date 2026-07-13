@@ -63,7 +63,7 @@ namespace Heroic.Editor
             ValidatePrefabComponents(Root + "/Prefabs/Projectiles/Projectile_EnemyMissile.prefab", "enemy missile projectile prefab", ref errors, typeof(VisualPresetApplier));
             ValidatePrefab<ExperiencePickup>(Root + "/Prefabs/Pickups/XP_Pickup.prefab", "XP pickup prefab", ref errors);
             ValidatePrefabComponents(Root + "/Prefabs/Pickups/XP_Pickup.prefab", "XP pickup prefab", ref errors, typeof(VisualPresetApplier), typeof(AudioSource), typeof(ProceduralAudioFeedback));
-            ValidateFloatFieldMinimum<ExperiencePickup>(Root + "/Prefabs/Pickups/XP_Pickup.prefab", "magnetRange", 6f, "XP pickup magnet range", ref errors);
+            ValidateFloatFieldMinimum<ExperiencePickup>(Root + "/Prefabs/Pickups/XP_Pickup.prefab", "magnetRange", 1f, "XP pickup magnet range", ref errors);
             ValidateAssetExists(Root + "/Resources/Audio/Music/HeroicDemoLoop.mp3", "current demo music candidate", ref errors);
             ValidateAssetExists(Root + "/ScriptableObjects/Waves/Wave_001.asset", "first wave asset", ref errors);
             ValidateEnemyDefinition(Root + "/ScriptableObjects/Enemies/Enemy_Crash_01.asset", "Crash I definition", VisualPresetApplier.Preset.CrashLevel1, ref errors);

@@ -60,7 +60,7 @@ namespace Heroic.World
 
         public static readonly TerrainLevelProfile[] Profiles =
         {
-            new TerrainLevelProfile(1, "Bare Dirt", 12, 0, 1f, 0, 0, 0),
+            new TerrainLevelProfile(1, "Bare Dirt", 0, 0, 1f, 0, 0, 0),
             new TerrainLevelProfile(2, "Scuffed Dirt", 13, 2, 0.94f, 0, 0, 0),
             new TerrainLevelProfile(3, "Loose Furrows", 14, 3, 0.92f, 0, 0, 0),
             new TerrainLevelProfile(4, "Brush Patches", 15, 4, 0.90f, 0, 0, 0),

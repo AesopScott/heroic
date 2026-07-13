@@ -7,11 +7,10 @@ namespace Heroic.Player
     public class ExperiencePickup : MonoBehaviour
     {
         [SerializeField] private int experienceValue = 1;
-        [SerializeField] private float magnetRange = 7f;
+        [SerializeField] private float magnetRange = 1f;
         [SerializeField] private float magnetSpeed = 11f;
 
         private Transform target;
-        private PlayerPickupMagnet targetMagnet;
 
         public event Action<ExperiencePickup> Collected;
 
@@ -32,9 +31,12 @@ namespace Heroic.Player
                 return;
             }
 
-            float distance = Vector2.Distance(transform.position, target.position);
-            float activeMagnetRange = targetMagnet != null ? targetMagnet.PickupRange : magnetRange;
-            if (distance <= activeMagnetRange)
+            if (magnetRange <= 0f || magnetSpeed <= 0f)
+            {
+                return;
+            }
+
+            if (Vector2.Distance(transform.position, target.position) <= magnetRange)
             {
                 transform.position = Vector2.MoveTowards(transform.position, target.position, magnetSpeed * Time.deltaTime);
             }
@@ -59,7 +61,6 @@ namespace Heroic.Player
             if (playerExperience != null)
             {
                 target = playerExperience.transform;
-                targetMagnet = playerExperience.GetComponent<PlayerPickupMagnet>();
             }
         }
     }

@@ -29,6 +29,12 @@ sysinfo.txt
 __pycache__/
 *.py[cod]
 
+# Local Node/OpenAI pipeline files
+node_modules/
+.env
+.env.*
+!.env.example
+
 # Local sibling worktrees; do not publish them from the main Heroic repo.
 heroic-build/
 heroic-skills/

@@ -20,6 +20,9 @@ namespace Heroic.Visuals
         [SerializeField] private float pixelsPerUnit = 384f;
         [SerializeField] private Vector2 pivotNormalized = new Vector2(0.5f, 0.18f);
         [SerializeField] private Vector2 worldScale = new Vector2(1.12f, 1.12f);
+        [SerializeField] private Color silhouetteColor = new Color(0.02f, 0.018f, 0.015f, 0.48f);
+        [SerializeField] private Vector2 silhouetteOffset = new Vector2(0.05f, -0.05f);
+        [SerializeField] private Vector2 silhouetteScale = new Vector2(1.08f, 1.06f);
 
         [Header("School Tints")]
         [SerializeField] private Color arcaneTint = new Color(0.78f, 0.92f, 1f);
@@ -33,6 +36,8 @@ namespace Heroic.Visuals
 
         private SpriteRenderer spriteRenderer;
         private PlayerController playerController;
+        private PlayerStealth playerStealth;
+        private SpriteRenderer silhouetteRenderer;
         private PlayerExperience playerExperience;
         private UpgradeManager upgradeManager;
         private string currentSchoolId;
@@ -46,7 +51,9 @@ namespace Heroic.Visuals
         private void Awake()
         {
             spriteRenderer = GetComponent<SpriteRenderer>();
+            EnsureSilhouetteRenderer();
             playerController = GetComponent<PlayerController>();
+            playerStealth = GetComponent<PlayerStealth>();
             playerExperience = GetComponent<PlayerExperience>();
             upgradeManager = FindAnyObjectByType<UpgradeManager>();
             ApplyForCurrentState();
@@ -62,6 +69,11 @@ namespace Heroic.Visuals
 
             frameIndex = (frameIndex + 1) % frames.Length;
             spriteRenderer.sprite = frames[frameIndex];
+            if (silhouetteRenderer != null)
+            {
+                silhouetteRenderer.sprite = frames[frameIndex];
+            }
+
             nextFrameTime = Time.time + secondsPerFrame;
             UpdateFacing();
         }
@@ -139,6 +151,8 @@ namespace Heroic.Visuals
                 spriteRenderer = GetComponent<SpriteRenderer>();
             }
 
+            EnsureSilhouetteRenderer();
+
             if (playerExperience == null)
             {
                 playerExperience = GetComponent<PlayerExperience>();
@@ -147,6 +161,11 @@ namespace Heroic.Visuals
             if (playerController == null)
             {
                 playerController = GetComponent<PlayerController>();
+            }
+
+            if (playerStealth == null)
+            {
+                playerStealth = GetComponent<PlayerStealth>();
             }
 
             int level = playerExperience != null ? playerExperience.Level : 1;
@@ -163,8 +182,15 @@ namespace Heroic.Visuals
             }
 
             spriteRenderer.sortingOrder = sortingOrder;
+            if (silhouetteRenderer != null)
+            {
+                silhouetteRenderer.sortingOrder = sortingOrder - 1;
+            }
+
             transform.localScale = new Vector3(worldScale.x, worldScale.y, 1f);
-            spriteRenderer.color = level >= 2 && accumulatedRobeColor.HasValue ? accumulatedRobeColor.Value : Color.white;
+            Color baseColor = level >= 2 && accumulatedRobeColor.HasValue ? accumulatedRobeColor.Value : Color.white;
+            spriteRenderer.color = playerStealth != null ? playerStealth.ApplyToBaseColor(baseColor) : baseColor;
+            ApplySilhouetteColor();
             UpdateFacing();
         }
 
@@ -213,6 +239,11 @@ namespace Heroic.Visuals
             if (frames.Length > 0 && frames[0] != null)
             {
                 spriteRenderer.sprite = frames[0];
+                if (silhouetteRenderer != null)
+                {
+                    silhouetteRenderer.sprite = frames[0];
+                }
+
                 nextFrameTime = Time.time + secondsPerFrame;
             }
         }
@@ -243,6 +274,11 @@ namespace Heroic.Visuals
             if (frames.Length > 0)
             {
                 spriteRenderer.sprite = frames[0];
+                if (silhouetteRenderer != null)
+                {
+                    silhouetteRenderer.sprite = frames[0];
+                }
+
                 nextFrameTime = Time.time + secondsPerFrame;
             }
         }
@@ -255,6 +291,48 @@ namespace Heroic.Visuals
             }
 
             spriteRenderer.flipX = playerController.LastHorizontalFacing < 0;
+            if (silhouetteRenderer != null)
+            {
+                silhouetteRenderer.flipX = spriteRenderer.flipX;
+            }
+        }
+
+        private void EnsureSilhouetteRenderer()
+        {
+            if (silhouetteRenderer != null)
+            {
+                return;
+            }
+
+            Transform existing = transform.Find("Player Silhouette");
+            GameObject silhouette = existing != null ? existing.gameObject : new GameObject("Player Silhouette");
+            silhouette.transform.SetParent(transform, false);
+            silhouette.transform.localPosition = silhouetteOffset;
+            silhouette.transform.localScale = new Vector3(silhouetteScale.x, silhouetteScale.y, 1f);
+            silhouetteRenderer = silhouette.GetComponent<SpriteRenderer>();
+            if (silhouetteRenderer == null)
+            {
+                silhouetteRenderer = silhouette.AddComponent<SpriteRenderer>();
+            }
+
+            silhouetteRenderer.sortingOrder = sortingOrder - 1;
+            ApplySilhouetteColor();
+        }
+
+        private void ApplySilhouetteColor()
+        {
+            if (silhouetteRenderer == null)
+            {
+                return;
+            }
+
+            Color color = silhouetteColor;
+            if (playerStealth != null && playerStealth.IsInvisible)
+            {
+                color.a *= 0.35f;
+            }
+
+            silhouetteRenderer.color = color;
         }
 
         private static string ResolveSchoolId(UpgradeManager.DraftChoice choice)

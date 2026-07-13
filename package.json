@@ -1,0 +1,19 @@
+{
+  "name": "heroic-icon-pipeline",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Heroic icon generation pipeline using the OpenAI Images API.",
+  "scripts": {
+    "icons:validate": "node scripts/generate-icons.mjs --validate",
+    "icons:dry-run": "node scripts/generate-icons.mjs --dry-run",
+    "icons:generate": "node scripts/generate-icons.mjs",
+    "icons:generate:force": "node scripts/generate-icons.mjs --force",
+    "icons:failed": "node scripts/generate-icons.mjs --failed-only",
+    "icons:update-manifest": "node scripts/generate-icons.mjs --update-manifest-images"
+  },
+  "dependencies": {
+    "openai": "^5.10.1",
+    "sharp": "^0.34.3"
+  }
+}

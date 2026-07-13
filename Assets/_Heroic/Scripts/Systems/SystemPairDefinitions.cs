@@ -22,21 +22,16 @@ namespace Heroic.Systems
 
         public static readonly PairDefinition[] Pairs =
         {
-            new PairDefinition("system_pair_territorial_components", "Territorial Components", "system_territory_casting", "system_component_boosts"),
-            new PairDefinition("system_pair_blood_territory", "Blood Territory", "system_territory_casting", "system_sacrifice_casting"),
-            new PairDefinition("system_pair_inscribed_territory", "Inscribed Territory", "system_territory_casting", "system_echo_casting"),
-            new PairDefinition("system_pair_woven_territory", "Woven Territory", "system_territory_casting", "system_spell_weaving"),
-            new PairDefinition("system_pair_runemarked_territory", "Runemarked Territory", "system_territory_casting", "system_runic_magic"),
-            new PairDefinition("system_pair_blood_reagents", "Blood Reagents", "system_component_boosts", "system_sacrifice_casting"),
-            new PairDefinition("system_pair_chanted_components", "Chanted Components", "system_component_boosts", "system_echo_casting"),
-            new PairDefinition("system_pair_woven_reagents", "Woven Reagents", "system_component_boosts", "system_spell_weaving"),
-            new PairDefinition("system_pair_runic_components", "Runic Components", "system_component_boosts", "system_runic_magic"),
-            new PairDefinition("system_pair_blood_incantations", "Blood Incantations", "system_sacrifice_casting", "system_echo_casting"),
-            new PairDefinition("system_pair_sacrificial_weave", "Sacrificial Weave", "system_sacrifice_casting", "system_spell_weaving"),
-            new PairDefinition("system_pair_blood_runes", "Blood Runes", "system_sacrifice_casting", "system_runic_magic"),
-            new PairDefinition("system_pair_woven_incantations", "Woven Incantations", "system_echo_casting", "system_spell_weaving"),
-            new PairDefinition("system_pair_runic_incantations", "Runic Incantations", "system_echo_casting", "system_runic_magic"),
-            new PairDefinition("system_pair_woven_runes", "Woven Runes", "system_spell_weaving", "system_runic_magic")
+            new PairDefinition("system_pair_territory_components", "Territory + Components", "system_territory_casting", "system_component_boosts"),
+            new PairDefinition("system_pair_territory_sacrifice", "Territory + Sacrifice", "system_territory_casting", "system_sacrifice_casting"),
+            new PairDefinition("system_pair_territory_rhythm", "Territory + Rhythm", "system_territory_casting", "system_rhythm_casting"),
+            new PairDefinition("system_pair_territory_tension", "Territory + Tension", "system_territory_casting", "system_spell_tension"),
+            new PairDefinition("system_pair_components_sacrifice", "Components + Sacrifice", "system_component_boosts", "system_sacrifice_casting"),
+            new PairDefinition("system_pair_components_rhythm", "Components + Rhythm", "system_component_boosts", "system_rhythm_casting"),
+            new PairDefinition("system_pair_components_tension", "Components + Tension", "system_component_boosts", "system_spell_tension"),
+            new PairDefinition("system_pair_sacrifice_rhythm", "Sacrifice + Rhythm", "system_sacrifice_casting", "system_rhythm_casting"),
+            new PairDefinition("system_pair_sacrifice_tension", "Sacrifice + Tension", "system_sacrifice_casting", "system_spell_tension"),
+            new PairDefinition("system_pair_rhythm_tension", "Rhythm + Tension", "system_rhythm_casting", "system_spell_tension")
         };
 
         public static bool IsPairUpgrade(string choiceId)

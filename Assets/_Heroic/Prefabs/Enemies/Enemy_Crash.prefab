@@ -137,7 +137,8 @@ MonoBehaviour:
   behavior: 0
   moveSpeed: 2
   contactDamage: 10
-  contactRange: 0.85
+  contactRange: 1.35
+  contactSurfaceRange: 0.18
   contactDamageInterval: 1
   destroyAfterContactDamage: 1
   suppressExperienceOnContactDamage: 1
@@ -164,70 +165,70 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Heroic.Enemies.ExperienceDropper
   pickupPrefab: {fileID: 5784620583280495773, guid: 73f2a172788c4434ea46f29cafd61a37, type: 3}
-  healthRestorePrefab: {fileID: 0}
-  experienceBoostPrefab: {fileID: 0}
-  speedBoostPrefab: {fileID: 0}
-  invulnerabilityPrefab: {fileID: 0}
+  healthRestorePrefab: {fileID: 9018687751504471961, guid: 014ccd75f729567498bd192c814d0161, type: 3}
+  experienceBoostPrefab: {fileID: 4695118078475687181, guid: be7e9c02fedfbeb429a25af7c66693e8, type: 3}
+  speedBoostPrefab: {fileID: 3924979799263977827, guid: 4b300439581e59f439c20155d7981e36, type: 3}
+  invulnerabilityPrefab: {fileID: 7775744166176063825, guid: 7b1cf906c90a9a742b95c4f07eb3b4cf, type: 3}
   experienceValue: 1
   healthRestoreTiers:
   - tier: 1
     minimumPlayerLevel: 1
-    dropChance: 0.1
+    dropChance: 0.08
     value: 8
     duration: 0
     multiplier: 1
   - tier: 2
     minimumPlayerLevel: 3
-    dropChance: 0.08
+    dropChance: 0.065
     value: 14
     duration: 0
     multiplier: 1
   - tier: 3
     minimumPlayerLevel: 5
-    dropChance: 0.06
+    dropChance: 0.05
     value: 22
     duration: 0
     multiplier: 1
   - tier: 4
     minimumPlayerLevel: 8
-    dropChance: 0.04
+    dropChance: 0.035
     value: 35
     duration: 0
     multiplier: 1
   - tier: 5
     minimumPlayerLevel: 12
-    dropChance: 0.025
+    dropChance: 0.02
     value: 55
     duration: 0
     multiplier: 1
   experienceBoostTiers:
   - tier: 1
     minimumPlayerLevel: 1
-    dropChance: 0.04
+    dropChance: 0.03
     value: 0
     duration: 10
     multiplier: 1.5
   - tier: 2
     minimumPlayerLevel: 3
-    dropChance: 0.035
+    dropChance: 0.026
     value: 0
     duration: 10
     multiplier: 2
   - tier: 3
     minimumPlayerLevel: 5
-    dropChance: 0.025
+    dropChance: 0.02
     value: 0
     duration: 10
     multiplier: 2.5
   - tier: 4
     minimumPlayerLevel: 8
-    dropChance: 0.015
+    dropChance: 0.014
     value: 0
     duration: 10
     multiplier: 3
   - tier: 5
     minimumPlayerLevel: 12
-    dropChance: 0.01
+    dropChance: 0.008
     value: 0
     duration: 10
     multiplier: 3.5
@@ -265,19 +266,19 @@ MonoBehaviour:
   invulnerabilityTiers:
   - tier: 1
     minimumPlayerLevel: 2
-    dropChance: 0.015
+    dropChance: 0.012
     value: 0
     duration: 1.25
     multiplier: 1
   - tier: 2
     minimumPlayerLevel: 4
-    dropChance: 0.012
+    dropChance: 0.01
     value: 0
     duration: 1.75
     multiplier: 1
   - tier: 3
     minimumPlayerLevel: 6
-    dropChance: 0.009
+    dropChance: 0.008
     value: 0
     duration: 2.25
     multiplier: 1
@@ -289,7 +290,7 @@ MonoBehaviour:
     multiplier: 1
   - tier: 5
     minimumPlayerLevel: 13
-    dropChance: 0.003
+    dropChance: 0.004
     value: 0
     duration: 4
     multiplier: 1
